@@ -21,7 +21,8 @@
       "@/app/*": ["./app/*"],
       "@/components/*": ["./components/*"],
       "@/lib/*": ["./lib/*"],
-      "@/payload/*": ["./payload/*"]
+      "@/payload/*": ["./payload/*"],
+      "@payload-config": ["./payload.config.ts"]
     },
     "types": ["node"]
   },
