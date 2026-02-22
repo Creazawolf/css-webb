@@ -5,7 +5,7 @@ const LOCALES = ['sv', 'en'] as const
 const DEFAULT_LOCALE = 'sv'
 
 // Paths that should NOT be locale-prefixed
-const PUBLIC_PATHS = ['/admin', '/api', '/robots.txt', '/sitemap.xml', '/_next', '/favicon.ico']
+const PUBLIC_PATHS = ['/admin', '/api', '/robots.txt', '/sitemap.xml', '/_next', '/favicon.ico', '/images']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
