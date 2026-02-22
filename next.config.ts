@@ -14,10 +14,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  i18n: {
-    locales: ['sv', 'en'],
-    defaultLocale: 'sv',
-  },
+  // i18n handled via [locale] route segments + middleware (App Router)
   experimental: {
     typedRoutes: true,
   },
