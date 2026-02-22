@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 
+import '../../globals.css'
+
 const SUPPORTED_LOCALES = ['sv', 'en'] as const
 
 type Locale = (typeof SUPPORTED_LOCALES)[number]
