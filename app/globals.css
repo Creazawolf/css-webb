@@ -1,6 +1,14 @@
 @import 'tailwindcss';
 
 :root {
+  --color-chelsea-blue: 3 70 148;
+  --color-chelsea-blue-dark: 2 43 92;
+  --color-chelsea-blue-light: 10 91 181;
+  --color-gold: 212 168 67;
+  --color-gold-light: 232 201 106;
+  --color-text: 15 23 42;
+  --color-surface: 248 250 252;
+
   --color-brand-50: 240 246 255;
   --color-brand-100: 221 236 255;
   --color-brand-200: 184 214 255;
@@ -11,15 +19,17 @@
   --color-brand-700: 2 43 92;
   --color-brand-800: 2 32 69;
   --color-brand-900: 1 20 44;
-  --color-accent: 212 168 67;
-  --color-surface: 248 250 252;
-  --color-text: 15 23 42;
+
   --radius-xl: 1rem;
   --radius-2xl: 1.25rem;
 }
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -32,7 +42,9 @@ body {
   min-height: 100vh;
   background: rgb(var(--color-surface));
   color: rgb(var(--color-text));
-  font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+  font-family: var(--font-inter), Inter, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a {

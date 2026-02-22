@@ -1,10 +1,33 @@
 import { notFound } from 'next/navigation'
 
+import Hero from '@/components/Hero'
+import MatchCard from '@/components/MatchCard'
+import MembershipCTA from '@/components/MembershipCTA'
+import NewsCard from '@/components/NewsCard'
+
 const SUPPORTED_LOCALES = ['sv', 'en'] as const
 
 type PageProps = {
   params: Promise<{ locale: string }>
 }
+
+const newsItems: Array<{ titel: string; ingress: string; datum: string }> = [
+  {
+    titel: 'Supporterträff i Borås inför stormatchen',
+    ingress: 'Vi laddar upp tillsammans med blå stämning, quiz och matchsnack innan avspark.',
+    datum: '22 februari 2026',
+  },
+  {
+    titel: 'Nya medlemsförmåner för säsongen 2026',
+    ingress: 'Medlemmar får tillgång till fler event, bättre erbjudanden och exklusiva supporterkvällar.',
+    datum: '20 februari 2026',
+  },
+  {
+    titel: 'Resegrupp till London öppnar anmälan',
+    ingress: 'Anmäl ditt intresse för vår nästa resa till Stamford Bridge och upplev matchen på plats.',
+    datum: '18 februari 2026',
+  },
+]
 
 export default async function Startsida({ params }: PageProps) {
   const { locale } = await params
@@ -14,17 +37,32 @@ export default async function Startsida({ params }: PageProps) {
   }
 
   return (
-    <section className="bg-[#034694] px-4 py-20 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <p className="inline-flex w-fit rounded-full border border-[#D4A843] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#D4A843]">
-          Chelsea Supporters Sweden
-        </p>
-        <h1 className="max-w-3xl text-4xl font-extrabold tracking-tight sm:text-5xl">Valkommen till var nya webbplats</h1>
-        <p className="max-w-2xl text-base text-blue-100 sm:text-lg">
-          Har kommer nyheter, matcher, evenemang och medlemsinformation samlas. Strukturen ar pa plats och
-          innehall fylls pa lopande.
-        </p>
-      </div>
-    </section>
+    <>
+      <Hero locale={locale} />
+
+      <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <div className="mx-auto w-full max-w-[1200px]">
+          <h2 className="mb-6 text-3xl font-extrabold tracking-tight text-[#022B5C]">Nästa match</h2>
+          <MatchCard motstandare="Arsenal" datum="Söndag 1 mars 2026" tid="17:30" tavling="Premier League" />
+        </div>
+      </section>
+
+      <section className="bg-white px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <div className="mx-auto w-full max-w-[1200px]">
+          <h2 className="mb-6 text-3xl font-extrabold tracking-tight text-[#022B5C]">Senaste nyheter</h2>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {newsItems.map((article) => (
+              <NewsCard key={article.titel} titel={article.titel} ingress={article.ingress} datum={article.datum} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <div className="mx-auto w-full max-w-[1200px]">
+          <MembershipCTA locale={locale} />
+        </div>
+      </section>
+    </>
   )
 }
