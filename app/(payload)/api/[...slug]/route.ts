@@ -1,4 +1,6 @@
-import config from '@/payload.config'
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
+import config from '@payload-config'
+import '@payloadcms/next/css'
 import {
   REST_DELETE,
   REST_GET,
@@ -7,8 +9,6 @@ import {
   REST_POST,
   REST_PUT,
 } from '@payloadcms/next/routes'
-
-export const dynamic = 'force-dynamic'
 
 export const GET = REST_GET(config)
 export const POST = REST_POST(config)

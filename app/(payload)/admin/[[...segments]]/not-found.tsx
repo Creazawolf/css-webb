@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import config from '@payload-config'
 import { NotFoundPage, generatePageMetadata } from '@payloadcms/next/views'
 // @ts-expect-error — generated at build time
-import { importMap } from '../importMap.js'
+import { importMap } from '../importMap'
 
 type Args = {
   params: Promise<{ segments: string[] }>

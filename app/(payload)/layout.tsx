@@ -6,7 +6,7 @@ import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
 import React from 'react'
 
 // @ts-expect-error — generated at build time
-import { importMap } from './admin/importMap.js'
+import { importMap } from './admin/importMap'
 import './custom.scss'
 
 type Args = {
