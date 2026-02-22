@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 type FooterProps = {
@@ -16,6 +17,7 @@ export default function Footer({ locale }: FooterProps) {
     <footer className="bg-[#022B5C] text-white">
       <div className="mx-auto grid w-full max-w-[1200px] grid-cols-1 gap-10 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 lg:px-8">
         <div>
+          <Image src="/images/logo-white.png" alt="CSS Logo" width={60} height={60} className="mb-4 h-14 w-14" />
           <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#D4A843]">Om oss</h3>
           <p className="text-sm text-white/80">
             Chelsea Supporters Sweden är en svensk supporterförening för alla som älskar Chelsea FC.
