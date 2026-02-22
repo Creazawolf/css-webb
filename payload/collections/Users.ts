@@ -43,8 +43,8 @@ export const Users = defineCollection({
         { label: 'Redaktor', value: 'editor' },
       ],
       access: {
-        create: isAdmin,
-        update: isAdmin,
+        create: isAdmin as any,
+        update: isAdmin as any,
       },
     },
   ],

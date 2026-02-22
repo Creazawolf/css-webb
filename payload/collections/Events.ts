@@ -49,11 +49,11 @@ export const Events = defineCollection({
           pickerAppearance: 'dayAndTime',
         },
       },
-      validate: (value: unknown, { siblingData }) => {
+      validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
         if (!value) return true
         if (!siblingData?.date) return true
 
-        const start = new Date(siblingData.date)
+        const start = new Date(String(siblingData.date))
         const end = new Date(String(value))
         if (Number.isNaN(start.valueOf()) || Number.isNaN(end.valueOf())) {
           return 'Ogiltigt datumformat.'

@@ -77,7 +77,7 @@ export const Members = defineCollection({
       name: 'expiresAt',
       type: 'date',
       required: true,
-      validate: (value: unknown, { siblingData }) => {
+      validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
         if (!value) return 'Utgångsdatum måste anges.'
 
         const joined = new Date(String(siblingData?.joinedAt))

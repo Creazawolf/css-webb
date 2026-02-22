@@ -81,7 +81,7 @@ export const Matches = defineCollection({
           type: 'number',
           min: 0,
           max: 30,
-          validate: (value: unknown, { data }) => {
+          validate: (value: unknown, { data }: { data: Record<string, unknown> }) => {
             if (data?.status === 'finished' && typeof value !== 'number') {
               return 'Ange hemmamål när matchen är avslutad.'
             }
@@ -93,7 +93,7 @@ export const Matches = defineCollection({
           type: 'number',
           min: 0,
           max: 30,
-          validate: (value: unknown, { data }) => {
+          validate: (value: unknown, { data }: { data: Record<string, unknown> }) => {
             if (data?.status === 'finished' && typeof value !== 'number') {
               return 'Ange bortamål när matchen är avslutad.'
             }
