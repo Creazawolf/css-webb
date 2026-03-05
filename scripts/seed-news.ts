@@ -40,6 +40,7 @@ async function seed() {
     const user = await payload.create({
       collection: 'users',
       overrideAccess: true,
+      draft: false,
       data: {
         email: 'redaktion@chelseafc.se',
         password: 'CssAdmin2026!',
@@ -70,6 +71,7 @@ async function seed() {
       const cat = await payload.create({
         collection: 'categories',
         overrideAccess: true,
+        draft: false,
         data: { name },
       })
       categoryMap.set(name, cat.id)
@@ -97,6 +99,7 @@ async function seed() {
     const media = await payload.create({
       collection: 'media',
       overrideAccess: true,
+      draft: false,
       data: {
         alt: imageAlts[i]!,
       },
@@ -248,6 +251,7 @@ async function seed() {
     await payload.create({
       collection: 'posts',
       overrideAccess: true,
+      draft: false,
       data: {
         title: postData.title,
         excerpt: postData.excerpt,
