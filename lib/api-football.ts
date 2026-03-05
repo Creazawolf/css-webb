@@ -10,9 +10,10 @@ const PREMIER_LEAGUE_ID = 39
 const WSL_ID = 44
 
 // ISR revalidation intervals (seconds)
-const REVALIDATE_FIXTURES = 3600   // 1 hour
-const REVALIDATE_STANDINGS = 7200  // 2 hours
-const REVALIDATE_STATS = 14400     // 4 hours
+// Conservative to stay within API-Football free tier (10 req/min, 100/day)
+const REVALIDATE_FIXTURES = 7200    // 2 hours
+const REVALIDATE_STANDINGS = 14400  // 4 hours
+const REVALIDATE_STATS = 43200      // 12 hours
 
 // --- Abbreviation lookup ---
 
@@ -349,7 +350,7 @@ async function getTeamData(
 ): Promise<MatchCenterData> {
   const season = getCurrentSeason().toString()
 
-  // Fetch fixtures sequentially to avoid API rate limits, then table/stats in parallel
+  // Fetch ALL endpoints sequentially — API-Football free tier allows only 10 req/min
   const lastFixtures = await apiFetch(
     '/fixtures',
     { team: teamId.toString(), last: '1' },
@@ -362,27 +363,24 @@ async function getTeamData(
     FixturesResponseSchema,
     REVALIDATE_FIXTURES,
   )
-
-  const [standingsData, scorersData, assistsData] = await Promise.all([
-    apiFetch(
-      '/standings',
-      { league: leagueId.toString(), season },
-      StandingsResponseSchema,
-      REVALIDATE_STANDINGS,
-    ),
-    apiFetch(
-      '/players/topscorers',
-      { league: leagueId.toString(), season },
-      PlayersResponseSchema,
-      REVALIDATE_STATS,
-    ),
-    apiFetch(
-      '/players/topassists',
-      { league: leagueId.toString(), season },
-      PlayersResponseSchema,
-      REVALIDATE_STATS,
-    ),
-  ])
+  const standingsData = await apiFetch(
+    '/standings',
+    { league: leagueId.toString(), season },
+    StandingsResponseSchema,
+    REVALIDATE_STANDINGS,
+  )
+  const scorersData = await apiFetch(
+    '/players/topscorers',
+    { league: leagueId.toString(), season },
+    PlayersResponseSchema,
+    REVALIDATE_STATS,
+  )
+  const assistsData = await apiFetch(
+    '/players/topassists',
+    { league: leagueId.toString(), season },
+    PlayersResponseSchema,
+    REVALIDATE_STATS,
+  )
 
   const lastFixture = lastFixtures.response[0]
   const nextFixture = nextFixtures.response[0]
