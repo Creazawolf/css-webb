@@ -197,7 +197,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // Track last request time to enforce minimum gap between API calls
 let lastRequestTime = 0
-const MIN_REQUEST_GAP = 7000 // 7 seconds between requests (safe for 10 req/min)
+const MIN_REQUEST_GAP = 6200 // ~6s between requests (safe for 10 req/min, fits in 60s timeout)
 
 async function apiFetch<T>(
   endpoint: string,
@@ -357,6 +357,53 @@ function transformTopAssists(
   })
 }
 
+// --- Cached individual API fetchers ---
+
+const cachedLastFixture = unstable_cache(
+  async (teamId: string) => {
+    const data = await apiFetch('/fixtures', { team: teamId, last: '1' }, FixturesResponseSchema, 0)
+    const fixture = data.response[0]
+    return fixture ? transformFixtureToMatch(fixture) : null
+  },
+  ['api-football', 'last-fixture'],
+  { revalidate: REVALIDATE_FIXTURES },
+)
+
+const cachedNextFixture = unstable_cache(
+  async (teamId: string) => {
+    const data = await apiFetch('/fixtures', { team: teamId, next: '1' }, FixturesResponseSchema, 0)
+    const fixture = data.response[0]
+    return fixture ? transformFixtureToMatch(fixture) : null
+  },
+  ['api-football', 'next-fixture'],
+  { revalidate: REVALIDATE_FIXTURES },
+)
+
+const cachedStandings = unstable_cache(
+  async (leagueId: string, season: string) =>
+    apiFetch('/standings', { league: leagueId, season }, StandingsResponseSchema, 0),
+  ['api-football', 'standings'],
+  { revalidate: REVALIDATE_STANDINGS },
+)
+
+const cachedTopScorers = unstable_cache(
+  async (leagueId: string, season: string) => {
+    const data = await apiFetch('/players/topscorers', { league: leagueId, season }, PlayersResponseSchema, 0)
+    return transformTopScorers(data)
+  },
+  ['api-football', 'topscorers'],
+  { revalidate: REVALIDATE_STATS },
+)
+
+const cachedTopAssists = unstable_cache(
+  async (leagueId: string, season: string) => {
+    const data = await apiFetch('/players/topassists', { league: leagueId, season }, PlayersResponseSchema, 0)
+    return transformTopAssists(data)
+  },
+  ['api-football', 'topassists'],
+  { revalidate: REVALIDATE_STATS },
+)
+
 // --- Exported fetchers ---
 
 async function getTeamData(
@@ -364,62 +411,32 @@ async function getTeamData(
   leagueId: number,
 ): Promise<MatchCenterData> {
   const season = getCurrentSeason().toString()
+  const tid = teamId.toString()
+  const lid = leagueId.toString()
 
-  // Fetch ALL endpoints sequentially — API-Football free tier allows only 10 req/min
-  const lastFixtures = await apiFetch(
-    '/fixtures',
-    { team: teamId.toString(), last: '1' },
-    FixturesResponseSchema,
-    REVALIDATE_FIXTURES,
-  )
-  const nextFixtures = await apiFetch(
-    '/fixtures',
-    { team: teamId.toString(), next: '1' },
-    FixturesResponseSchema,
-    REVALIDATE_FIXTURES,
-  )
-  const standingsData = await apiFetch(
-    '/standings',
-    { league: leagueId.toString(), season },
-    StandingsResponseSchema,
-    REVALIDATE_STANDINGS,
-  )
-  const scorersData = await apiFetch(
-    '/players/topscorers',
-    { league: leagueId.toString(), season },
-    PlayersResponseSchema,
-    REVALIDATE_STATS,
-  )
-  const assistsData = await apiFetch(
-    '/players/topassists',
-    { league: leagueId.toString(), season },
-    PlayersResponseSchema,
-    REVALIDATE_STATS,
-  )
-
-  const lastFixture = lastFixtures.response[0]
-  const nextFixture = nextFixtures.response[0]
+  // Each call is individually cached — only uncached calls hit the API
+  const lastMatch = await cachedLastFixture(tid)
+  const nextMatch = await cachedNextFixture(tid)
+  const standingsData = await cachedStandings(lid, season)
+  const scorersData = await cachedTopScorers(lid, season)
+  const assistsData = await cachedTopAssists(lid, season)
 
   return {
-    lastMatch: lastFixture ? transformFixtureToMatch(lastFixture) : null,
-    nextMatch: nextFixture ? transformFixtureToMatch(nextFixture) : null,
+    lastMatch,
+    nextMatch,
     standings: transformStandings(standingsData, teamId),
-    topScorers: transformTopScorers(scorersData),
-    topAssists: transformTopAssists(assistsData),
+    topScorers: scorersData,
+    topAssists: assistsData,
   }
 }
 
-export const getHerrarData = unstable_cache(
-  () => getTeamData(CHELSEA_MEN_ID, PREMIER_LEAGUE_ID),
-  ['api-football', 'herrar'],
-  { revalidate: REVALIDATE_FIXTURES },
-)
+export async function getHerrarData(): Promise<MatchCenterData> {
+  return getTeamData(CHELSEA_MEN_ID, PREMIER_LEAGUE_ID)
+}
 
-export const getDamerData = unstable_cache(
-  () => getTeamData(CHELSEA_WOMEN_ID, WSL_ID),
-  ['api-football', 'damer'],
-  { revalidate: REVALIDATE_FIXTURES },
-)
+export async function getDamerData(): Promise<MatchCenterData> {
+  return getTeamData(CHELSEA_WOMEN_ID, WSL_ID)
+}
 
 // --- Full standings (all rows) ---
 
@@ -447,26 +464,17 @@ function transformAllStandings(
 
 async function getFullStandings(leagueId: number): Promise<StandingRow[]> {
   const season = getCurrentSeason().toString()
-  const data = await apiFetch(
-    '/standings',
-    { league: leagueId.toString(), season },
-    StandingsResponseSchema,
-    REVALIDATE_STANDINGS,
-  )
+  const data = await cachedStandings(leagueId.toString(), season)
   return transformAllStandings(data)
 }
 
-export const getHerrarStandings = unstable_cache(
-  () => getFullStandings(PREMIER_LEAGUE_ID),
-  ['api-football', 'herrar-standings'],
-  { revalidate: REVALIDATE_STANDINGS },
-)
+export async function getHerrarStandings(): Promise<StandingRow[]> {
+  return getFullStandings(PREMIER_LEAGUE_ID)
+}
 
-export const getDamerStandings = unstable_cache(
-  () => getFullStandings(WSL_ID),
-  ['api-football', 'damer-standings'],
-  { revalidate: REVALIDATE_STANDINGS },
-)
+export async function getDamerStandings(): Promise<StandingRow[]> {
+  return getFullStandings(WSL_ID)
+}
 
 // --- Full schedule (all season fixtures) ---
 
@@ -484,15 +492,11 @@ async function getSchedule(teamId: number): Promise<MatchData[]> {
     .map(transformFixtureToMatch)
 }
 
-export const getHerrarSchedule = unstable_cache(
-  () => getSchedule(CHELSEA_MEN_ID),
-  ['api-football', 'herrar-schedule'],
-  { revalidate: REVALIDATE_FIXTURES },
-)
+export async function getHerrarSchedule(): Promise<MatchData[]> {
+  return getSchedule(CHELSEA_MEN_ID)
+}
 
-export const getDamerSchedule = unstable_cache(
-  () => getSchedule(CHELSEA_WOMEN_ID),
-  ['api-football', 'damer-schedule'],
-  { revalidate: REVALIDATE_FIXTURES },
-)
+export async function getDamerSchedule(): Promise<MatchData[]> {
+  return getSchedule(CHELSEA_WOMEN_ID)
+}
 }
