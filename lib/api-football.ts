@@ -219,11 +219,13 @@ async function apiFetch<T>(
   const data = await res.json() as { errors?: Record<string, string>; results?: number; response?: unknown[] }
 
   // API-Football returns 200 with errors in body for rate limits etc.
-  if (data.errors && Object.keys(data.errors).length > 0) {
-    console.error(`[api-football] ${endpoint} errors:`, data.errors)
+  const errors = data.errors
+  const hasErrors = errors && (Array.isArray(errors) ? errors.length > 0 : Object.keys(errors).length > 0)
+  if (hasErrors) {
+    console.error(`[api-football] ${endpoint} errors: ${JSON.stringify(errors)}`)
   }
   if (data.results === 0) {
-    console.warn(`[api-football] ${endpoint} returned 0 results`, params)
+    console.warn(`[api-football] ${endpoint} returned 0 results params=${JSON.stringify(params)}`)
   }
 
   return schema.parse(data)
