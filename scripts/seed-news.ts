@@ -72,7 +72,7 @@ async function seed() {
         collection: 'categories',
         overrideAccess: true,
         draft: false,
-        data: { name },
+        data: { name, slug: name.toLowerCase().replace(/[åä]/g, 'a').replace(/ö/g, 'o').replace(/\s+/g, '-') },
       })
       categoryMap.set(name, cat.id)
       console.log(`Created category: "${name}" (id: ${cat.id})`)
