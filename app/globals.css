@@ -55,3 +55,146 @@ a {
 main {
   width: 100%;
 }
+
+/* Display font for sporty headings */
+.font-display {
+  font-family: var(--font-oswald), 'Oswald', system-ui, sans-serif;
+}
+
+/* Hero news grid overlay gradient */
+.hero-overlay {
+  background: linear-gradient(
+    0deg,
+    rgba(1, 20, 44, 0.92) 0%,
+    rgba(1, 20, 44, 0.6) 35%,
+    rgba(1, 20, 44, 0.1) 65%,
+    transparent 100%
+  );
+}
+
+.hero-overlay-sm {
+  background: linear-gradient(
+    0deg,
+    rgba(1, 20, 44, 0.92) 0%,
+    rgba(1, 20, 44, 0.55) 50%,
+    transparent 100%
+  );
+}
+
+/* News category tab active state */
+.tab-active {
+  color: #fff;
+  background: #034694;
+}
+
+/* Match center score typography */
+.score-display {
+  font-family: var(--font-oswald), 'Oswald', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Table row hover */
+.table-row-highlight {
+  background: rgba(3, 70, 148, 0.06);
+}
+
+/* Placeholder image gradients for demo */
+.placeholder-img-1 {
+  background: linear-gradient(135deg, #022b5c 0%, #0a5bb5 40%, #034694 100%);
+}
+.placeholder-img-2 {
+  background: linear-gradient(135deg, #0a5bb5 0%, #034694 50%, #022b5c 100%);
+}
+.placeholder-img-3 {
+  background: linear-gradient(135deg, #034694 0%, #022b5c 60%, #0a5bb5 100%);
+}
+.placeholder-img-4 {
+  background: linear-gradient(135deg, #022b5c 0%, #034694 100%);
+}
+.placeholder-img-5 {
+  background: linear-gradient(135deg, #0a5bb5 0%, #022b5c 100%);
+}
+.placeholder-img-6 {
+  background: linear-gradient(135deg, #034694 0%, #0a5bb5 100%);
+}
+
+/* Article body prose styling */
+.article-content {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #1e293b;
+}
+
+.article-content p {
+  margin-bottom: 1.5em;
+}
+
+.article-content h2 {
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #0f172a;
+}
+
+.article-content h3 {
+  margin-top: 1.75em;
+  margin-bottom: 0.5em;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #0f172a;
+}
+
+.article-content a {
+  color: #034694;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.article-content a:hover {
+  color: #022b5c;
+}
+
+.article-content ul,
+.article-content ol {
+  margin-bottom: 1.5em;
+  padding-left: 1.5em;
+}
+
+.article-content ul {
+  list-style-type: disc;
+}
+
+.article-content ol {
+  list-style-type: decimal;
+}
+
+.article-content li {
+  margin-bottom: 0.5em;
+}
+
+.article-content blockquote {
+  margin: 1.5em 0;
+  padding: 0.75em 1.25em;
+  border-left: 4px solid #D4A843;
+  background: #faf8f3;
+  color: #334155;
+  font-style: italic;
+}
+
+.article-content code {
+  padding: 0.15em 0.4em;
+  border-radius: 0.25rem;
+  background: #f1f5f9;
+  font-size: 0.875em;
+}
+
+.article-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 1.5em 0;
+  border-radius: 0.5rem;
+}

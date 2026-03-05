@@ -9,15 +9,25 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
         protocol: 'https',
         hostname: 'public.blob.vercel-storage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'imgk.svenskafans.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'media.api-sports.io',
       },
     ],
   },
   // i18n handled via [locale] route segments + middleware (App Router)
-  experimental: {
-    typedRoutes: true,
-  },
+  typedRoutes: true,
 }
 
 export default withPayload(nextConfig)

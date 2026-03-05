@@ -26,7 +26,7 @@ export default async function FrontendLayout({ children, params }: FrontendLayou
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-[#f5f6f8] text-slate-900">
       <NavBar locale={locale} />
       <main>{children}</main>
       <Footer locale={locale} />
