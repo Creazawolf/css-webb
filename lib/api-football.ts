@@ -193,16 +193,30 @@ const PlayersResponseSchema = z.object({
 
 // --- Core fetch helper ---
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+// Track last request time to enforce minimum gap between API calls
+let lastRequestTime = 0
+const MIN_REQUEST_GAP = 7000 // 7 seconds between requests (safe for 10 req/min)
+
 async function apiFetch<T>(
   endpoint: string,
   params: Record<string, string>,
   schema: z.ZodType<T>,
-  revalidate: number,
+  _revalidate: number,
 ): Promise<T> {
   const apiKey = process.env.API_FOOTBALL_KEY
   if (!apiKey) {
     throw new Error('Missing API_FOOTBALL_KEY environment variable')
   }
+
+  // Enforce minimum gap between requests to avoid rate limiting
+  const now = Date.now()
+  const elapsed = now - lastRequestTime
+  if (elapsed < MIN_REQUEST_GAP) {
+    await sleep(MIN_REQUEST_GAP - elapsed)
+  }
+  lastRequestTime = Date.now()
 
   const url = new URL(`${API_BASE}${endpoint}`)
   for (const [key, value] of Object.entries(params)) {
