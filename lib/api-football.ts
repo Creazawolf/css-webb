@@ -499,4 +499,3 @@ export async function getHerrarSchedule(): Promise<MatchData[]> {
 export async function getDamerSchedule(): Promise<MatchData[]> {
   return getSchedule(CHELSEA_WOMEN_ID)
 }
-}
