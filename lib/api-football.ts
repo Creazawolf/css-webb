@@ -197,7 +197,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // Track last request time to enforce minimum gap between API calls
 let lastRequestTime = 0
-const MIN_REQUEST_GAP = 6200 // ~6s between requests (safe for 10 req/min, fits in 60s timeout)
+const MIN_REQUEST_GAP = 3000 // 3s between requests — with unstable_cache only uncached calls hit API
 
 async function apiFetch<T>(
   endpoint: string,
@@ -414,12 +414,14 @@ async function getTeamData(
   const tid = teamId.toString()
   const lid = leagueId.toString()
 
-  // Each call is individually cached — only uncached calls hit the API
+  // Priority: fixtures first, then standings — topscorers/assists are best-effort
   const lastMatch = await cachedLastFixture(tid)
   const nextMatch = await cachedNextFixture(tid)
   const standingsData = await cachedStandings(lid, season)
-  const scorersData = await cachedTopScorers(lid, season)
-  const assistsData = await cachedTopAssists(lid, season)
+
+  // TopScorers and assists are non-critical — fetch but don't block on errors
+  const scorersData = await cachedTopScorers(lid, season).catch(() => [] as PlayerStat[])
+  const assistsData = await cachedTopAssists(lid, season).catch(() => [] as PlayerStat[])
 
   return {
     lastMatch,
