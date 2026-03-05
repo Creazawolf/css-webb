@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { z } from 'zod'
 
 // --- Constants ---
@@ -210,7 +211,7 @@ async function apiFetch<T>(
 
   const res = await fetch(url.toString(), {
     headers: { 'x-apisports-key': apiKey },
-    next: { revalidate },
+    cache: 'no-store',
   })
 
   if (!res.ok) {
@@ -394,13 +395,17 @@ async function getTeamData(
   }
 }
 
-export function getHerrarData(): Promise<MatchCenterData> {
-  return getTeamData(CHELSEA_MEN_ID, PREMIER_LEAGUE_ID)
-}
+export const getHerrarData = unstable_cache(
+  () => getTeamData(CHELSEA_MEN_ID, PREMIER_LEAGUE_ID),
+  ['api-football', 'herrar'],
+  { revalidate: REVALIDATE_FIXTURES },
+)
 
-export function getDamerData(): Promise<MatchCenterData> {
-  return getTeamData(CHELSEA_WOMEN_ID, WSL_ID)
-}
+export const getDamerData = unstable_cache(
+  () => getTeamData(CHELSEA_WOMEN_ID, WSL_ID),
+  ['api-football', 'damer'],
+  { revalidate: REVALIDATE_FIXTURES },
+)
 
 // --- Full standings (all rows) ---
 
@@ -437,13 +442,17 @@ async function getFullStandings(leagueId: number): Promise<StandingRow[]> {
   return transformAllStandings(data)
 }
 
-export function getHerrarStandings(): Promise<StandingRow[]> {
-  return getFullStandings(PREMIER_LEAGUE_ID)
-}
+export const getHerrarStandings = unstable_cache(
+  () => getFullStandings(PREMIER_LEAGUE_ID),
+  ['api-football', 'herrar-standings'],
+  { revalidate: REVALIDATE_STANDINGS },
+)
 
-export function getDamerStandings(): Promise<StandingRow[]> {
-  return getFullStandings(WSL_ID)
-}
+export const getDamerStandings = unstable_cache(
+  () => getFullStandings(WSL_ID),
+  ['api-football', 'damer-standings'],
+  { revalidate: REVALIDATE_STANDINGS },
+)
 
 // --- Full schedule (all season fixtures) ---
 
@@ -461,10 +470,15 @@ async function getSchedule(teamId: number): Promise<MatchData[]> {
     .map(transformFixtureToMatch)
 }
 
-export function getHerrarSchedule(): Promise<MatchData[]> {
-  return getSchedule(CHELSEA_MEN_ID)
-}
+export const getHerrarSchedule = unstable_cache(
+  () => getSchedule(CHELSEA_MEN_ID),
+  ['api-football', 'herrar-schedule'],
+  { revalidate: REVALIDATE_FIXTURES },
+)
 
-export function getDamerSchedule(): Promise<MatchData[]> {
-  return getSchedule(CHELSEA_WOMEN_ID)
+export const getDamerSchedule = unstable_cache(
+  () => getSchedule(CHELSEA_WOMEN_ID),
+  ['api-football', 'damer-schedule'],
+  { revalidate: REVALIDATE_FIXTURES },
+)
 }
