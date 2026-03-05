@@ -216,7 +216,16 @@ async function apiFetch<T>(
     throw new Error(`API-Football error: ${res.status} ${res.statusText}`)
   }
 
-  const data: unknown = await res.json()
+  const data = await res.json() as { errors?: Record<string, string>; results?: number; response?: unknown[] }
+
+  // API-Football returns 200 with errors in body for rate limits etc.
+  if (data.errors && Object.keys(data.errors).length > 0) {
+    console.error(`[api-football] ${endpoint} errors:`, data.errors)
+  }
+  if (data.results === 0) {
+    console.warn(`[api-football] ${endpoint} returned 0 results`, params)
+  }
+
   return schema.parse(data)
 }
 
@@ -338,39 +347,40 @@ async function getTeamData(
 ): Promise<MatchCenterData> {
   const season = getCurrentSeason().toString()
 
-  const [lastFixtures, nextFixtures, standingsData, scorersData, assistsData] =
-    await Promise.all([
-      apiFetch(
-        '/fixtures',
-        { team: teamId.toString(), last: '1' },
-        FixturesResponseSchema,
-        REVALIDATE_FIXTURES,
-      ),
-      apiFetch(
-        '/fixtures',
-        { team: teamId.toString(), next: '1' },
-        FixturesResponseSchema,
-        REVALIDATE_FIXTURES,
-      ),
-      apiFetch(
-        '/standings',
-        { league: leagueId.toString(), season },
-        StandingsResponseSchema,
-        REVALIDATE_STANDINGS,
-      ),
-      apiFetch(
-        '/players/topscorers',
-        { league: leagueId.toString(), season },
-        PlayersResponseSchema,
-        REVALIDATE_STATS,
-      ),
-      apiFetch(
-        '/players/topassists',
-        { league: leagueId.toString(), season },
-        PlayersResponseSchema,
-        REVALIDATE_STATS,
-      ),
-    ])
+  // Fetch fixtures sequentially to avoid API rate limits, then table/stats in parallel
+  const lastFixtures = await apiFetch(
+    '/fixtures',
+    { team: teamId.toString(), last: '1' },
+    FixturesResponseSchema,
+    REVALIDATE_FIXTURES,
+  )
+  const nextFixtures = await apiFetch(
+    '/fixtures',
+    { team: teamId.toString(), next: '1' },
+    FixturesResponseSchema,
+    REVALIDATE_FIXTURES,
+  )
+
+  const [standingsData, scorersData, assistsData] = await Promise.all([
+    apiFetch(
+      '/standings',
+      { league: leagueId.toString(), season },
+      StandingsResponseSchema,
+      REVALIDATE_STANDINGS,
+    ),
+    apiFetch(
+      '/players/topscorers',
+      { league: leagueId.toString(), season },
+      PlayersResponseSchema,
+      REVALIDATE_STATS,
+    ),
+    apiFetch(
+      '/players/topassists',
+      { league: leagueId.toString(), season },
+      PlayersResponseSchema,
+      REVALIDATE_STATS,
+    ),
+  ])
 
   const lastFixture = lastFixtures.response[0]
   const nextFixture = nextFixtures.response[0]

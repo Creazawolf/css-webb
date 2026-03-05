@@ -24,13 +24,16 @@ export default async function Startsida({ params }: PageProps) {
     notFound()
   }
 
-  const [podcastData, sfArticles, herrarData, damerData, cmsPosts] = await Promise.all([
+  // Fetch non-API-Football data in parallel
+  const [podcastData, sfArticles, cmsPosts] = await Promise.all([
     getShowWithEpisodes().catch(() => null),
     getLatestArticles(3).catch(() => []),
-    getHerrarData().catch(() => null),
-    getDamerData().catch(() => null),
     getLatestPosts(9, locale).catch(() => []),
   ])
+
+  // Fetch API-Football data sequentially to avoid rate limits
+  const herrarData = await getHerrarData().catch(() => null)
+  const damerData = await getDamerData().catch(() => null)
 
   const heroPosts = cmsPosts.slice(0, 3)
   const newsPosts = cmsPosts.slice(3, 9)
