@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { defineCollection, isAdmin } from './_shared'
+import { defineCollection, isAdmin, isAdminField } from './_shared'
 
 export const Users = defineCollection({
   slug: 'users',
@@ -43,8 +43,8 @@ export const Users = defineCollection({
         { label: 'Redaktor', value: 'editor' },
       ],
       access: {
-        create: isAdmin as any,
-        update: isAdmin as any,
+        create: isAdminField,
+        update: isAdminField,
       },
     },
   ],

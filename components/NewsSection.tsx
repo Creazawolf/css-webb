@@ -12,16 +12,16 @@ type NewsSectionProps = {
 }
 
 export default function NewsSection({ locale, articles }: NewsSectionProps) {
-  if (articles.length === 0) return null
+  const [active, setActive] = useState('Alla')
 
   const categories = useMemo(() => {
     const unique = Array.from(new Set(articles.map((a) => a.category).filter(Boolean)))
     return ['Alla', ...unique]
   }, [articles])
 
-  const [active, setActive] = useState('Alla')
-
   const filtered = active === 'Alla' ? articles : articles.filter((a) => a.category === active)
+
+  if (articles.length === 0) return null
 
   return (
     <section className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:px-8">

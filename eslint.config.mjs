@@ -1,0 +1,27 @@
+import coreWebVitals from 'eslint-config-next/core-web-vitals'
+import nextTypescript from 'eslint-config-next/typescript'
+
+const config = [
+  {
+    ignores: [
+      '.next/**',
+      'node_modules/**',
+      'migrations/**',
+      'payload-types.ts',
+      'app/(payload)/admin/importMap.js',
+      'next-env.d.ts',
+    ],
+  },
+  ...coreWebVitals,
+  ...nextTypescript,
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+    },
+  },
+]
+
+export default config

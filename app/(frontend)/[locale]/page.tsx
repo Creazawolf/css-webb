@@ -45,7 +45,6 @@ export default async function Startsida({ params }: PageProps) {
       <NewsSection locale={locale} articles={newsPosts} />
       {sfArticles.length > 0 && <SvenskaFansSlider articles={sfArticles} />}
       <PodcastSection
-        locale={locale}
         description={podcastData?.description}
         episodes={podcastData?.episodes}
         showUrl={podcastData?.showUrl}

@@ -10,7 +10,6 @@ const SV_MONTH_NAMES = [
 ] as const
 
 type ScheduleProps = {
-  locale: string
   herrar: MatchData[] | null
   damer: MatchData[] | null
 }
@@ -61,7 +60,7 @@ function TeamCell({ name, logo }: { name: string; logo: string }) {
   )
 }
 
-export default function Schedule({ locale, herrar, damer }: ScheduleProps) {
+export default function Schedule({ herrar, damer }: ScheduleProps) {
   const [activeTeam, setActiveTeam] = useState<'herrar' | 'damer'>('herrar')
 
   const matches = activeTeam === 'herrar' ? herrar : damer

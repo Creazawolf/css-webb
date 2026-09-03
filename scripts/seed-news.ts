@@ -280,6 +280,9 @@ async function seed() {
         status: 'published',
         publishedAt: postData.publishedAt,
         seo: postData.seo,
+        // Seed data is assembled dynamically; Payload's generated create type is
+        // too narrow to express it without duplicating the whole Post shape here.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
     })
     created++

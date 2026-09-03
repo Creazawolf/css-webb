@@ -4,12 +4,11 @@ import { useState } from 'react'
 import type { StandingRow } from '@/lib/api-football'
 
 type FullTableProps = {
-  locale: string
   herrar: StandingRow[] | null
   damer: StandingRow[] | null
 }
 
-export default function FullTable({ locale, herrar, damer }: FullTableProps) {
+export default function FullTable({ herrar, damer }: FullTableProps) {
   const [activeTeam, setActiveTeam] = useState<'herrar' | 'damer'>('herrar')
 
   const standings = activeTeam === 'herrar' ? herrar : damer

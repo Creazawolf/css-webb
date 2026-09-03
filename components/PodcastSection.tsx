@@ -38,7 +38,6 @@ const FALLBACK_EPISODES: PodcastEpisode[] = [
 ]
 
 type PodcastSectionProps = {
-  locale: string
   description?: string | undefined
   episodes?: PodcastEpisode[] | undefined
   showUrl?: string | undefined
@@ -70,7 +69,6 @@ function HeadphonesIcon({ className }: { className?: string }) {
 }
 
 export default function PodcastSection({
-  locale,
   description,
   episodes,
   showUrl,

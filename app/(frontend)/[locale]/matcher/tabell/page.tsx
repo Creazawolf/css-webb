@@ -32,7 +32,7 @@ export default async function TabellPage({
       <h1 className="font-display mb-6 text-2xl font-bold tracking-tight text-slate-900">
         Tabell
       </h1>
-      <FullTable locale={locale} herrar={herrar} damer={damer} />
+      <FullTable herrar={herrar} damer={damer} />
     </section>
   )
 }

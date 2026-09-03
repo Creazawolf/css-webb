@@ -13,13 +13,14 @@
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "build": "payload generate:importmap && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "payload": "payload",
     "payload:types": "payload generate:types",
     "payload:migrate": "payload migrate",
     "payload:migrate:create": "payload migrate:create",
-    "postinstall": "pnpm payload:types"
+    "postinstall": "pnpm payload:types",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.0.0",
@@ -39,6 +40,8 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
+    "@typescript-eslint/eslint-plugin": "^8.69.0",
+    "@typescript-eslint/parser": "^8.69.0",
     "cross-env": "^7.0.3",
     "eslint": "^9.16.0",
     "eslint-config-next": "^16.1.6",

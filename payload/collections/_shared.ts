@@ -3,6 +3,7 @@ import type {
   CollectionBeforeChangeHook,
   CollectionConfig,
   Field,
+  FieldAccess,
   GlobalConfig,
 } from 'payload'
 
@@ -21,6 +22,10 @@ export const isAdmin: Access = ({ req }) => hasRole((req.user as ReqUser) ?? nul
 
 export const isAdminOrEditor: Access = ({ req }) =>
   hasRole((req.user as ReqUser) ?? null, ['admin', 'editor'])
+
+/** Field-level variant of `isAdmin` (field access has a different signature). */
+export const isAdminField: FieldAccess = ({ req }) =>
+  hasRole((req.user as ReqUser) ?? null, ['admin'])
 
 export const readPublishedOrPrivileged: Access = ({ req }) => {
   if (hasRole((req.user as ReqUser) ?? null, ['admin', 'editor'])) return true

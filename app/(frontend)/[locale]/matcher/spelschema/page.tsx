@@ -32,7 +32,7 @@ export default async function SpelschemaPage({
       <h1 className="font-display mb-6 text-2xl font-bold tracking-tight text-slate-900">
         Spelschema
       </h1>
-      <Schedule locale={locale} herrar={herrar} damer={damer} />
+      <Schedule herrar={herrar} damer={damer} />
     </section>
   )
 }
