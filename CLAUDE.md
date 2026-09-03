@@ -6,15 +6,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Chelsea Supporters Sweden (CSS) website built with **Next.js 16 + Payload CMS 3 + Neon Postgres**, deployed on Vercel (Stockholm/arn1 region). Swedish-language football supporter club site with CMS-managed content.
 
+The site is replacing the club's section on SvenskaFans, so the information architecture deliberately mirrors what members already know from there (Löpsedel, Artiklar, Matcher, Medlem, Biljetter, Arenaguide, Reseguide, Podden, FPL, Mötesplatser, Redaktionen). The forum ("The Shed") still lives on SvenskaFans and is linked out via `SiteSettings.forumUrl`.
+
 ## Commands
 
 ```bash
-pnpm dev              # Start dev server (port 3000)
-pnpm build            # Production build (generates Payload importmap + types first)
-pnpm lint             # ESLint
-pnpm typecheck        # TypeScript strict check (tsc --noEmit)
+pnpm dev              # Dev server (port 3000)
+pnpm build            # Production build (importmap → migrate → next build)
+pnpm lint             # ESLint (flat config)
+pnpm typecheck        # tsc --noEmit
+pnpm seed             # Idempotent starting content: settings, menu, categories, fixed pages
+pnpm seed:news        # Demo articles with placeholder images — local only
 pnpm payload:types    # Regenerate Payload TypeScript types
 pnpm payload:migrate  # Run database migrations
+pnpm payload:migrate:create  # Generate a migration (interactive)
 ```
 
 Package manager is **pnpm** (v10.4.1). Types auto-generate on `pnpm install` via postinstall hook.
@@ -27,55 +32,95 @@ Package manager is **pnpm** (v10.4.1). Types auto-generate on `pnpm install` via
 - `app/(payload)/admin/` — Payload CMS admin panel (no locale prefix)
 - `app/(payload)/api/` — Payload auto-generated REST API
 
-### Middleware (`middleware.ts`)
+### Routes
 
-Handles locale detection and redirect. Skips `/admin`, `/api`, `/images`, static files, and `/_next`. Non-locale URLs redirect to `/sv`.
+| Path | Source |
+| --- | --- |
+| `/[locale]` | Löpsedel — streaming modules |
+| `/[locale]/artiklar` | Article list (paginated via `?sida=`) |
+| `/[locale]/artiklar/typ/[type]` | Filtered by `articleType` |
+| `/[locale]/artiklar/[slug]` | Article |
+| `/[locale]/matcher{,/spelschema,/tabell}` | API-Football data |
+| `/[locale]/evenemang`, `/motesplatser`, `/redaktionen`, `/podden`, `/medlemskap`, `/kontakt` | Dedicated pages |
+| `/[locale]/[slug]` | Any published `pages` doc (Om oss, Biljetter, Arenaguide, Reseguide, FPL) |
+
+`/nyheter` redirects to `/artiklar` (see `next.config.ts`). Slugs with their own route are listed in `RESERVED_SLUGS` (`lib/pages.ts`) so the catch-all never shadows them.
+
+### Proxy (`proxy.ts`)
+
+Locale detection and redirect. Next 16 renamed the `middleware` convention to `proxy`. Skips `/admin`, `/api`, `/images`, static files and `/_next`; non-locale URLs redirect to `/sv`.
 
 ### Payload CMS (embedded in Next.js)
 
-Payload runs inside the Next.js process via `withPayload()` in `next.config.ts`. Config lives at `payload.config.ts`.
+Payload runs inside the Next.js process via `withPayload()`. Config at `payload.config.ts`.
 
-**Collections:** Users, Media, Posts, Matches, Events, Categories, Pages, Members
-
+**Collections:** Users, Media, Categories, Posts, Matches, Events, Venues, Members, Pages
 **Globals:** SiteSettings, Navigation
 
+`sharp` **must** stay passed into `buildConfig` — without it no image sizes are generated, and the frontend reads `sizes.card` / `sizes.og` everywhere.
+
+Admin UI runs in Swedish (`i18n.supportedLanguages`), collections are grouped (Innehåll / Föreningen / Matcher / Inställningar), and Posts, Pages and Events use drafts with autosave, so published state lives in `_status`, not a custom `status` field.
+
 **Access control** patterns are in `payload/collections/_shared.ts`:
-- `isAdmin` / `isAdminOrEditor` — role-based guards
-- `readPublishedOrPrivileged` — public sees only `status: published`, editors see all
+- `isAdmin` / `isAdminOrEditor` — role guards; `isAdminField` for field-level access
+- `readPublishedOrPrivileged` — public sees only `_status: published`, editors see all
+
+### Editor experience
+
+Publishing an article requires only **rubrik** and **artikeltext**. Everything else is derived and overridable:
+- slug from the title (`slugField`)
+- excerpt from the first paragraph (`richTextToPlainText` + `truncateAtWord`)
+- author from the logged-in user (`defaultToCurrentUser`)
+- `publishedAt` on first publish; SEO falls back to title/excerpt at render time
+
+Editors can upload media and create categories — don't tighten those back to admin-only, or they can't illustrate their own posts.
 
 ### Data Fetching
 
-- **Server Components** use Payload Local API (in-process, no HTTP hop)
-- **External integrations** use REST API at `/api/*`
-- Frontend pages are currently placeholder content, not yet wired to CMS
+- **Server Components** use the Payload Local API (in-process, no HTTP hop). The sitemap does too — don't fetch the site's own REST API from within the app.
+- **External data** lives in `lib/`: `api-football.ts`, `chelsea-news.ts`, `spotify.ts`, `svenskafans.ts`. Each throws on failure; the calling module catches and renders without itself.
+
+### Caching
+
+Every page sets `export const revalidate`. Slow modules are wrapped in `<Suspense>` with skeletons from `components/Skeletons.tsx` so the shell ships immediately. External fetches carry their own `next.revalidate`.
+
+Payload `afterChange` hooks (`payload/hooks/revalidate.ts`) purge the affected paths on publish, so editors see changes at once. Those helpers must stay no-ops outside a request context — `revalidatePath` throws in scripts and jobs.
+
+### External integrations
+
+- **API-Football** (`API_FOOTBALL_KEY`) — fixtures, standings, top scorers for men's and women's teams.
+- **Chelsea FC news** — the official listing API at `chelseafc.com/en/api/news/listing/<id>`, discovered from the `data-props` payload on `/en/news`. No key needed. Images go through Chelsea's Cloudinary with `c_fill,q_auto,f_auto`, which takes a 1 MB original down to ~40 kB. We show headline, category and image only, and always link out.
+- **Spotify** (`SPOTIFY_CLIENT_ID` / `SECRET`) — ChelseaPodden episodes.
+- **SvenskaFans RSS** — legacy archive, off by default (`SiteSettings.showSvenskaFans`). The feed 403s without a browser-like User-Agent.
 
 ### Styling
 
-Tailwind CSS 4 via PostCSS (`postcss.config.mjs`). Design tokens in `app/globals.css` as CSS custom properties:
-- Chelsea Blue: `#034694`, Gold: `#D4A843`
-- Extended brand color scale (50–900) in `tailwind.config.ts`
-- Font: Inter (via `next/font/google`)
+Tailwind CSS 4 via PostCSS. Design tokens in `app/globals.css`.
+
+**Base element styles must stay inside `@layer base`.** Tailwind 4 puts utilities in the `utilities` layer, and unlayered CSS beats layered CSS regardless of specificity — an unlayered `a { color: inherit }` silently overrides every `text-*` utility on links.
+
+Motion lives in `globals.css` behind one easing curve and three durations, and is disabled wholesale under `prefers-reduced-motion`. `components/Reveal.tsx` animates content in on scroll; content is visible by default and only hidden once `html[data-js='on']` is set, so nothing depends on JS to be readable.
 
 ### Components
 
-All in `/components/`. Server Components by default; only NavBar mobile menu uses client-side state. Hardcoded navigation array in NavBar (not yet connected to Payload Navigation global).
+All in `/components/`. Server Components by default — only NavBar, MatchCenter, NextMatchBar, MembershipForm, Reveal, Schedule, FullTable and SvenskaFansSlider are client components.
 
 ### i18n
 
-Locale segment `[locale]` in URL path. Swedish slugify utility in `lib/slugify.ts` handles å→a, ä→a, ö→o. Payload has localization enabled with fallback.
+Locale segment `[locale]` in URL path. Swedish slugify in `lib/slugify.ts` (å→a, ä→a, ö→o). Payload localization enabled with fallback.
 
 ### TypeScript
 
-Strict mode with path aliases: `@/*`, `@/app/*`, `@/components/*`, `@/lib/*`, `@/payload/*`, `@payload-config`.
+Strict mode with `exactOptionalPropertyTypes`, so pass `...(x ? { k: x } : {})` rather than `k: x ?? undefined`. Path aliases: `@/*`, `@/app/*`, `@/components/*`, `@/lib/*`, `@/payload/*`, `@payload-config`.
 
 ### SEO
 
-Dynamic sitemap (`app/sitemap.ts`), robots.txt (`app/robots.ts`), metadata API. Posts/Pages have SEO fields (metaTitle, metaDescription, ogImage).
+Dynamic sitemap (`app/sitemap.ts`), robots.txt, per-page metadata. Posts and Pages have optional SEO fields that fall back to title/excerpt.
 
 ## Key Patterns
 
-- Slug fields auto-generate from title via `beforeValidate` hooks (see `_shared.ts`)
-- Posts/Pages use draft/published status with `publishedAt` auto-set on publish
-- Media generates 3 image sizes: thumbnail (400x300), card (800x600), og (1200x630)
-- Members collection is GDPR-minimal (no personnummer or sensitive data)
+- Membership applications write through a server action (`medlemskap/actions.ts`) using `overrideAccess` after validation — `members` stays admin-only so the REST API can't be written to. It answers identically for known addresses so it can't be used to probe the register.
+- Media generates 3 sizes: thumbnail (400x300), card (800x600), og (1200x630)
+- Members collection is GDPR-minimal — no personnummer or sensitive data
+- Local uploads land in `/media` and are gitignored; production uses Vercel Blob
 - Vercel deployment has 60s timeout for API routes, 15s for frontend
