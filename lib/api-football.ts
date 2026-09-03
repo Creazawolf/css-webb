@@ -1,4 +1,3 @@
-import { unstable_cache } from 'next/cache'
 import { z } from 'zod'
 
 // --- Constants ---
@@ -193,30 +192,24 @@ const PlayersResponseSchema = z.object({
 
 // --- Core fetch helper ---
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
-// Track last request time to enforce minimum gap between API calls
-let lastRequestTime = 0
-const MIN_REQUEST_GAP = 3000 // 3s between requests — with unstable_cache only uncached calls hit API
-
+/**
+ * Anropar API-Football och validerar svaret.
+ *
+ * Svaren cachas av Next Data Cache via `next.revalidate`, så ett cache-träff
+ * kostar ingenting. Varje resurs får en tag så att den kan revalideras på
+ * begäran (se app/api/revalidate).
+ */
 async function apiFetch<T>(
   endpoint: string,
   params: Record<string, string>,
   schema: z.ZodType<T>,
-  _revalidate: number,
+  revalidate: number,
+  tag: string,
 ): Promise<T> {
   const apiKey = process.env.API_FOOTBALL_KEY
   if (!apiKey) {
     throw new Error('Missing API_FOOTBALL_KEY environment variable')
   }
-
-  // Enforce minimum gap between requests to avoid rate limiting
-  const now = Date.now()
-  const elapsed = now - lastRequestTime
-  if (elapsed < MIN_REQUEST_GAP) {
-    await sleep(MIN_REQUEST_GAP - elapsed)
-  }
-  lastRequestTime = Date.now()
 
   const url = new URL(`${API_BASE}${endpoint}`)
   for (const [key, value] of Object.entries(params)) {
@@ -225,23 +218,24 @@ async function apiFetch<T>(
 
   const res = await fetch(url.toString(), {
     headers: { 'x-apisports-key': apiKey },
-    cache: 'no-store',
+    next: { revalidate, tags: [TAG_ALL, tag] },
   })
 
   if (!res.ok) {
     throw new Error(`API-Football error: ${res.status} ${res.statusText}`)
   }
 
-  const data = await res.json() as { errors?: Record<string, string>; results?: number; response?: unknown[] }
-
-  // API-Football returns 200 with errors in body for rate limits etc.
-  const errors = data.errors
-  const hasErrors = errors && (Array.isArray(errors) ? errors.length > 0 : Object.keys(errors).length > 0)
-  if (hasErrors) {
-    console.error(`[api-football] ${endpoint} errors: ${JSON.stringify(errors)}`)
+  const data = (await res.json()) as {
+    errors?: Record<string, string> | string[]
+    results?: number
   }
-  if (data.results === 0) {
-    console.warn(`[api-football] ${endpoint} returned 0 results params=${JSON.stringify(params)}`)
+
+  // API-Football svarar 200 med fel i bodyn vid t.ex. rate limit.
+  const errors = data.errors
+  const hasErrors =
+    errors && (Array.isArray(errors) ? errors.length > 0 : Object.keys(errors).length > 0)
+  if (hasErrors) {
+    throw new Error(`API-Football ${endpoint}: ${JSON.stringify(errors)}`)
   }
 
   return schema.parse(data)
@@ -357,78 +351,95 @@ function transformTopAssists(
   })
 }
 
-// --- Cached individual API fetchers ---
+// --- Cache-taggar ---
 
-const cachedLastFixture = unstable_cache(
-  async (teamId: string) => {
-    const data = await apiFetch('/fixtures', { team: teamId, last: '1' }, FixturesResponseSchema, 0)
-    const fixture = data.response[0]
-    return fixture ? transformFixtureToMatch(fixture) : null
-  },
-  ['api-football', 'last-fixture'],
-  { revalidate: REVALIDATE_FIXTURES },
-)
+export const TAG_ALL = 'api-football'
+export const TAG_FIXTURES = 'api-football:fixtures'
+export const TAG_STANDINGS = 'api-football:standings'
+export const TAG_STATS = 'api-football:stats'
 
-const cachedNextFixture = unstable_cache(
-  async (teamId: string) => {
-    const data = await apiFetch('/fixtures', { team: teamId, next: '1' }, FixturesResponseSchema, 0)
-    const fixture = data.response[0]
-    return fixture ? transformFixtureToMatch(fixture) : null
-  },
-  ['api-football', 'next-fixture'],
-  { revalidate: REVALIDATE_FIXTURES },
-)
+// --- Enskilda hämtare ---
 
-const cachedStandings = unstable_cache(
-  async (leagueId: string, season: string) =>
-    apiFetch('/standings', { league: leagueId, season }, StandingsResponseSchema, 0),
-  ['api-football', 'standings'],
-  { revalidate: REVALIDATE_STANDINGS },
-)
+async function fetchLastFixture(teamId: number): Promise<MatchData | null> {
+  const data = await apiFetch(
+    '/fixtures',
+    { team: String(teamId), last: '1' },
+    FixturesResponseSchema,
+    REVALIDATE_FIXTURES,
+    TAG_FIXTURES,
+  )
+  const fixture = data.response[0]
+  return fixture ? transformFixtureToMatch(fixture) : null
+}
 
-const cachedTopScorers = unstable_cache(
-  async (leagueId: string, season: string) => {
-    const data = await apiFetch('/players/topscorers', { league: leagueId, season }, PlayersResponseSchema, 0)
-    return transformTopScorers(data)
-  },
-  ['api-football', 'topscorers'],
-  { revalidate: REVALIDATE_STATS },
-)
+async function fetchNextFixture(teamId: number): Promise<MatchData | null> {
+  const data = await apiFetch(
+    '/fixtures',
+    { team: String(teamId), next: '1' },
+    FixturesResponseSchema,
+    REVALIDATE_FIXTURES,
+    TAG_FIXTURES,
+  )
+  const fixture = data.response[0]
+  return fixture ? transformFixtureToMatch(fixture) : null
+}
 
-const cachedTopAssists = unstable_cache(
-  async (leagueId: string, season: string) => {
-    const data = await apiFetch('/players/topassists', { league: leagueId, season }, PlayersResponseSchema, 0)
-    return transformTopAssists(data)
-  },
-  ['api-football', 'topassists'],
-  { revalidate: REVALIDATE_STATS },
-)
+function fetchStandings(leagueId: number, season: string) {
+  return apiFetch(
+    '/standings',
+    { league: String(leagueId), season },
+    StandingsResponseSchema,
+    REVALIDATE_STANDINGS,
+    TAG_STANDINGS,
+  )
+}
 
-// --- Exported fetchers ---
+async function fetchTopScorers(leagueId: number, season: string): Promise<PlayerStat[]> {
+  const data = await apiFetch(
+    '/players/topscorers',
+    { league: String(leagueId), season },
+    PlayersResponseSchema,
+    REVALIDATE_STATS,
+    TAG_STATS,
+  )
+  return transformTopScorers(data)
+}
 
-async function getTeamData(
-  teamId: number,
-  leagueId: number,
-): Promise<MatchCenterData> {
+async function fetchTopAssists(leagueId: number, season: string): Promise<PlayerStat[]> {
+  const data = await apiFetch(
+    '/players/topassists',
+    { league: String(leagueId), season },
+    PlayersResponseSchema,
+    REVALIDATE_STATS,
+    TAG_STATS,
+  )
+  return transformTopAssists(data)
+}
+
+// --- Exporterade hämtare ---
+
+const EMPTY_STATS: PlayerStat[] = []
+
+async function getTeamData(teamId: number, leagueId: number): Promise<MatchCenterData> {
   const season = getCurrentSeason().toString()
-  const tid = teamId.toString()
-  const lid = leagueId.toString()
 
-  // Priority: fixtures first, then standings — topscorers/assists are best-effort
-  const lastMatch = await cachedLastFixture(tid)
-  const nextMatch = await cachedNextFixture(tid)
-  const standingsData = await cachedStandings(lid, season)
-
-  // TopScorers and assists are non-critical — fetch but don't block on errors
-  const scorersData = await cachedTopScorers(lid, season).catch(() => [] as PlayerStat[])
-  const assistsData = await cachedTopAssists(lid, season).catch(() => [] as PlayerStat[])
+  // Alla anrop parallellt. Cachade svar kostar inget, och vid cache-miss
+  // vinner vi flera sekunder mot att kedja dem. Spelarstatistiken är
+  // sekundär — den får falla tillbaka på tom lista utan att fälla resten.
+  const [lastMatch, nextMatch, standingsData, topScorers, topAssists] = await Promise.all([
+    fetchLastFixture(teamId).catch(() => null),
+    fetchNextFixture(teamId).catch(() => null),
+    fetchStandings(leagueId, season).catch(() => null),
+    fetchTopScorers(leagueId, season).catch(() => EMPTY_STATS),
+    fetchTopAssists(leagueId, season).catch(() => EMPTY_STATS),
+  ])
 
   return {
     lastMatch,
     nextMatch,
-    standings: transformStandings(standingsData, teamId),
-    topScorers: scorersData,
-    topAssists: assistsData,
+    standings: standingsData ? transformStandings(standingsData, teamId) : [],
+    topScorers,
+    topAssists,
   }
 }
 
@@ -438,6 +449,23 @@ export async function getHerrarData(): Promise<MatchCenterData> {
 
 export async function getDamerData(): Promise<MatchCenterData> {
   return getTeamData(CHELSEA_WOMEN_ID, WSL_ID)
+}
+
+/** Hämtar herr- och damdata parallellt — används av startsidan. */
+export async function getMatchCenterData(): Promise<{
+  herrar: MatchCenterData | null
+  damer: MatchCenterData | null
+}> {
+  const [herrar, damer] = await Promise.all([
+    getHerrarData().catch(() => null),
+    getDamerData().catch(() => null),
+  ])
+  return { herrar, damer }
+}
+
+/** Nästa match för herrlaget — används av nedräkningen i sidhuvudet. */
+export async function getNextFixture(): Promise<MatchData | null> {
+  return fetchNextFixture(CHELSEA_MEN_ID).catch(() => null)
 }
 
 // --- Full standings (all rows) ---
@@ -466,7 +494,7 @@ function transformAllStandings(
 
 async function getFullStandings(leagueId: number): Promise<StandingRow[]> {
   const season = getCurrentSeason().toString()
-  const data = await cachedStandings(leagueId.toString(), season)
+  const data = await fetchStandings(leagueId, season)
   return transformAllStandings(data)
 }
 
@@ -487,6 +515,7 @@ async function getSchedule(teamId: number): Promise<MatchData[]> {
     { team: teamId.toString(), season },
     FixturesResponseSchema,
     REVALIDATE_FIXTURES,
+    TAG_FIXTURES,
   )
 
   return data.response

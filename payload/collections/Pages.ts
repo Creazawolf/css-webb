@@ -2,12 +2,18 @@ import type { CollectionConfig } from 'payload'
 
 import {
   defineCollection,
-  isAdmin,
+  isAdminOrEditor,
   readPublishedOrPrivileged,
+  seoField,
   setPublishedAtOnPublish,
   slugField,
 } from './_shared'
 
+/**
+ * Fristående sidor: Om oss, Biljettinfo, Arenaguide, Reseguide, FPL-ligan
+ * och liknande. Innehållet byggs av block så att en redaktör kan sätta ihop
+ * en sida utan att skriva kod.
+ */
 export const Pages = defineCollection({
   slug: 'pages',
   labels: {
@@ -16,13 +22,24 @@ export const Pages = defineCollection({
   },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'status', 'updatedAt'],
+    defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
+    description: 'Fasta sidor som Om oss, Biljetter, Arenaguide och Reseguide.',
+    group: 'Innehåll',
+    preview: (doc) => {
+      if (typeof doc?.slug !== 'string' || !doc.slug) return null
+      const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+      return `${base}/sv/${doc.slug}`
+    },
+  },
+  versions: {
+    drafts: { autosave: { interval: 1500 } },
+    maxPerDoc: 30,
   },
   access: {
-    create: isAdmin,
+    create: isAdminOrEditor,
     read: readPublishedOrPrivileged,
-    update: isAdmin,
-    delete: isAdmin,
+    update: isAdminOrEditor,
+    delete: isAdminOrEditor,
   },
   hooks: {
     beforeChange: [setPublishedAtOnPublish],
@@ -31,105 +48,137 @@ export const Pages = defineCollection({
     {
       name: 'title',
       type: 'text',
+      label: 'Rubrik',
       required: true,
       maxLength: 120,
       validate: (value: unknown) => {
         if (typeof value !== 'string' || value.trim().length < 2) {
-          return 'Titel måste vara minst 2 tecken.'
+          return 'Rubriken måste vara minst 2 tecken.'
         }
         return true
       },
     },
-    slugField('title'),
     {
-      name: 'content',
-      type: 'blocks',
-      required: true,
-      minRows: 1,
-      blocks: [
+      type: 'tabs',
+      tabs: [
         {
-          slug: 'richTextBlock',
-          labels: {
-            singular: 'Textblock',
-            plural: 'Textblock',
-          },
+          label: 'Innehåll',
           fields: [
             {
-              name: 'body',
-              type: 'richText',
-              required: true,
+              name: 'intro',
+              type: 'textarea',
+              label: 'Ingress',
+              maxLength: 320,
+              admin: { description: 'Valfri kort text som visas under rubriken.' },
             },
-          ],
-        },
-        {
-          slug: 'imageBlock',
-          labels: {
-            singular: 'Bildblock',
-            plural: 'Bildblock',
-          },
-          fields: [
             {
-              name: 'image',
-              type: 'relationship',
+              name: 'heroImage',
+              type: 'upload',
               relationTo: 'media',
-              required: true,
+              label: 'Toppbild',
             },
             {
-              name: 'caption',
-              type: 'text',
-              maxLength: 180,
+              name: 'content',
+              type: 'blocks',
+              label: 'Innehållsblock',
+              labels: { singular: 'Block', plural: 'Block' },
+              admin: {
+                description:
+                  'Bygg sidan genom att lägga till block. Du kan dra dem för att ändra ordning.',
+              },
+              blocks: [
+                {
+                  slug: 'richTextBlock',
+                  labels: { singular: 'Text', plural: 'Textblock' },
+                  fields: [
+                    { name: 'body', type: 'richText', label: 'Text', required: true },
+                  ],
+                },
+                {
+                  slug: 'imageBlock',
+                  labels: { singular: 'Bild', plural: 'Bildblock' },
+                  fields: [
+                    {
+                      name: 'image',
+                      type: 'upload',
+                      relationTo: 'media',
+                      label: 'Bild',
+                      required: true,
+                    },
+                    { name: 'caption', type: 'text', label: 'Bildtext', maxLength: 180 },
+                  ],
+                },
+                {
+                  slug: 'factsBlock',
+                  labels: { singular: 'Faktaruta', plural: 'Faktarutor' },
+                  fields: [
+                    { name: 'heading', type: 'text', label: 'Rubrik', required: true },
+                    {
+                      name: 'items',
+                      type: 'array',
+                      label: 'Rader',
+                      labels: { singular: 'Rad', plural: 'Rader' },
+                      minRows: 1,
+                      fields: [
+                        { name: 'label', type: 'text', label: 'Etikett', required: true },
+                        { name: 'value', type: 'text', label: 'Värde', required: true },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  slug: 'ctaBlock',
+                  labels: { singular: 'Knapp', plural: 'Knappar' },
+                  fields: [
+                    { name: 'heading', type: 'text', label: 'Rubrik', required: true },
+                    { name: 'body', type: 'textarea', label: 'Text', maxLength: 240 },
+                    { name: 'buttonLabel', type: 'text', label: 'Knapptext', required: true },
+                    {
+                      name: 'buttonUrl',
+                      type: 'text',
+                      label: 'Knapplänk',
+                      required: true,
+                      admin: { description: 'Intern länk som /sv/medlemskap, eller full https://-adress.' },
+                    },
+                  ],
+                },
+                {
+                  slug: 'faqBlock',
+                  labels: { singular: 'Frågor och svar', plural: 'Frågor och svar' },
+                  fields: [
+                    { name: 'heading', type: 'text', label: 'Rubrik' },
+                    {
+                      name: 'items',
+                      type: 'array',
+                      label: 'Frågor',
+                      labels: { singular: 'Fråga', plural: 'Frågor' },
+                      minRows: 1,
+                      fields: [
+                        { name: 'question', type: 'text', label: 'Fråga', required: true },
+                        { name: 'answer', type: 'textarea', label: 'Svar', required: true },
+                      ],
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
+        {
+          label: 'Sökmotorer',
+          fields: [seoField()],
+        },
       ],
     },
-    {
-      name: 'featuredImage',
-      type: 'relationship',
-      relationTo: 'media',
-    },
-    {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'draft',
-      options: [
-        { label: 'Draft', value: 'draft' },
-        { label: 'Publicerad', value: 'published' },
-      ],
-      admin: {
-        position: 'sidebar',
-      },
-    },
+    slugField('title'),
     {
       name: 'publishedAt',
       type: 'date',
+      label: 'Publicerad',
       admin: {
         position: 'sidebar',
+        date: { displayFormat: 'yyyy-MM-dd' },
       },
-    },
-    {
-      name: 'seo',
-      type: 'group',
-      fields: [
-        {
-          name: 'metaTitle',
-          type: 'text',
-          required: true,
-          maxLength: 60,
-        },
-        {
-          name: 'metaDescription',
-          type: 'textarea',
-          required: true,
-          maxLength: 160,
-        },
-        {
-          name: 'ogImage',
-          type: 'relationship',
-          relationTo: 'media',
-        },
-      ],
     },
   ],
 } satisfies CollectionConfig)

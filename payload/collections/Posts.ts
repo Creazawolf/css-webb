@@ -1,22 +1,51 @@
 import type { CollectionConfig } from 'payload'
 
 import {
+  defaultToCurrentUser,
   defineCollection,
   isAdminOrEditor,
   readPublishedOrPrivileged,
+  richTextToPlainText,
+  seoField,
   setPublishedAtOnPublish,
   slugField,
+  truncateAtWord,
 } from './_shared'
 
+/**
+ * Artiklar — matchreferat, spelarbetyg, inför-texter, krönikor och klubbnytt.
+ *
+ * Målet med den här konfigurationen är att en redaktör utan teknisk vana ska
+ * kunna skriva och publicera med bara två fält ifyllda: rubrik och text.
+ * Allt annat (slug, ingress, författare, datum, SEO) fylls i automatiskt och
+ * kan finjusteras efteråt av den som vill.
+ */
 export const Posts = defineCollection({
   slug: 'posts',
   labels: {
-    singular: 'Inlägg',
-    plural: 'Inlägg',
+    singular: 'Artikel',
+    plural: 'Artiklar',
   },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'status', 'publishedAt', 'updatedAt'],
+    defaultColumns: ['title', 'articleType', 'publishedAt', '_status'],
+    description: 'Nyheter, matchreferat, spelarbetyg och krönikor.',
+    group: 'Innehåll',
+    listSearchableFields: ['title', 'excerpt'],
+    preview: (doc) => {
+      if (typeof doc?.slug !== 'string' || !doc.slug) return null
+      const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+      return `${base}/sv/artiklar/${doc.slug}`
+    },
+  },
+  // Utkast + autospar. Redaktörer kan spara halvfärdigt utan att något syns
+  // publikt, och en felredigering går alltid att återställa från versionerna.
+  versions: {
+    drafts: {
+      autosave: { interval: 1500 },
+      schedulePublish: true,
+    },
+    maxPerDoc: 30,
   },
   access: {
     create: isAdminOrEditor,
@@ -31,128 +60,180 @@ export const Posts = defineCollection({
     {
       name: 'title',
       type: 'text',
+      label: 'Rubrik',
       required: true,
       maxLength: 140,
+      admin: {
+        placeholder: 'T.ex. "Spelarbetyg: Chelsea – Arsenal"',
+      },
       validate: (value: unknown) => {
         if (typeof value !== 'string' || value.trim().length < 5) {
-          return 'Titel måste vara minst 5 tecken.'
+          return 'Rubriken måste vara minst 5 tecken.'
         }
         return true
       },
     },
-    slugField('title'),
+
+    // Flikar håller formuläret kort: redaktören ser "Innehåll" och behöver
+    // aldrig öppna resten om hen inte vill.
     {
-      name: 'excerpt',
-      type: 'textarea',
-      required: true,
-      maxLength: 320,
-      validate: (value: unknown) => {
-        if (typeof value !== 'string' || value.trim().length < 30) {
-          return 'Ingress måste vara minst 30 tecken.'
-        }
-        return true
-      },
-    },
-    {
-      name: 'content',
-      type: 'richText',
-      required: true,
-    },
-    {
-      name: 'featuredImage',
-      type: 'relationship',
-      relationTo: 'media',
-      required: true,
-    },
-    {
-      name: 'category',
-      type: 'relationship',
-      relationTo: 'categories',
-      required: true,
-    },
-    {
-      name: 'tags',
-      type: 'array',
-      minRows: 0,
-      maxRows: 10,
-      fields: [
+      type: 'tabs',
+      tabs: [
         {
-          name: 'tag',
-          type: 'text',
-          required: true,
-          validate: (value: unknown) => {
-            if (typeof value !== 'string' || value.trim().length < 2) {
-              return 'Tagg måste vara minst 2 tecken.'
-            }
-            return true
-          },
+          label: 'Innehåll',
+          description: 'Det här är allt du behöver för att publicera.',
+          fields: [
+            {
+              name: 'content',
+              type: 'richText',
+              label: 'Artikeltext',
+              required: true,
+            },
+            {
+              name: 'featuredImage',
+              type: 'upload',
+              relationTo: 'media',
+              label: 'Huvudbild',
+              admin: {
+                description:
+                  'Visas överst i artikeln och i alla listor. Dra och släpp en bild här — du kan ladda upp direkt.',
+              },
+            },
+            {
+              name: 'excerpt',
+              type: 'textarea',
+              label: 'Ingress',
+              maxLength: 320,
+              admin: {
+                description:
+                  'Kort sammanfattning som visas i listor. Lämnar du fältet tomt skapas en ingress automatiskt från artikelns första stycke.',
+              },
+              hooks: {
+                beforeValidate: [
+                  ({ value, data }) => {
+                    if (typeof value === 'string' && value.trim().length > 0) {
+                      return value
+                    }
+                    const plain = richTextToPlainText(data?.content)
+                    if (!plain) return value
+                    return truncateAtWord(plain, 260)
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        {
+          label: 'Sortering',
+          description: 'Hjälper läsarna att hitta rätt. Kan lämnas som det är.',
+          fields: [
+            {
+              name: 'articleType',
+              type: 'select',
+              label: 'Typ av artikel',
+              defaultValue: 'nyhet',
+              admin: {
+                description:
+                  'Styr hur artikeln märks upp i listorna. Samma indelning som vi använt på SvenskaFans.',
+              },
+              options: [
+                { label: 'Nyhet', value: 'nyhet' },
+                { label: 'Inför match', value: 'infor' },
+                { label: 'Matchreferat', value: 'referat' },
+                { label: 'Spelarbetyg', value: 'spelarbetyg' },
+                { label: 'Krönika', value: 'kronika' },
+                { label: 'Föreningsnytt', value: 'foreningen' },
+                { label: 'Intervju', value: 'intervju' },
+              ],
+            },
+            {
+              name: 'category',
+              type: 'relationship',
+              relationTo: 'categories',
+              label: 'Kategori',
+              admin: {
+                description: 'Valfritt. Används för filtrering på nyhetssidan.',
+              },
+            },
+            {
+              name: 'relatedMatch',
+              type: 'relationship',
+              relationTo: 'matches',
+              label: 'Hör till match',
+              admin: {
+                description:
+                  'Koppla ett referat, spelarbetyg eller inför-text till rätt match, så dyker artikeln upp i matchcentret.',
+              },
+            },
+            {
+              name: 'tags',
+              type: 'array',
+              label: 'Taggar',
+              labels: { singular: 'Tagg', plural: 'Taggar' },
+              maxRows: 10,
+              admin: {
+                description: 'Valfritt. T.ex. spelarnamn eller motståndare.',
+              },
+              fields: [
+                {
+                  name: 'tag',
+                  type: 'text',
+                  required: true,
+                  validate: (value: unknown) => {
+                    if (typeof value !== 'string' || value.trim().length < 2) {
+                      return 'Taggen måste vara minst 2 tecken.'
+                    }
+                    return true
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Sökmotorer',
+          fields: [seoField()],
         },
       ],
     },
+
+    // --- Sidopanel ---
+    slugField('title'),
     {
       name: 'author',
       type: 'relationship',
       relationTo: 'users',
-      required: true,
+      label: 'Skribent',
+      admin: {
+        position: 'sidebar',
+        description: 'Sätts till dig automatiskt. Ändra om någon annan skrivit texten.',
+      },
+      hooks: {
+        beforeValidate: [defaultToCurrentUser],
+      },
     },
     {
       name: 'publishedAt',
       type: 'date',
+      label: 'Publiceringsdatum',
       admin: {
         position: 'sidebar',
+        description: 'Fylls i automatiskt när du publicerar.',
         date: {
           pickerAppearance: 'dayAndTime',
+          displayFormat: 'yyyy-MM-dd HH:mm',
         },
       },
     },
     {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'draft',
-      options: [
-        { label: 'Draft', value: 'draft' },
-        { label: 'Publicerad', value: 'published' },
-      ],
+      name: 'featured',
+      type: 'checkbox',
+      label: 'Toppa på startsidan',
+      defaultValue: false,
       admin: {
         position: 'sidebar',
+        description: 'Lyfter artikeln till den stora puffen högst upp.',
       },
-    },
-    {
-      name: 'seo',
-      type: 'group',
-      fields: [
-        {
-          name: 'metaTitle',
-          type: 'text',
-          required: true,
-          maxLength: 60,
-          validate: (value: unknown) => {
-            if (typeof value !== 'string' || value.trim().length < 20) {
-              return 'Meta title bör vara minst 20 tecken.'
-            }
-            return true
-          },
-        },
-        {
-          name: 'metaDescription',
-          type: 'textarea',
-          required: true,
-          maxLength: 160,
-          validate: (value: unknown) => {
-            if (typeof value !== 'string' || value.trim().length < 50) {
-              return 'Meta description bör vara minst 50 tecken.'
-            }
-            return true
-          },
-        },
-        {
-          name: 'ogImage',
-          type: 'relationship',
-          relationTo: 'media',
-          required: false,
-        },
-      ],
     },
   ],
 } satisfies CollectionConfig)

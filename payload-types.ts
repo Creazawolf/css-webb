@@ -73,9 +73,11 @@ export interface Config {
     posts: Post;
     matches: Match;
     events: Event;
+    venues: Venue;
     members: Member;
     pages: Page;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -88,9 +90,11 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     matches: MatchesSelect<false> | MatchesSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
+    venues: VenuesSelect<false> | VenuesSelect<true>;
     members: MembersSelect<false> | MembersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -108,9 +112,18 @@ export interface Config {
     navigation: NavigationSelect<false> | NavigationSelect<true>;
   };
   locale: 'sv' | 'en';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
-    tasks: unknown;
+    tasks: {
+      schedulePublish: TaskSchedulePublish;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -133,13 +146,32 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Redaktörer och administratörer som kan logga in.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
   name: string;
+  /**
+   * Redaktörer kan skriva, publicera och ladda upp bilder. Administratörer kan dessutom bjuda in fler och se medlemsregistret.
+   */
   role: 'admin' | 'editor';
+  showInTeam?: boolean | null;
+  /**
+   * T.ex. "Ordförande", "Skribent" eller "Poddredaktör".
+   */
+  title?: string | null;
+  /**
+   * Visas på sidan Redaktionen och under dina artiklar.
+   */
+  bio?: string | null;
+  avatar?: (number | null) | Media;
+  /**
+   * Årtal, t.ex. 1997.
+   */
+  supporterSince?: number | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -160,13 +192,24 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Alla bilder som används på sajten.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
+  /**
+   * Beskriv kort vad bilden föreställer. Läses upp för synskadade besökare och visas om bilden inte laddar. T.ex. "Cole Palmer jublar efter mål".
+   */
   alt: string;
+  /**
+   * Valfritt. Visas under bilden i artikeln.
+   */
   caption?: string | null;
+  /**
+   * Valfritt, men ange alltid källa för bilder du inte tagit själv.
+   */
   credit?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -207,26 +250,34 @@ export interface Media {
   };
 }
 /**
+ * Ämnen att sortera artiklar under.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
   id: number;
   name: string;
-  slug: string;
+  /**
+   * Fylls i automatiskt från rubriken. Ändra bara om du vet vad du gör — en publicerad artikel som byter slug tappar sina gamla länkar.
+   */
+  slug?: string | null;
+  /**
+   * Valfritt. Visas överst på kategorisidan.
+   */
   description?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * Nyheter, matchreferat, spelarbetyg och krönikor.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
   id: number;
   title: string;
-  slug: string;
-  excerpt: string;
   content: {
     root: {
       type: string;
@@ -242,26 +293,75 @@ export interface Post {
     };
     [k: string]: unknown;
   };
-  featuredImage: number | Media;
-  category: number | Category;
+  /**
+   * Visas överst i artikeln och i alla listor. Dra och släpp en bild här — du kan ladda upp direkt.
+   */
+  featuredImage?: (number | null) | Media;
+  /**
+   * Kort sammanfattning som visas i listor. Lämnar du fältet tomt skapas en ingress automatiskt från artikelns första stycke.
+   */
+  excerpt?: string | null;
+  /**
+   * Styr hur artikeln märks upp i listorna. Samma indelning som vi använt på SvenskaFans.
+   */
+  articleType?: ('nyhet' | 'infor' | 'referat' | 'spelarbetyg' | 'kronika' | 'foreningen' | 'intervju') | null;
+  /**
+   * Valfritt. Används för filtrering på nyhetssidan.
+   */
+  category?: (number | null) | Category;
+  /**
+   * Koppla ett referat, spelarbetyg eller inför-text till rätt match, så dyker artikeln upp i matchcentret.
+   */
+  relatedMatch?: (number | null) | Match;
+  /**
+   * Valfritt. T.ex. spelarnamn eller motståndare.
+   */
   tags?:
     | {
         tag: string;
         id?: string | null;
       }[]
     | null;
-  author: number | User;
-  publishedAt?: string | null;
-  status: 'draft' | 'published';
-  seo: {
-    metaTitle: string;
-    metaDescription: string;
+  /**
+   * Valfritt. Lämnar du fälten tomma används rubriken och ingressen automatiskt.
+   */
+  seo?: {
+    /**
+     * Max ca 60 tecken. Tomt = artikelns rubrik används.
+     */
+    metaTitle?: string | null;
+    /**
+     * Max ca 160 tecken. Tomt = ingressen används.
+     */
+    metaDescription?: string | null;
+    /**
+     * Tomt = huvudbilden används när någon delar artikeln.
+     */
     ogImage?: (number | null) | Media;
   };
+  /**
+   * Fylls i automatiskt från rubriken. Ändra bara om du vet vad du gör — en publicerad artikel som byter slug tappar sina gamla länkar.
+   */
+  slug?: string | null;
+  /**
+   * Sätts till dig automatiskt. Ändra om någon annan skrivit texten.
+   */
+  author?: (number | null) | User;
+  /**
+   * Fylls i automatiskt när du publicerar.
+   */
+  publishedAt?: string | null;
+  /**
+   * Lyfter artikeln till den stora puffen högst upp.
+   */
+  featured?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
+ * Föreningens egna matchsidor. Spelschema och tabell hämtas automatiskt — här lägger ni till referat, betyg och var vi ses.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "matches".
  */
@@ -269,13 +369,92 @@ export interface Match {
   id: number;
   opponent: string;
   date: string;
-  venue: string;
-  competition: 'premier-league' | 'champions-league' | 'fa-cup' | 'efl-cup' | 'friendly' | 'other';
+  team: 'herrar' | 'damer' | 'akademin';
+  homeOrAway: 'home' | 'away' | 'neutral';
+  competition:
+    | 'premier-league'
+    | 'champions-league'
+    | 'europa-league'
+    | 'fa-cup'
+    | 'efl-cup'
+    | 'wsl'
+    | 'friendly'
+    | 'other';
+  venue?: string | null;
+  status: 'upcoming' | 'live' | 'finished';
+  /**
+   * Fylls i när matchen är slut. Alltid Chelseas mål först.
+   */
   result?: {
-    homeGoals?: number | null;
-    awayGoals?: number | null;
+    chelseaGoals?: number | null;
+    opponentGoals?: number | null;
   };
-  matchReport?: {
+  /**
+   * Vilka mötesplatser som visar den här matchen.
+   */
+  watchAt?: (number | Venue)[] | null;
+  tvChannel?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Puben eller platsen där vi ses och ser matcherna, stad för stad.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "venues".
+ */
+export interface Venue {
+  id: number;
+  city: string;
+  name: string;
+  /**
+   * Fylls i automatiskt från rubriken. Ändra bara om du vet vad du gör — en publicerad artikel som byter slug tappar sina gamla länkar.
+   */
+  slug?: string | null;
+  address?: string | null;
+  /**
+   * Berätta kort hur det funkar — var ni brukar sitta, om det behövs bokning, vem man frågar efter.
+   */
+  description?: string | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  /**
+   * Valfritt. Klistra in en Google Maps-länk.
+   */
+  mapsUrl?: string | null;
+  image?: (number | null) | Media;
+  /**
+   * Avmarkera om stället inte längre gäller, istället för att radera.
+   */
+  active?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Pubkvällar, resor, årsmöten och andra träffar.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  /**
+   * Fylls i automatiskt från rubriken. Ändra bara om du vet vad du gör — en publicerad artikel som byter slug tappar sina gamla länkar.
+   */
+  slug?: string | null;
+  date: string;
+  /**
+   * Valfritt.
+   */
+  endDate?: string | null;
+  eventType: 'pubkvall' | 'resa' | 'arsmote' | 'traff' | 'annat';
+  city?: string | null;
+  /**
+   * Namn och gärna adress, t.ex. "The Bishops Arms, Vasagatan 1".
+   */
+  location: string;
+  description?: {
     root: {
       type: string;
       children: {
@@ -290,111 +469,171 @@ export interface Match {
     };
     [k: string]: unknown;
   } | null;
-  /**
-   * Länka publicerat matchreferat från nyhetsflödet.
-   */
-  matchReportPost?: (number | null) | Post;
-  status: 'upcoming' | 'live' | 'finished';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events".
- */
-export interface Event {
-  id: number;
-  title: string;
-  date: string;
-  endDate?: string | null;
-  location: string;
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  eventType: 'pubkvall' | 'resa' | 'arsmote' | 'annat';
-  maxAttendees?: number | null;
-  registrationLink?: string | null;
   featuredImage?: (number | null) | Media;
+  /**
+   * Valfritt.
+   */
+  maxAttendees?: number | null;
+  /**
+   * Valfritt. Full adress inklusive https://
+   */
+  registrationLink?: string | null;
+  featured?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
- * GDPR: Minimalt medlemsregister, inga personnummer eller känslig data.
+ * GDPR: minimalt medlemsregister. Inga personnummer eller känsliga uppgifter — lägg aldrig till sådana fält.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "members".
  */
 export interface Member {
   id: number;
+  /**
+   * Nya ansökningar från webbformuläret hamnar som "Ny ansökan".
+   */
+  status: 'pending' | 'active' | 'expired' | 'cancelled';
   name: string;
   email: string;
+  /**
+   * Valfritt.
+   */
   phone?: string | null;
-  membershipType: 'standard' | 'premium' | 'ungdom';
+  /**
+   * Hjälper oss ordna träffar på rätt ställen.
+   */
+  city?: string | null;
+  membershipType: 'standard' | 'familj' | 'ungdom' | 'heders';
+  /**
+   * Fritext som personen skrev i ansökningsformuläret.
+   */
+  message?: string | null;
   joinedAt: string;
-  expiresAt: string;
-  active: boolean;
+  /**
+   * Fylls i när medlemsavgiften betalats.
+   */
+  expiresAt?: string | null;
+  newsletter?: boolean | null;
+  /**
+   * Syns bara här i admin. Skriv aldrig känsliga uppgifter.
+   */
+  notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * Fasta sidor som Om oss, Biljetter, Arenaguide och Reseguide.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
   id: number;
   title: string;
-  slug: string;
-  content: (
-    | {
-        body: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
+  /**
+   * Valfri kort text som visas under rubriken.
+   */
+  intro?: string | null;
+  heroImage?: (number | null) | Media;
+  /**
+   * Bygg sidan genom att lägga till block. Du kan dra dem för att ändra ordning.
+   */
+  content?:
+    | (
+        | {
+            body: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
               [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        };
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'richTextBlock';
-      }
-    | {
-        image: number | Media;
-        caption?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'imageBlock';
-      }
-  )[];
-  featuredImage?: (number | null) | Media;
-  status: 'draft' | 'published';
-  publishedAt?: string | null;
-  seo: {
-    metaTitle: string;
-    metaDescription: string;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'richTextBlock';
+          }
+        | {
+            image: number | Media;
+            caption?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'imageBlock';
+          }
+        | {
+            heading: string;
+            items?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'factsBlock';
+          }
+        | {
+            heading: string;
+            body?: string | null;
+            buttonLabel: string;
+            /**
+             * Intern länk som /sv/medlemskap, eller full https://-adress.
+             */
+            buttonUrl: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'ctaBlock';
+          }
+        | {
+            heading?: string | null;
+            items?:
+              | {
+                  question: string;
+                  answer: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'faqBlock';
+          }
+      )[]
+    | null;
+  /**
+   * Valfritt. Lämnar du fälten tomma används rubriken och ingressen automatiskt.
+   */
+  seo?: {
+    /**
+     * Max ca 60 tecken. Tomt = artikelns rubrik används.
+     */
+    metaTitle?: string | null;
+    /**
+     * Max ca 160 tecken. Tomt = ingressen används.
+     */
+    metaDescription?: string | null;
+    /**
+     * Tomt = huvudbilden används när någon delar artikeln.
+     */
     ogImage?: (number | null) | Media;
   };
+  /**
+   * Fylls i automatiskt från rubriken. Ändra bara om du vet vad du gör — en publicerad artikel som byter slug tappar sina gamla länkar.
+   */
+  slug?: string | null;
+  publishedAt?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -412,6 +651,98 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: number;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'schedulePublish';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'schedulePublish') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -443,6 +774,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'events';
         value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'venues';
+        value: number | Venue;
       } | null)
     | ({
         relationTo: 'members';
@@ -501,6 +836,11 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   role?: T;
+  showInTeam?: T;
+  title?: T;
+  bio?: T;
+  avatar?: T;
+  supporterSince?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -589,20 +929,18 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
-  excerpt?: T;
   content?: T;
   featuredImage?: T;
+  excerpt?: T;
+  articleType?: T;
   category?: T;
+  relatedMatch?: T;
   tags?:
     | T
     | {
         tag?: T;
         id?: T;
       };
-  author?: T;
-  publishedAt?: T;
-  status?: T;
   seo?:
     | T
     | {
@@ -610,8 +948,13 @@ export interface PostsSelect<T extends boolean = true> {
         metaDescription?: T;
         ogImage?: T;
       };
+  slug?: T;
+  author?: T;
+  publishedAt?: T;
+  featured?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -620,17 +963,19 @@ export interface PostsSelect<T extends boolean = true> {
 export interface MatchesSelect<T extends boolean = true> {
   opponent?: T;
   date?: T;
-  venue?: T;
+  team?: T;
+  homeOrAway?: T;
   competition?: T;
+  venue?: T;
+  status?: T;
   result?:
     | T
     | {
-        homeGoals?: T;
-        awayGoals?: T;
+        chelseaGoals?: T;
+        opponentGoals?: T;
       };
-  matchReport?: T;
-  matchReportPost?: T;
-  status?: T;
+  watchAt?: T;
+  tvChannel?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -640,14 +985,36 @@ export interface MatchesSelect<T extends boolean = true> {
  */
 export interface EventsSelect<T extends boolean = true> {
   title?: T;
+  slug?: T;
   date?: T;
   endDate?: T;
+  eventType?: T;
+  city?: T;
   location?: T;
   description?: T;
-  eventType?: T;
+  featuredImage?: T;
   maxAttendees?: T;
   registrationLink?: T;
-  featuredImage?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "venues_select".
+ */
+export interface VenuesSelect<T extends boolean = true> {
+  city?: T;
+  name?: T;
+  slug?: T;
+  address?: T;
+  description?: T;
+  contactName?: T;
+  contactEmail?: T;
+  mapsUrl?: T;
+  image?: T;
+  active?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -656,13 +1023,17 @@ export interface EventsSelect<T extends boolean = true> {
  * via the `definition` "members_select".
  */
 export interface MembersSelect<T extends boolean = true> {
+  status?: T;
   name?: T;
   email?: T;
   phone?: T;
+  city?: T;
   membershipType?: T;
+  message?: T;
   joinedAt?: T;
   expiresAt?: T;
-  active?: T;
+  newsletter?: T;
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -672,7 +1043,8 @@ export interface MembersSelect<T extends boolean = true> {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
+  intro?: T;
+  heroImage?: T;
   content?:
     | T
     | {
@@ -691,10 +1063,45 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        factsBlock?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        ctaBlock?:
+          | T
+          | {
+              heading?: T;
+              body?: T;
+              buttonLabel?: T;
+              buttonUrl?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faqBlock?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
       };
-  featuredImage?: T;
-  status?: T;
-  publishedAt?: T;
   seo?:
     | T
     | {
@@ -702,8 +1109,11 @@ export interface PagesSelect<T extends boolean = true> {
         metaDescription?: T;
         ogImage?: T;
       };
+  slug?: T;
+  publishedAt?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -712,6 +1122,37 @@ export interface PagesSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -746,46 +1187,115 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Namn, kontaktuppgifter, sociala medier och vilka moduler som visas.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
  */
 export interface SiteSetting {
   id: number;
   siteName: string;
-  logo: number | Media;
+  tagline?: string | null;
+  /**
+   * Används av Google och när sajten delas i sociala medier.
+   */
+  description?: string | null;
+  logo?: (number | null) | Media;
+  email?: string | null;
+  orgNumber?: string | null;
+  /**
+   * T.ex. "250 kr per år". Visas på medlemssidan.
+   */
+  membershipFee?: string | null;
+  /**
+   * Visas i instruktionerna för att betala medlemsavgiften.
+   */
+  swish?: string | null;
+  bankgiro?: string | null;
   socialLinks?:
     | {
-        platform: 'facebook' | 'instagram' | 'x' | 'youtube' | 'other';
+        platform: 'facebook' | 'instagram' | 'x' | 'youtube' | 'tiktok' | 'discord' | 'spotify' | 'other';
         url: string;
         id?: string | null;
       }[]
     | null;
-  footerText: string;
+  showChelseaNews?: boolean | null;
+  showPodcast?: boolean | null;
   /**
-   * Om satt, anvands denna match istallet for automatisk nasta match.
+   * Under övergången kan vi visa arkivet från SvenskaFans. Slå av den här när allt innehåll flyttat hit.
    */
-  nextMatchOverride?: (number | null) | Match;
+  showSvenskaFans?: boolean | null;
+  /**
+   * En rad högst upp på sajten, t.ex. inför en resa eller ett årsmöte.
+   */
+  announcement?: {
+    enabled?: boolean | null;
+    text?: string | null;
+    linkLabel?: string | null;
+    /**
+     * Intern länk som /sv/evenemang eller full https://-adress.
+     */
+    linkUrl?: string | null;
+  };
+  forumUrl?: string | null;
+  podcastUrl?: string | null;
+  /**
+   * Valfritt. Länk till Fantasy Premier League-ligan.
+   */
+  fplLeagueUrl?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
+ * Huvudmenyn högst upp på sajten. Dra raderna för att ändra ordning.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "navigation".
  */
 export interface Navigation {
   id: number;
-  items: {
-    label: string;
-    link: string;
-    children?:
-      | {
-          label: string;
-          link: string;
-          id?: string | null;
-        }[]
-      | null;
-    id?: string | null;
-  }[];
+  /**
+   * Lämnas listan tom används sajtens standardmeny. Ett menyval kan ha undermeny.
+   */
+  items?:
+    | {
+        label: string;
+        /**
+         * Intern sida skrivs som /matcher. Extern länk med full https://-adress.
+         */
+        link: string;
+        external?: boolean | null;
+        children?:
+          | {
+              label: string;
+              /**
+               * Intern sida skrivs som /matcher. Extern länk med full https://-adress.
+               */
+              link: string;
+              external?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  footerColumns?:
+    | {
+        title: string;
+        links?:
+          | {
+              label: string;
+              /**
+               * Intern sida skrivs som /matcher. Extern länk med full https://-adress.
+               */
+              link: string;
+              external?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -795,7 +1305,14 @@ export interface Navigation {
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
   siteName?: T;
+  tagline?: T;
+  description?: T;
   logo?: T;
+  email?: T;
+  orgNumber?: T;
+  membershipFee?: T;
+  swish?: T;
+  bankgiro?: T;
   socialLinks?:
     | T
     | {
@@ -803,8 +1320,20 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
-  footerText?: T;
-  nextMatchOverride?: T;
+  showChelseaNews?: T;
+  showPodcast?: T;
+  showSvenskaFans?: T;
+  announcement?:
+    | T
+    | {
+        enabled?: T;
+        text?: T;
+        linkLabel?: T;
+        linkUrl?: T;
+      };
+  forumUrl?: T;
+  podcastUrl?: T;
+  fplLeagueUrl?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -819,11 +1348,27 @@ export interface NavigationSelect<T extends boolean = true> {
     | {
         label?: T;
         link?: T;
+        external?: T;
         children?:
           | T
           | {
               label?: T;
               link?: T;
+              external?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  footerColumns?:
+    | T
+    | {
+        title?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              link?: T;
+              external?: T;
               id?: T;
             };
         id?: T;
@@ -831,6 +1376,33 @@ export interface NavigationSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSchedulePublish".
+ */
+export interface TaskSchedulePublish {
+  input: {
+    type?: ('publish' | 'unpublish') | null;
+    locale?: string | null;
+    doc?: {
+      relationTo: 'posts';
+      value: number | Post;
+    } | null;
+    global?: string | null;
+    user?: (number | null) | User;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

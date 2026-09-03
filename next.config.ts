@@ -24,7 +24,18 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'media.api-sports.io',
       },
+      {
+        // Chelseas officiella nyhetsbilder
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.chelseafc.com',
+      },
     ],
+    // Bilderna från externa CDN:er ändras sällan — låt Next cacha dem länge.
+    minimumCacheTTL: 60 * 60 * 24 * 7,
   },
   // i18n handled via [locale] route segments + middleware (App Router)
   typedRoutes: true,

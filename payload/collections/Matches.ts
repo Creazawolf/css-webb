@@ -2,6 +2,13 @@ import type { CollectionConfig } from 'payload'
 
 import { defineCollection, isAdminOrEditor } from './_shared'
 
+/**
+ * Matcher som föreningen själv vill lyfta — framför allt för att koppla ihop
+ * inför-texter, referat och spelarbetyg, och för att peka ut var vi ses.
+ *
+ * Spelschema, resultat och tabell hämtas live från API-Football; den här
+ * samlingen ersätter inte det, den lägger föreningens eget lager ovanpå.
+ */
 export const Matches = defineCollection({
   slug: 'matches',
   labels: {
@@ -10,121 +17,174 @@ export const Matches = defineCollection({
   },
   admin: {
     useAsTitle: 'opponent',
-    defaultColumns: ['opponent', 'date', 'competition', 'status'],
+    defaultColumns: ['opponent', 'date', 'competition', 'team', 'status'],
+    description:
+      'Föreningens egna matchsidor. Spelschema och tabell hämtas automatiskt — här lägger ni till referat, betyg och var vi ses.',
+    group: 'Matcher',
   },
   access: {
     create: isAdminOrEditor,
-    read: ({ req }) => {
-      if (req.user?.role === 'admin' || req.user?.role === 'editor') return true
-      return {
-        status: {
-          in: ['upcoming', 'live', 'finished'],
-        },
-      }
-    },
+    read: () => true,
     update: isAdminOrEditor,
     delete: isAdminOrEditor,
   },
+  defaultSort: '-date',
   fields: [
     {
-      name: 'opponent',
-      type: 'text',
-      required: true,
-      maxLength: 120,
-      validate: (value: unknown) => {
-        if (typeof value !== 'string' || value.trim().length < 2) {
-          return 'Motståndare måste anges.'
-        }
-        return true
-      },
+      type: 'row',
+      fields: [
+        {
+          name: 'opponent',
+          type: 'text',
+          label: 'Motståndare',
+          required: true,
+          maxLength: 120,
+          admin: { width: '50%' },
+          validate: (value: unknown) => {
+            if (typeof value !== 'string' || value.trim().length < 2) {
+              return 'Ange motståndare.'
+            }
+            return true
+          },
+        },
+        {
+          name: 'date',
+          type: 'date',
+          label: 'Avspark',
+          required: true,
+          admin: {
+            width: '50%',
+            date: { pickerAppearance: 'dayAndTime', displayFormat: 'yyyy-MM-dd HH:mm' },
+          },
+        },
+      ],
     },
     {
-      name: 'date',
-      type: 'date',
-      required: true,
-      admin: {
-        date: {
-          pickerAppearance: 'dayAndTime',
+      type: 'row',
+      fields: [
+        {
+          name: 'team',
+          type: 'select',
+          label: 'Lag',
+          required: true,
+          defaultValue: 'herrar',
+          admin: { width: '33%' },
+          options: [
+            { label: 'Herrar', value: 'herrar' },
+            { label: 'Damer', value: 'damer' },
+            { label: 'Akademin', value: 'akademin' },
+          ],
         },
-      },
+        {
+          name: 'homeOrAway',
+          type: 'select',
+          label: 'Hemma/borta',
+          required: true,
+          defaultValue: 'home',
+          admin: { width: '33%' },
+          options: [
+            { label: 'Hemma', value: 'home' },
+            { label: 'Borta', value: 'away' },
+            { label: 'Neutral plan', value: 'neutral' },
+          ],
+        },
+        {
+          name: 'competition',
+          type: 'select',
+          label: 'Tävling',
+          required: true,
+          defaultValue: 'premier-league',
+          admin: { width: '34%' },
+          options: [
+            { label: 'Premier League', value: 'premier-league' },
+            { label: 'Champions League', value: 'champions-league' },
+            { label: 'Europa League', value: 'europa-league' },
+            { label: 'FA-cupen', value: 'fa-cup' },
+            { label: 'Ligacupen', value: 'efl-cup' },
+            { label: "Women's Super League", value: 'wsl' },
+            { label: 'Träningsmatch', value: 'friendly' },
+            { label: 'Annat', value: 'other' },
+          ],
+        },
+      ],
     },
     {
       name: 'venue',
       type: 'text',
-      required: true,
-      validate: (value: unknown) => {
-        if (typeof value !== 'string' || value.trim().length < 3) {
-          return 'Arena/plats måste anges.'
-        }
-        return true
-      },
+      label: 'Arena',
+      admin: { placeholder: 'T.ex. Stamford Bridge' },
     },
     {
-      name: 'competition',
+      name: 'status',
       type: 'select',
+      label: 'Status',
       required: true,
+      defaultValue: 'upcoming',
+      admin: { position: 'sidebar' },
       options: [
-        { label: 'Premier League', value: 'premier-league' },
-        { label: 'Champions League', value: 'champions-league' },
-        { label: 'FA Cup', value: 'fa-cup' },
-        { label: 'EFL Cup', value: 'efl-cup' },
-        { label: 'Klubbvänskap', value: 'friendly' },
-        { label: 'Annat', value: 'other' },
+        { label: 'Kommande', value: 'upcoming' },
+        { label: 'Pågår', value: 'live' },
+        { label: 'Avslutad', value: 'finished' },
       ],
     },
     {
       name: 'result',
       type: 'group',
+      label: 'Resultat',
+      admin: {
+        description: 'Fylls i när matchen är slut. Alltid Chelseas mål först.',
+      },
       fields: [
         {
-          name: 'homeGoals',
-          type: 'number',
-          min: 0,
-          max: 30,
-          validate: (value: unknown, { data }: { data: Record<string, unknown> }) => {
-            if (data?.status === 'finished' && typeof value !== 'number') {
-              return 'Ange hemmamål när matchen är avslutad.'
-            }
-            return true
-          },
-        },
-        {
-          name: 'awayGoals',
-          type: 'number',
-          min: 0,
-          max: 30,
-          validate: (value: unknown, { data }: { data: Record<string, unknown> }) => {
-            if (data?.status === 'finished' && typeof value !== 'number') {
-              return 'Ange bortamål när matchen är avslutad.'
-            }
-            return true
-          },
+          type: 'row',
+          fields: [
+            {
+              name: 'chelseaGoals',
+              type: 'number',
+              label: 'Chelsea',
+              min: 0,
+              max: 30,
+              admin: { width: '50%', step: 1 },
+              validate: (value: unknown, { data }: { data: Record<string, unknown> }) => {
+                if (data?.status === 'finished' && typeof value !== 'number') {
+                  return 'Ange Chelseas mål när matchen är avslutad.'
+                }
+                return true
+              },
+            },
+            {
+              name: 'opponentGoals',
+              type: 'number',
+              label: 'Motståndaren',
+              min: 0,
+              max: 30,
+              admin: { width: '50%', step: 1 },
+              validate: (value: unknown, { data }: { data: Record<string, unknown> }) => {
+                if (data?.status === 'finished' && typeof value !== 'number') {
+                  return 'Ange motståndarens mål när matchen är avslutad.'
+                }
+                return true
+              },
+            },
+          ],
         },
       ],
     },
     {
-      name: 'matchReport',
-      type: 'richText',
-    },
-    {
-      name: 'matchReportPost',
+      name: 'watchAt',
       type: 'relationship',
-      relationTo: 'posts',
-      hasMany: false,
+      relationTo: 'venues',
+      hasMany: true,
+      label: 'Vi ses här',
       admin: {
-        description: 'Länka publicerat matchreferat från nyhetsflödet.',
+        description: 'Vilka mötesplatser som visar den här matchen.',
       },
     },
     {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'upcoming',
-      options: [
-        { label: 'Kommande', value: 'upcoming' },
-        { label: 'Live', value: 'live' },
-        { label: 'Avslutad', value: 'finished' },
-      ],
+      name: 'tvChannel',
+      type: 'text',
+      label: 'Visas på',
+      admin: { placeholder: 'T.ex. Viaplay' },
     },
   ],
 } satisfies CollectionConfig)

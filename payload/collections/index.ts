@@ -8,6 +8,7 @@ import { Members } from './Members'
 import { Pages } from './Pages'
 import { Posts } from './Posts'
 import { Users } from './Users'
+import { Venues } from './Venues'
 
 export { Categories } from './Categories'
 export { Events } from './Events'
@@ -17,6 +18,7 @@ export { Members } from './Members'
 export { Pages } from './Pages'
 export { Posts } from './Posts'
 export { Users } from './Users'
+export { Venues } from './Venues'
 
 export const allCollections: CollectionConfig[] = [
   Users,
@@ -25,6 +27,7 @@ export const allCollections: CollectionConfig[] = [
   Posts,
   Matches,
   Events,
+  Venues,
   Members,
   Pages,
 ]
