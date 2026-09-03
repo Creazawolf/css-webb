@@ -50,7 +50,7 @@ function Unit({ value, label }: { value: number; label: string }) {
       <span className="tabular font-display text-lg font-bold leading-none text-white sm:text-xl">
         {String(value).padStart(2, '0')}
       </span>
-      <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/40">
+      <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/65">
         {label}
       </span>
     </div>
@@ -111,13 +111,13 @@ export default function NextMatchBar({ locale, match }: NextMatchBarProps) {
             <span className="mx-1.5 text-white/30">–</span>
             {isHome ? opponent : 'Chelsea'}
           </span>
-          <span className="hidden rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/50 sm:inline-block">
+          <span className="hidden rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/70 sm:inline-block">
             {isHome ? 'Hemma' : 'Borta'}
           </span>
         </div>
 
         {/* Avspark */}
-        <span className="hidden text-[12px] text-white/40 md:inline">
+        <span className="hidden text-[12px] text-white/70 md:inline">
           {formatKickoff(match.isoDate)} · {match.league}
         </span>
 
@@ -132,7 +132,7 @@ export default function NextMatchBar({ locale, match }: NextMatchBarProps) {
             </div>
           ) : (
             /* Innan klienten hunnit räkna, och när matchen har startat */
-            <span className="text-[12px] font-semibold text-white/50">
+            <span className="text-[12px] font-semibold text-white/75">
               {started ? 'Pågår nu' : formatKickoff(match.isoDate)}
             </span>
           )}

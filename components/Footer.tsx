@@ -70,7 +70,7 @@ function SocialIcon({ platform, url }: { platform: string; url: string }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="text-white/40 transition-colors duration-200 hover:text-[#D4A843]"
+      className="text-white/70 transition-colors duration-200 hover:text-[#D4A843]"
     >
       {known ? (
         <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="currentColor" aria-hidden="true">
@@ -111,7 +111,7 @@ export default function Footer({ locale, site, columns }: FooterProps) {
       {site.socialLinks.length > 0 && (
         <div className="border-b border-white/5">
           <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/30">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/60">
               Följ oss
             </span>
             <div className="flex items-center gap-4">
@@ -142,7 +142,7 @@ export default function Footer({ locale, site, columns }: FooterProps) {
               </span>
             </div>
           </div>
-          <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-white/40">
+          <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-white/65">
             {site.description}
           </p>
           {site.forumUrl && (
@@ -159,7 +159,7 @@ export default function Footer({ locale, site, columns }: FooterProps) {
 
         {cols.map((col) => (
           <div key={col.title}>
-            <h2 className="font-display mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-white/50">
+            <h2 className="font-display mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-white/70">
               {col.title}
             </h2>
             <ul className="space-y-2">
@@ -170,7 +170,7 @@ export default function Footer({ locale, site, columns }: FooterProps) {
                     {...(link.external
                       ? { target: '_blank', rel: 'noopener noreferrer' }
                       : {})}
-                    className="text-[13px] text-white/40 transition-colors duration-200 hover:text-[#D4A843]"
+                    className="text-[13px] text-white/70 transition-colors duration-200 hover:text-[#D4A843]"
                   >
                     {link.label}
                   </Link>
@@ -183,11 +183,11 @@ export default function Footer({ locale, site, columns }: FooterProps) {
 
       <div className="border-t border-white/5">
         <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center justify-between gap-2 px-4 py-4 sm:flex-row sm:px-6 lg:px-8">
-          <p className="text-[11px] text-white/25">
+          <p className="text-[11px] text-white/55">
             &copy; {new Date().getFullYear()} {site.siteName}
             {site.orgNumber ? ` · Org.nr ${site.orgNumber}` : ''}
           </p>
-          <p className="text-[11px] text-white/25">
+          <p className="text-[11px] text-white/55">
             <a href={`mailto:${site.email}`} className="transition-colors hover:text-white/50">
               {site.email}
             </a>

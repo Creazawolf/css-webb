@@ -126,7 +126,7 @@ export default async function RedaktionenPage({ params }: PageProps) {
         <h2 className="font-display text-xl font-bold uppercase tracking-wide text-white">
           Vill du skriva för oss?
         </h2>
-        <p className="mx-auto mt-2 max-w-lg text-[14px] leading-relaxed text-blue-100/70">
+        <p className="mx-auto mt-2 max-w-lg text-[14px] leading-relaxed text-blue-100/90">
           Vi tar alltid emot fler skribenter — referat, krönikor, analyser eller
           något helt eget. Hör av dig så sätter vi upp ett konto åt dig.
         </p>

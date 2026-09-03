@@ -117,13 +117,13 @@ export default function SvenskaFansSlider({ articles }: SvenskaFansSliderProps) 
 
             {/* Content */}
             <div className="flex flex-1 flex-col justify-center p-5 sm:p-7">
-              <span className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30">
+              <span className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">
                 {article.date}
               </span>
               <h3 className="font-display text-xl font-bold leading-tight text-white transition-colors group-hover:text-[#D4A843] sm:text-2xl">
                 {article.title}
               </h3>
-              <p className="mt-3 line-clamp-3 text-[14px] leading-relaxed text-white/50">
+              <p className="mt-3 line-clamp-3 text-[14px] leading-relaxed text-white/70">
                 {article.description}
               </p>
               <span className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#D4A843]">

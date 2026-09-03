@@ -70,7 +70,7 @@ export default async function KontaktPage({ params }: PageProps) {
             </a>
 
             {site.orgNumber && (
-              <p className="mt-5 border-t border-white/10 pt-4 text-[12px] text-white/40">
+              <p className="mt-5 border-t border-white/10 pt-4 text-[12px] text-white/65">
                 Organisationsnummer
                 <br />
                 <span className="text-white/70">{site.orgNumber}</span>
@@ -79,7 +79,7 @@ export default async function KontaktPage({ params }: PageProps) {
 
             {site.socialLinks.length > 0 && (
               <div className="mt-5 border-t border-white/10 pt-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/65">
                   Sociala medier
                 </p>
                 <ul className="mt-2 space-y-1.5">
@@ -89,7 +89,7 @@ export default async function KontaktPage({ params }: PageProps) {
                         href={s.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[13px] capitalize text-white/60 transition-colors hover:text-[#D4A843]"
+                        className="text-[13px] capitalize text-white/80 transition-colors hover:text-[#D4A843]"
                       >
                         {s.platform}
                       </a>

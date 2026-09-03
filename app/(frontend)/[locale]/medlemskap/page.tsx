@@ -96,26 +96,26 @@ export default async function MedlemskapPage({ params }: PageProps) {
                 <h2 className="font-display mb-3 text-base font-bold uppercase tracking-wide">
                   Så betalar du
                 </h2>
-                <p className="text-[13px] leading-relaxed text-blue-100/70">
+                <p className="text-[13px] leading-relaxed text-blue-100/90">
                   Skicka in ansökan först — vi bekräftar via e-post och skickar
                   betalningsinformation.
                 </p>
                 <dl className="mt-4 space-y-2 text-[13px]">
                   {site.swish && (
                     <div className="flex justify-between border-b border-white/10 pb-2">
-                      <dt className="text-white/50">Swish</dt>
+                      <dt className="text-white/70">Swish</dt>
                       <dd className="font-semibold">{site.swish}</dd>
                     </div>
                   )}
                   {site.bankgiro && (
                     <div className="flex justify-between border-b border-white/10 pb-2">
-                      <dt className="text-white/50">Bankgiro</dt>
+                      <dt className="text-white/70">Bankgiro</dt>
                       <dd className="font-semibold">{site.bankgiro}</dd>
                     </div>
                   )}
                   {site.membershipFee && (
                     <div className="flex justify-between">
-                      <dt className="text-white/50">Avgift</dt>
+                      <dt className="text-white/70">Avgift</dt>
                       <dd className="font-semibold text-[#D4A843]">
                         {site.membershipFee}
                       </dd>

@@ -1,8 +1,9 @@
 /**
- * Seed script: creates categories, a system user, placeholder images,
- * and mock news posts based on recent Chelsea FC news (Feb–Mar 2026).
+ * Demoinnehåll: kategorier, en systemanvändare, platshållarbilder och några
+ * exempelartiklar. Används för att se hur sajten ser ut med innehåll i —
+ * kör aldrig mot produktion.
  *
- * Run: npx tsx scripts/seed-news.ts
+ * Kör: pnpm seed:news
  */
 import { getPayload } from 'payload'
 import config from '../payload.config'
@@ -121,6 +122,7 @@ async function seed() {
       excerpt:
         'Chelsea föll mot Arsenal på Emirates Stadium efter två hörnmål av Timber och Saliba. Pedro Neto fick rött kort — lagets sjunde utvisning i ligan denna säsong.',
       category: 'Matcher',
+      articleType: 'referat',
       publishedAt: '2026-03-01T22:00:00.000Z',
       seo: {
         metaTitle: 'Arsenal 2–1 Chelsea: Matchreferat från Emirates',
@@ -133,6 +135,7 @@ async function seed() {
       excerpt:
         'Chelsea-managern Liam Rosenior pekar ut två nyckelfaktorer som laget måste förbättra — disciplin och försvar vid fasta situationer — för att hänga med i topp fyra-racet.',
       category: 'Nyheter',
+      articleType: 'spelarbetyg',
       publishedAt: '2026-03-01T18:30:00.000Z',
       seo: {
         metaTitle: 'Rosenior kräver bättre disciplin av Chelsea',
@@ -145,6 +148,7 @@ async function seed() {
       excerpt:
         'Chelsea har lottats mot titelhållarna Paris Saint-Germain i Champions League-slutspelet. Rosenior har erfarenhet av PSG från sin tid i Strasbourg.',
       category: 'Matcher',
+      articleType: 'infor',
       publishedAt: '2026-02-28T14:00:00.000Z',
       seo: {
         metaTitle: 'Chelsea möter PSG i Champions League-åttondelen',
@@ -157,6 +161,7 @@ async function seed() {
       excerpt:
         'Chelsea presenterar ett flerårigt globalt partnerskap med teknikföretaget IFS. Logotypen syns på herrlagets och damlagets tröjor från och med nu.',
       category: 'Nyheter',
+      articleType: 'kronika',
       publishedAt: '2026-02-20T10:00:00.000Z',
       seo: {
         metaTitle: 'IFS blir Chelseas nya huvudsponsor resten av säsongen',
@@ -169,6 +174,7 @@ async function seed() {
       excerpt:
         'CSS ordnar resa till Stamford Bridge för Champions League-åttondelsfinalen mot PSG. Begränsat antal platser — anmäl dig senast 10 mars.',
       category: 'Resor',
+      articleType: 'nyhet',
       publishedAt: '2026-02-27T08:00:00.000Z',
       seo: {
         metaTitle: 'CSS-resa till Chelsea vs PSG i Champions League',
@@ -181,6 +187,7 @@ async function seed() {
       excerpt:
         'Liverpool leder med tre poäng före Chelsea, medan Aston Villa och Manchester United ligger ytterligare tre poäng framför. Vi analyserar slutspurten.',
       category: 'Nyheter',
+      articleType: 'foreningen',
       publishedAt: '2026-02-26T16:00:00.000Z',
       seo: {
         metaTitle: 'Premier League: Chelseas väg till topp fyra',
@@ -193,6 +200,7 @@ async function seed() {
       excerpt:
         'CSS bjuder in till pubkväll för att se Champions League-åttondelen mot PSG. Vi ses på The Aston, Norrlandsgatan 21, onsdagen den 12 mars.',
       category: 'Evenemang',
+      articleType: 'referat',
       publishedAt: '2026-02-25T12:00:00.000Z',
       seo: {
         metaTitle: 'Pubkväll: Chelsea vs PSG med CSS i Stockholm',
@@ -205,6 +213,7 @@ async function seed() {
       excerpt:
         'Chelsea uppges vara öppna för att sälja Trevoh Chalobah i sommar. Samtidigt fortsätter intresset för Dortmunds Felix Nmecha och målvakten Bart Verbruggen.',
       category: 'Transfers',
+      articleType: 'nyhet',
       publishedAt: '2026-02-22T09:00:00.000Z',
       seo: {
         metaTitle: 'Chelsea-transfers: Chalobah ut, Nmecha in kanske',
@@ -217,6 +226,7 @@ async function seed() {
       excerpt:
         'Liam Rosenior inledde sitt Chelsea-äventyr med en 5–1-seger mot Charlton i FA-cupen — den bästa debuten sedan Antonio Conte 2016. Vi sammanfattar hans första veckor.',
       category: 'Nyheter',
+      articleType: 'kronika',
       publishedAt: '2026-02-18T11:00:00.000Z',
       seo: {
         metaTitle: 'Roseniors Chelsea-start den bästa sedan Conte',
@@ -277,7 +287,9 @@ async function seed() {
         featuredImage: mediaIds[i]!,
         category: catId,
         author: authorId,
-        status: 'published',
+        articleType: postData.articleType ?? 'nyhet',
+        featured: i < 3,
+        _status: 'published',
         publishedAt: postData.publishedAt,
         seo: postData.seo,
         // Seed data is assembled dynamically; Payload's generated create type is

@@ -29,7 +29,7 @@ export default function MembershipCTA({ locale, membershipFee }: MembershipCTAPr
           <h2 className="font-display text-2xl font-bold uppercase tracking-wide text-white sm:text-3xl">
             Bli medlem i CSS
           </h2>
-          <p className="mt-2 max-w-lg text-[14px] leading-relaxed text-blue-100/80">
+          <p className="mt-2 max-w-lg text-[14px] leading-relaxed text-blue-100/90">
             Gå med i Chelsea Supporters Sweden och bli en del av den blå
             gemenskapen — från Malmö till Luleå.
             {membershipFee ? ` Medlemskapet kostar ${membershipFee}.` : ''}

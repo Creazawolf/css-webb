@@ -141,3 +141,7 @@ vite.config.ts.timestamp-*
 
 # Payload generated
 app/(payload)/admin/importMap.js
+
+# Lokala mediauppladdningar (Payload staticDir). I produktion ligger bilderna
+# i Vercel Blob — de här filerna hör inte hemma i repot.
+/media/

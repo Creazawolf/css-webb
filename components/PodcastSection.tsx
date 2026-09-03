@@ -87,7 +87,7 @@ export default function PodcastSection({
             <h2 className="font-display text-lg font-bold uppercase tracking-wide text-white">
               ChelseaPodden
             </h2>
-            <span className="hidden rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-white/60 sm:inline-block">
+            <span className="hidden rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-white/75 sm:inline-block">
               by CSS
             </span>
           </div>
@@ -116,21 +116,21 @@ export default function PodcastSection({
               />
             </div>
 
-            <p className="max-w-xs text-center text-[13px] leading-relaxed text-white/50">
+            <p className="max-w-xs text-center text-[13px] leading-relaxed text-white/70">
               {displayDescription}
             </p>
 
             <div className="mt-3 flex items-center gap-1.5">
               <span className="text-[#D4A843]">&#9733;</span>
-              <span className="text-[13px] font-semibold text-white/70">4.9</span>
-              <span className="text-[12px] text-white/30">(209 betyg)</span>
+              <span className="text-[13px] font-semibold text-white/85">4.9</span>
+              <span className="text-[12px] text-white/60">(209 betyg)</span>
             </div>
           </div>
 
           {/* Right: Episode list */}
           <div className="lg:col-span-3">
             <div className="border-b border-white/10 px-5 py-3 sm:px-7">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">
                 Senaste avsnitt
               </span>
             </div>
@@ -156,13 +156,13 @@ export default function PodcastSection({
                       <p className="truncate text-[14px] font-semibold text-white transition-colors group-hover:text-[#D4A843]">
                         {ep.nummer != null ? `#${ep.nummer}. ` : ''}{ep.titel}
                       </p>
-                      <p className="mt-0.5 text-[12px] text-white/35">
+                      <p className="mt-0.5 text-[12px] text-white/65">
                         {ep.datum} &middot; {ep.tid}
                       </p>
                     </div>
 
                     {/* Spotify icon */}
-                    <SpotifyIcon className="hidden h-4 w-4 shrink-0 text-white/20 transition-colors group-hover:text-[#1DB954] sm:block" />
+                    <SpotifyIcon className="hidden h-4 w-4 shrink-0 text-white/45 transition-colors group-hover:text-[#1DB954] sm:block" />
                   </a>
                 </li>
               ))}

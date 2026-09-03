@@ -75,11 +75,11 @@ export default function HeroNewsGrid({ locale, articles }: HeroNewsGridProps) {
               {main.title}
             </h2>
             {main.excerpt && (
-              <p className="mt-2 hidden max-w-xl text-[14px] leading-relaxed text-white/70 sm:block">
+              <p className="mt-2 hidden max-w-xl text-[14px] leading-relaxed text-white/80 sm:block">
                 {main.excerpt}
               </p>
             )}
-            <p className="mt-2.5 text-[12px] text-white/50">
+            <p className="mt-2.5 text-[12px] text-white/75">
               {formatDateSv(main.publishedAt)}
             </p>
           </div>
@@ -112,7 +112,7 @@ export default function HeroNewsGrid({ locale, articles }: HeroNewsGridProps) {
               <h3 className="font-display text-base font-bold leading-snug text-white sm:text-lg">
                 {article.title}
               </h3>
-              <p className="mt-1 text-[12px] text-white/50">
+              <p className="mt-1 text-[12px] text-white/75">
                 {formatDateSv(article.publishedAt)}
               </p>
             </div>

@@ -12,10 +12,25 @@ import type { GlobalAfterChangeHook } from 'payload'
 
 const LOCALES = ['sv', 'en'] as const
 
+/**
+ * revalidatePath kastar utanför en Next-request ("static generation store
+ * missing") — t.ex. i seed-skript, migreringar och bakgrundsjobb. Där finns
+ * ingen cache att rensa, så det är inget fel: vi sväljer det tyst istället
+ * för att fälla skrivningen som utlöste hooken.
+ */
+function safeRevalidatePath(path: string, type?: 'layout' | 'page'): void {
+  try {
+    if (type) revalidatePath(path, type)
+    else revalidatePath(path)
+  } catch {
+    // Ingen renderingskontext — inget att rensa.
+  }
+}
+
 function revalidateForAllLocales(paths: string[]): void {
   for (const locale of LOCALES) {
     for (const path of paths) {
-      revalidatePath(`/${locale}${path}`)
+      safeRevalidatePath(`/${locale}${path}`)
     }
   }
 }
@@ -89,7 +104,7 @@ export const revalidateUsers: CollectionAfterChangeHook = ({ doc }) => {
 export const revalidateEverything: GlobalAfterChangeHook = ({ doc }) => {
   // Meny och inställningar renderas i layouten, så hela trädet måste bort.
   for (const locale of LOCALES) {
-    revalidatePath(`/${locale}`, 'layout')
+    safeRevalidatePath(`/${locale}`, 'layout')
   }
   return doc
 }
