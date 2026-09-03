@@ -156,29 +156,25 @@
 }
 
 /*
-  Scroll-avslöjning. Elementet börjar dolt och animeras in när
-  <Reveal> sätter data-revealed. Utan JS (eller med reduced motion)
-  visas innehållet direkt — se fallbacken nedan.
+  Scroll-avslöjning.
+
+  Innehållet är synligt som utgångsläge. Först när vi vet att JavaScript
+  kör (html[data-js='on'] sätts av ett inline-skript före första målningen)
+  göms det för att kunna animeras in. Skulle skriptet utebli, bundeln fallera
+  eller observern aldrig trigga, står texten kvar synlig — innehåll får
+  aldrig bli beroende av en animation för att synas.
 */
 .reveal {
-  opacity: 0;
-  transform: translate3d(0, 14px, 0);
   transition:
     opacity var(--dur-slow) var(--ease-out-soft),
     transform var(--dur-slow) var(--ease-out-soft);
   transition-delay: var(--reveal-delay, 0ms);
+}
+
+html[data-js='on'] .reveal:not([data-revealed='true']) {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
   will-change: opacity, transform;
-}
-
-.reveal[data-revealed='true'] {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-}
-
-/* Skulle JS inte köra visas innehållet ändå. */
-.no-js .reveal {
-  opacity: 1;
-  transform: none;
 }
 
 .animate-fade-up {
@@ -439,7 +435,7 @@
     scroll-behavior: auto !important;
   }
 
-  .reveal {
+  html[data-js='on'] .reveal:not([data-revealed='true']) {
     opacity: 1;
     transform: none;
   }

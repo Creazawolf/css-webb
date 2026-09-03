@@ -78,6 +78,18 @@ export default async function FrontendLayout({ children, params }: FrontendLayou
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7f8fa] text-slate-900">
+      {/*
+        Talar om för CSS:en att JavaScript kör, innan sidan målas första
+        gången. Utan den här flaggan visas allt reveal-innehåll direkt
+        istället för att bli osynligt i väntan på en animation som aldrig
+        kommer.
+      */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: "document.documentElement.setAttribute('data-js','on')",
+        }}
+      />
+
       <a
         href="#innehall"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[200] focus:rounded-md focus:bg-[#034694] focus:px-4 focus:py-2 focus:text-white"

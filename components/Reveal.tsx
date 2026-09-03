@@ -58,7 +58,19 @@ export default function Reveal({
     )
 
     observer.observe(node)
-    return () => observer.disconnect()
+
+    // Skyddsnät: skulle observern aldrig trigga (udda layout, element som
+    // aldrig korsar tröskeln) visas innehållet ändå efter en stund. En
+    // animation får aldrig vara det som avgör om text syns.
+    const failsafe = window.setTimeout(() => {
+      reveal()
+      observer.disconnect()
+    }, 2500)
+
+    return () => {
+      window.clearTimeout(failsafe)
+      observer.disconnect()
+    }
   }, [])
 
   return (
