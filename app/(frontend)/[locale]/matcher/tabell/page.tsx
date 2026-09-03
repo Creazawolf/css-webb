@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { getHerrarStandings, getDamerStandings } from '@/lib/api-football'
 import FullTable from '@/components/FullTable'
 
+export const revalidate = 1800
+
 export const metadata = {
   title: 'Tabell | Chelsea Supporters Sweden',
   description: 'Fullständig tabellställning för Premier League och Women\u2019s Super League.',

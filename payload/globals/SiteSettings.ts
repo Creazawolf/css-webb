@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { defineGlobal, isAdminOrEditor } from '../collections/_shared'
+import { revalidateEverything } from '../hooks/revalidate'
 
 const urlValidation = (value: unknown): true | string => {
   if (typeof value !== 'string') return 'Adressen måste vara text.'
@@ -25,6 +26,9 @@ export const SiteSettings = defineGlobal({
   access: {
     read: () => true,
     update: isAdminOrEditor,
+  },
+  hooks: {
+    afterChange: [revalidateEverything],
   },
   fields: [
     {

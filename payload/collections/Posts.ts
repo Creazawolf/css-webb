@@ -11,6 +11,7 @@ import {
   slugField,
   truncateAtWord,
 } from './_shared'
+import { revalidatePost, revalidatePostAfterDelete } from '../hooks/revalidate'
 
 /**
  * Artiklar — matchreferat, spelarbetyg, inför-texter, krönikor och klubbnytt.
@@ -55,6 +56,8 @@ export const Posts = defineCollection({
   },
   hooks: {
     beforeChange: [setPublishedAtOnPublish],
+    afterChange: [revalidatePost],
+    afterDelete: [revalidatePostAfterDelete],
   },
   fields: [
     {

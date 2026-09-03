@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { getHerrarSchedule, getDamerSchedule } from '@/lib/api-football'
 import Schedule from '@/components/Schedule'
 
+export const revalidate = 1800
+
 export const metadata = {
   title: 'Spelschema | Chelsea Supporters Sweden',
   description: 'Fullständigt spelschema för Chelsea herrar och damer.',

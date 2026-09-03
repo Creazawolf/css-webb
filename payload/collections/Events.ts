@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { defineCollection, isAdminOrEditor, slugField } from './_shared'
+import { revalidateEvents } from '../hooks/revalidate'
 
 /**
  * Evenemang med ett datum: pubkvällar, resor till London, årsmöten och träffar.
@@ -22,6 +23,9 @@ export const Events = defineCollection({
   versions: {
     drafts: { autosave: { interval: 1500 } },
     maxPerDoc: 20,
+  },
+  hooks: {
+    afterChange: [revalidateEvents],
   },
   access: {
     create: isAdminOrEditor,

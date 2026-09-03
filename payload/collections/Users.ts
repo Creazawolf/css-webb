@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { defineCollection, isAdmin, isAdminField, isLoggedIn } from './_shared'
+import { revalidateUsers } from '../hooks/revalidate'
 
 /**
  * Redaktionen. Rollen styr vad man kommer åt:
@@ -24,6 +25,9 @@ export const Users = defineCollection({
     defaultColumns: ['name', 'email', 'role', 'showInTeam'],
     description: 'Redaktörer och administratörer som kan logga in.',
     group: 'Föreningen',
+  },
+  hooks: {
+    afterChange: [revalidateUsers],
   },
   access: {
     create: isAdmin,

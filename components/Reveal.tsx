@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import type { ElementType, ReactNode } from 'react'
+import { useEffect, useRef } from 'react'
+import type { CSSProperties, ElementType, ReactNode } from 'react'
 
 type RevealProps = {
   children: ReactNode
@@ -15,9 +15,12 @@ type RevealProps = {
 /**
  * Animerar in innehåll när det scrollas in i vy.
  *
- * Elementet renderas alltid i markup — animationen ändrar bara opacity och
- * transform. Om IntersectionObserver saknas, eller om användaren har valt
- * reducerad rörelse, visas innehållet direkt.
+ * Avslöjningen skrivs direkt till DOM:en istället för via React-state:
+ * det är rent visuellt, händer en enda gång per element, och slipper en
+ * omrendering per kort när en lista med tjugo artiklar rullar förbi.
+ *
+ * Innehållet finns alltid i markup — bara opacity och transform ändras. Utan
+ * IntersectionObserver, eller med reducerad rörelse, visas det direkt.
  */
 export default function Reveal({
   children,
@@ -26,28 +29,27 @@ export default function Reveal({
   className = '',
 }: RevealProps) {
   const ref = useRef<HTMLElement | null>(null)
-  const [revealed, setRevealed] = useState(false)
 
   useEffect(() => {
     const node = ref.current
     if (!node) return
+
+    const reveal = () => node.setAttribute('data-revealed', 'true')
 
     const prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)',
     ).matches
 
     if (prefersReducedMotion || typeof IntersectionObserver === 'undefined') {
-      setRevealed(true)
+      reveal()
       return
     }
 
-    // Redan i vy vid montering (t.ex. innehåll ovanför mitten) — visa direkt
-    // istället för att vänta på en scrollhändelse som kanske aldrig kommer.
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            setRevealed(true)
+            reveal()
             observer.disconnect()
           }
         }
@@ -63,8 +65,8 @@ export default function Reveal({
     <Tag
       ref={ref}
       className={`reveal ${className}`}
-      data-revealed={revealed ? 'true' : 'false'}
-      style={delay ? ({ '--reveal-delay': `${delay}ms` } as React.CSSProperties) : undefined}
+      data-revealed="false"
+      style={delay ? ({ '--reveal-delay': `${delay}ms` } as CSSProperties) : undefined}
     >
       {children}
     </Tag>

@@ -56,10 +56,14 @@ export default function NavBar({
   const pathname = usePathname()
 
   // Stäng menyn när man navigerar — annars ligger den kvar över nya sidan.
-  useEffect(() => {
+  // Justeras under render istället för i en effekt, så att menyn aldrig hinner
+  // ritas öppen ovanpå den nya sidan.
+  const [renderedPath, setRenderedPath] = useState(pathname)
+  if (renderedPath !== pathname) {
+    setRenderedPath(pathname)
     setIsOpen(false)
     setOpenGroup(null)
-  }, [pathname])
+  }
 
   // Lås bakgrundsscroll när mobilmenyn är öppen.
   useEffect(() => {

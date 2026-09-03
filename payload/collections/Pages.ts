@@ -8,6 +8,7 @@ import {
   setPublishedAtOnPublish,
   slugField,
 } from './_shared'
+import { revalidatePage } from '../hooks/revalidate'
 
 /**
  * Fristående sidor: Om oss, Biljettinfo, Arenaguide, Reseguide, FPL-ligan
@@ -43,6 +44,7 @@ export const Pages = defineCollection({
   },
   hooks: {
     beforeChange: [setPublishedAtOnPublish],
+    afterChange: [revalidatePage],
   },
   fields: [
     {

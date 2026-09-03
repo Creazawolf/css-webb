@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { defineCollection, isAdminOrEditor, slugField } from './_shared'
+import { revalidateVenues } from '../hooks/revalidate'
 
 /**
  * Mötesplatser — puben eller platsen där medlemmar i en viss stad ses och
@@ -26,6 +27,9 @@ export const Venues = defineCollection({
     delete: isAdminOrEditor,
   },
   defaultSort: 'city',
+  hooks: {
+    afterChange: [revalidateVenues],
+  },
   fields: [
     {
       type: 'row',

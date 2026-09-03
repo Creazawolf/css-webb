@@ -106,7 +106,15 @@ function parseEpisodeNumber(name: string): { nummer: number | null; titel: strin
 
 // --- Main fetch ---
 
-export async function getShowWithEpisodes(): Promise<SpotifyShowData> {
+type GetShowOptions = {
+  /** Antal avsnitt att returnera. Default 4. */
+  limit?: number
+}
+
+export async function getShowWithEpisodes(
+  options: GetShowOptions = {},
+): Promise<SpotifyShowData> {
+  const { limit = 4 } = options
   const token = await getSpotifyToken()
 
   const res = await fetch(
@@ -124,7 +132,7 @@ export async function getShowWithEpisodes(): Promise<SpotifyShowData> {
   const raw = await res.json()
   const show = SpotifyShowSchema.parse(raw)
 
-  const episodes: PodcastEpisode[] = show.episodes.items.slice(0, 4).map((ep) => {
+  const episodes: PodcastEpisode[] = show.episodes.items.slice(0, limit).map((ep) => {
     const { nummer, titel } = parseEpisodeNumber(ep.name)
     return {
       nummer,

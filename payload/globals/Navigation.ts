@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { defineGlobal, isAdminOrEditor } from '../collections/_shared'
+import { revalidateEverything } from '../hooks/revalidate'
 
 const linkValidation = (value: unknown): true | string => {
   if (typeof value !== 'string' || value.trim().length < 1) {
@@ -62,6 +63,9 @@ export const Navigation = defineGlobal({
   access: {
     read: () => true,
     update: isAdminOrEditor,
+  },
+  hooks: {
+    afterChange: [revalidateEverything],
   },
   fields: [
     {
