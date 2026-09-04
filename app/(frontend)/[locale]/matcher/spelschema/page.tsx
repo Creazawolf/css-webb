@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getHerrarSchedule, getDamerSchedule } from '@/lib/api-football'
+import { getHerrarSchedule, getDamerSchedule } from '@/lib/chelsea-matches'
 import Schedule from '@/components/Schedule'
 
 export const revalidate = 1800

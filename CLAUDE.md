@@ -40,7 +40,7 @@ Package manager is **pnpm** (v10.4.1). Types auto-generate on `pnpm install` via
 | `/[locale]/artiklar` | Article list (paginated via `?sida=`) |
 | `/[locale]/artiklar/typ/[type]` | Filtered by `articleType` |
 | `/[locale]/artiklar/[slug]` | Article |
-| `/[locale]/matcher{,/spelschema,/tabell}` | API-Football data |
+| `/[locale]/matcher{,/spelschema,/tabell}` | Chelsea FC:s eget match-API |
 | `/[locale]/evenemang`, `/motesplatser`, `/redaktionen`, `/podden`, `/medlemskap`, `/kontakt` | Dedicated pages |
 | `/[locale]/[slug]` | Any published `pages` doc (Om oss, Biljetter, Arenaguide, Reseguide, FPL) |
 
@@ -78,7 +78,7 @@ Editors can upload media and create categories — don't tighten those back to a
 ### Data Fetching
 
 - **Server Components** use the Payload Local API (in-process, no HTTP hop). The sitemap does too — don't fetch the site's own REST API from within the app.
-- **External data** lives in `lib/`: `api-football.ts`, `chelsea-news.ts`, `spotify.ts`, `svenskafans.ts`. Each throws on failure; the calling module catches and renders without itself.
+- **External data** lives in `lib/`: `chelsea-matches.ts`, `chelsea-news.ts`, `spotify.ts`, `svenskafans.ts`. Each throws on failure; the calling module catches and renders without itself.
 
 ### Caching
 
@@ -88,7 +88,8 @@ Payload `afterChange` hooks (`payload/hooks/revalidate.ts`) purge the affected p
 
 ### External integrations
 
-- **API-Football** (`API_FOOTBALL_KEY`) — fixtures, standings, top scorers for men's and women's teams.
+- **Chelsea FC match data** — `chelseafc.com/en/api/fixtures/{upcoming,results,league-table}`, keyed by the `pageId` of the club's own Fixtures & Results pages (men `30EGwHPO9uwBCc75RQY6kg`, women `NFFa1rMz6sNIHsRi7Hbpb`). No key, no quota, and the WSL coverage that paid tiers of the general football APIs charge for. `seasonId` is optional — leave it out and the API always answers for the current season, so nothing needs touching between seasons. Endpoints were read out of the club's own bundle (`/assets/<version>/main.js`).
+  The `results` feed lags: on 4 Sept 2026 it still omitted the 30 Aug win over Brighton, which the league table already counted. `lib/chelsea-matches.ts` therefore also parses the `data-props` blob on `chelseafc.com/en`, which carries the true last and next match per team, and merges the two. Don't drop that merge — the match centre goes stale without it.
 - **Chelsea FC news** — the official listing API at `chelseafc.com/en/api/news/listing/<id>`, discovered from the `data-props` payload on `/en/news`. No key needed. Images go through Chelsea's Cloudinary with `c_fill,q_auto,f_auto`, which takes a 1 MB original down to ~40 kB. We show headline, category and image only, and always link out.
 - **Spotify** (`SPOTIFY_CLIENT_ID` / `SECRET`) — ChelseaPodden episodes.
 - **SvenskaFans RSS** — legacy archive, off by default (`SiteSettings.showSvenskaFans`). The feed 403s without a browser-like User-Agent.

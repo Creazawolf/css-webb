@@ -17,7 +17,7 @@ import {
   NewsGridSkeleton,
   PodcastSkeleton,
 } from '@/components/Skeletons'
-import { getMatchCenterData } from '@/lib/api-football'
+import { getMatchCenterData } from '@/lib/chelsea-matches'
 import { getChelseaNews } from '@/lib/chelsea-news'
 import { getHeroPosts, getPosts } from '@/lib/posts'
 import { getSiteConfig, getUpcomingEvents } from '@/lib/site'

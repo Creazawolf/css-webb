@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getHerrarStandings, getDamerStandings } from '@/lib/api-football'
+import { getHerrarStandings, getDamerStandings } from '@/lib/chelsea-matches'
 import FullTable from '@/components/FullTable'
 
 export const revalidate = 1800

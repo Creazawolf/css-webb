@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 import Footer from '@/components/Footer'
 import NavBar from '@/components/NavBar'
 import NextMatchBar from '@/components/NextMatchBar'
-import { getNextFixture } from '@/lib/api-football'
+import { getNextFixture } from '@/lib/chelsea-matches'
 import { getSiteUrl } from '@/lib/env'
 import { getNavigation, getSiteConfig } from '@/lib/site'
 

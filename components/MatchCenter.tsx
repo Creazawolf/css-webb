@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Route } from 'next'
 
-import type { MatchCenterData, MatchData, PlayerStat, StandingRow } from '@/lib/api-football'
+import type { MatchCenterData, MatchData, StandingRow } from '@/lib/chelsea-matches'
 
 type MatchCenterProps = {
   locale: string
@@ -13,15 +13,15 @@ type MatchCenterProps = {
   damer?: MatchCenterData | null | undefined
 }
 
-const tableTabs = ['Tabell', 'Målskyttar', 'Assist'] as const
+const tableTabs = ['Tabell', 'Kommande'] as const
 type TableTab = (typeof tableTabs)[number]
 
 const EMPTY: MatchCenterData = {
   lastMatch: null,
   nextMatch: null,
   standings: [],
-  topScorers: [],
-  topAssists: [],
+  upcoming: [],
+  leagueName: '',
 }
 
 /** Gemensam tomtext — matchdata kommer utifrån och kan saknas tillfälligt. */
@@ -93,7 +93,12 @@ function MatchCard({
       ) : (
         <>
           <p className="mb-3 text-center text-[11px] text-slate-500">
-            {match.date} &middot; {match.league}
+            <time dateTime={match.isoDate}>{match.date}</time> &middot; {match.league}
+            {match.isLive && (
+              <span className="ml-2 rounded-full bg-rose-500 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
+                Live
+              </span>
+            )}
           </p>
 
           <div className="flex items-center justify-center gap-5">
@@ -112,9 +117,19 @@ function MatchCard({
             <TeamBadge logo={match.awayLogo} abbr={match.awayAbbr} name={match.awayTeam} />
           </div>
 
-          <div className="mt-auto pt-5 text-center">
+          <div className="mt-auto flex flex-col items-center gap-1 pt-5 text-center">
             {match.venue ? (
               <span className="text-[12px] text-slate-500">{match.venue}</span>
+            ) : null}
+            {match.matchCentreUrl ? (
+              <a
+                href={match.matchCentreUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[12px] font-semibold text-[#034694] hover:underline"
+              >
+                Matchcenter på chelseafc.com &rarr;
+              </a>
             ) : (
               <Link
                 href={`/${locale}/matcher/spelschema` as Route}
@@ -127,6 +142,31 @@ function MatchCard({
         </>
       )}
     </div>
+  )
+}
+
+/** Formkurvan från Chelseas tabell: nyaste matchen först. */
+function Form({ form }: { form: string[] }) {
+  if (form.length === 0) return null
+
+  const tone: Record<string, string> = {
+    W: 'bg-emerald-500',
+    D: 'bg-slate-300',
+    L: 'bg-rose-400',
+  }
+  const label: Record<string, string> = { W: 'vinst', D: 'oavgjort', L: 'förlust' }
+
+  return (
+    <span className="inline-flex gap-[3px] align-middle">
+      {form.map((result, i) => (
+        <span
+          key={`${result}-${i}`}
+          title={label[result] ?? result}
+          className={`h-1.5 w-1.5 rounded-full ${tone[result] ?? 'bg-slate-200'}`}
+        />
+      ))}
+      <span className="sr-only">{form.map((r) => label[r] ?? r).join(', ')}</span>
+    </span>
   )
 }
 
@@ -143,8 +183,8 @@ function StandingsTable({ standings }: { standings: StandingRow[] }) {
           <th scope="col" className="pb-2 font-semibold">#</th>
           <th scope="col" className="pb-2 font-semibold">Lag</th>
           <th scope="col" className="pb-2 text-center font-semibold" title="Spelade">S</th>
-          <th scope="col" className="pb-2 text-center font-semibold" title="Vunna">V</th>
-          <th scope="col" className="pb-2 text-center font-semibold" title="Oavgjorda">O</th>
+          <th scope="col" className="pb-2 text-center font-semibold" title="Målskillnad">+/&minus;</th>
+          <th scope="col" className="pb-2 text-center font-semibold">Form</th>
           <th scope="col" className="pb-2 text-right font-semibold" title="Poäng">P</th>
         </tr>
       </thead>
@@ -161,8 +201,10 @@ function StandingsTable({ standings }: { standings: StandingRow[] }) {
               <td className="py-2">{row.pos}</td>
               <td className="py-2 font-semibold">{row.team}</td>
               <td className="py-2 text-center">{row.played}</td>
-              <td className="py-2 text-center">{row.won}</td>
-              <td className="py-2 text-center">{row.drawn}</td>
+              <td className="py-2 text-center">
+                {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
+              </td>
+              <td className="py-2 text-center"><Form form={row.form} /></td>
               <td className="py-2 text-right font-bold">{row.points}</td>
             </tr>
           )
@@ -172,48 +214,39 @@ function StandingsTable({ standings }: { standings: StandingRow[] }) {
   )
 }
 
-function PlayerStatsTable({ players, label }: { players: PlayerStat[]; label: string }) {
-  if (players.length === 0) {
-    return <EmptyState>Statistiken är inte tillgänglig just nu.</EmptyState>
+function UpcomingList({ matches }: { matches: MatchData[] }) {
+  if (matches.length === 0) {
+    return <EmptyState>Inga kommande matcher är inlagda ännu.</EmptyState>
   }
 
   return (
-    <table className="w-full text-left text-[12px]">
-      <thead>
-        <tr className="text-[10px] uppercase tracking-[0.1em] text-slate-500">
-          <th scope="col" className="pb-2 font-semibold">#</th>
-          <th scope="col" className="pb-2 font-semibold">Spelare</th>
-          <th scope="col" className="pb-2 font-semibold">Lag</th>
-          <th scope="col" className="pb-2 text-right font-semibold">{label}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {players.map((player, i) => {
-          const isChelsea = player.team.toLowerCase().includes('chelsea')
-          return (
-            <tr
-              key={`${player.name}-${player.team}`}
-              className={`border-t border-slate-100 ${
-                isChelsea ? 'font-bold text-[#034694]' : 'text-slate-700'
-              }`}
-            >
-              <td className="py-2">{i + 1}</td>
-              <td className="py-2 font-semibold">{player.name}</td>
-              <td className="py-2">{player.team}</td>
-              <td className="py-2 text-right font-bold">{player.value}</td>
-            </tr>
-          )
-        })}
-      </tbody>
-    </table>
+    <ul className="divide-y divide-slate-100">
+      {matches.map((match) => (
+        <li key={match.isoDate + match.awayTeam} className="flex items-baseline gap-3 py-2">
+          <time
+            dateTime={match.isoDate}
+            className="w-24 shrink-0 text-[11px] font-semibold text-slate-500"
+          >
+            {match.date}
+          </time>
+          <div className="min-w-0">
+            <p className="truncate text-[12px] font-semibold text-slate-700">
+              {match.homeTeam} &ndash; {match.awayTeam}
+            </p>
+            <p className="truncate text-[11px] text-slate-400">{match.league}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
   )
 }
 
 /**
- * Matchcenter: senaste och nästa match plus tabell och skytteliga.
+ * Matchcenter: senaste och nästa match plus tabell och kommande matcher.
  *
- * All data kommer från API-Football. Saknas den visar vi en tydlig tomtext —
- * aldrig påhittade resultat, som skulle vara sämre än inget alls.
+ * All data kommer från Chelseas egen sajt (se lib/chelsea-matches.ts). Saknas
+ * den visar vi en tydlig tomtext — aldrig påhittade resultat, som skulle vara
+ * sämre än inget alls.
  */
 export default function MatchCenter({ locale, herrar, damer }: MatchCenterProps) {
   const [activeTeam, setActiveTeam] = useState<'herrar' | 'damer'>('herrar')
@@ -274,12 +307,7 @@ export default function MatchCenter({ locale, herrar, damer }: MatchCenterProps)
 
           <div className="flex-1">
             {activeTab === 'Tabell' && <StandingsTable standings={data.standings} />}
-            {activeTab === 'Målskyttar' && (
-              <PlayerStatsTable players={data.topScorers} label="Mål" />
-            )}
-            {activeTab === 'Assist' && (
-              <PlayerStatsTable players={data.topAssists} label="Assist" />
-            )}
+            {activeTab === 'Kommande' && <UpcomingList matches={data.upcoming} />}
           </div>
 
           <div className="mt-4 flex items-center justify-end gap-3 border-t border-slate-100 pt-3">

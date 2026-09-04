@@ -1,7 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import type { StandingRow } from '@/lib/api-football'
+import type { StandingRow } from '@/lib/chelsea-matches'
+
+/** Formkurvan från Chelseas tabell: nyaste matchen först. */
+const FORM_TONES: Record<string, string> = {
+  W: 'bg-emerald-500',
+  D: 'bg-slate-300',
+  L: 'bg-rose-400',
+}
+const FORM_LABELS: Record<string, string> = { W: 'vinst', D: 'oavgjort', L: 'förlust' }
 
 type FullTableProps = {
   herrar: StandingRow[] | null
@@ -59,7 +67,9 @@ export default function FullTable({ herrar, damer }: FullTableProps) {
                   <th className="pb-2 text-center font-semibold">V</th>
                   <th className="pb-2 text-center font-semibold">O</th>
                   <th className="pb-2 text-center font-semibold">F</th>
+                  <th className="pb-2 text-center font-semibold">Mål</th>
                   <th className="pb-2 text-center font-semibold">+/&minus;</th>
+                  <th className="pb-2 text-center font-semibold">Form</th>
                   <th className="pb-2 text-right font-semibold">P</th>
                 </tr>
               </thead>
@@ -77,7 +87,24 @@ export default function FullTable({ herrar, damer }: FullTableProps) {
                       <td className="py-2 text-center">{row.won}</td>
                       <td className="py-2 text-center">{row.drawn}</td>
                       <td className="py-2 text-center">{row.lost}</td>
-                      <td className="py-2 text-center">{row.goalsFor}&minus;{row.goalsAgainst}</td>
+                      <td className="py-2 text-center whitespace-nowrap">{row.goalsFor}&minus;{row.goalsAgainst}</td>
+                      <td className="py-2 text-center">
+                        {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
+                      </td>
+                      <td className="py-2 text-center">
+                        <span className="inline-flex gap-[3px]">
+                          {row.form.map((result, i) => (
+                            <span
+                              key={`${result}-${i}`}
+                              title={FORM_LABELS[result] ?? result}
+                              className={`h-1.5 w-1.5 rounded-full ${FORM_TONES[result] ?? 'bg-slate-200'}`}
+                            />
+                          ))}
+                          <span className="sr-only">
+                            {row.form.map((r) => FORM_LABELS[r] ?? r).join(', ')}
+                          </span>
+                        </span>
+                      </td>
                       <td className="py-2 text-right font-bold">{row.points}</td>
                     </tr>
                   )

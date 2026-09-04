@@ -6,7 +6,7 @@ import type { Route } from 'next'
 import MatchCenter from '@/components/MatchCenter'
 import Reveal from '@/components/Reveal'
 import { MatchCenterSkeleton } from '@/components/Skeletons'
-import { getMatchCenterData } from '@/lib/api-football'
+import { getMatchCenterData } from '@/lib/chelsea-matches'
 import { getPosts } from '@/lib/posts'
 import ArticleCard from '@/components/ArticleCard'
 
@@ -84,8 +84,8 @@ export default async function MatcherPage({ params }: PageProps) {
           Matchcenter
         </h1>
         <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-slate-600">
-          Senaste och nästa match, tabell och skytteliga — för både herrar och
-          damer. Uppdateras automatiskt.
+          Senaste och nästa match, tabell och kommande möten — för både herrar
+          och damer. Hämtas direkt från Chelsea FC och uppdateras automatiskt.
         </p>
       </div>
 

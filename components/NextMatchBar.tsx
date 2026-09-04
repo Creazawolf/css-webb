@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import type { Route } from 'next'
 
-import type { MatchData } from '@/lib/api-football'
+import type { MatchData } from '@/lib/chelsea-matches'
 
 type NextMatchBarProps = {
   locale: string
@@ -30,19 +30,6 @@ function diff(target: number, now: number): Remaining | null {
   }
 }
 
-const WEEKDAYS_SV = ['sön', 'mån', 'tis', 'ons', 'tors', 'fre', 'lör']
-const MONTHS_SV = [
-  'jan', 'feb', 'mar', 'apr', 'maj', 'jun',
-  'jul', 'aug', 'sep', 'okt', 'nov', 'dec',
-]
-
-function formatKickoff(iso: string): string {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  const weekday = WEEKDAYS_SV[d.getDay()]
-  const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-  return `${weekday} ${d.getDate()} ${MONTHS_SV[d.getMonth()]} · ${time}`
-}
 
 function Unit({ value, label }: { value: number; label: string }) {
   return (
@@ -118,7 +105,7 @@ export default function NextMatchBar({ locale, match }: NextMatchBarProps) {
 
         {/* Avspark */}
         <span className="hidden text-[12px] text-white/70 md:inline">
-          {formatKickoff(match.isoDate)} · {match.league}
+          {match.date} · {match.league}
         </span>
 
         {/* Nedräkning */}
@@ -133,7 +120,7 @@ export default function NextMatchBar({ locale, match }: NextMatchBarProps) {
           ) : (
             /* Innan klienten hunnit räkna, och när matchen har startat */
             <span className="text-[12px] font-semibold text-white/75">
-              {started ? 'Pågår nu' : formatKickoff(match.isoDate)}
+              {started ? 'Pågår nu' : match.date}
             </span>
           )}
 

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Image from 'next/image'
-import type { MatchData } from '@/lib/api-football'
+import type { MatchData } from '@/lib/chelsea-matches'
 
 const SV_MONTH_NAMES = [
   'Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni',
