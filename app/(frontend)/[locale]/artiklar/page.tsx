@@ -31,7 +31,11 @@ export default async function ArtiklarPage({ params, searchParams }: PageProps) 
   const parsed = Number.parseInt(sida ?? '1', 10)
   const page = Number.isFinite(parsed) && parsed > 0 ? parsed : 1
 
-  const { articles, totalPages } = await getPosts({ limit: PER_PAGE, page, locale })
+  // Faller tillbaka på en tom lista om databasen inte svarar — en listsida
+  // ska visa "inga artiklar", aldrig ett 500-fel.
+  const { articles, totalPages } = await getPosts({ limit: PER_PAGE, page, locale }).catch(
+    () => ({ articles: [], totalPages: 0, totalDocs: 0 }),
+  )
 
   return (
     <section className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:px-8">

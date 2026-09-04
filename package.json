@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "build": "payload generate:importmap && payload migrate --force-accept-warning && next build",
+    "build": "payload generate:importmap && pnpm payload:migrate:ci && next build",
     "build:no-migrate": "payload generate:importmap && next build",
     "start": "next start",
     "lint": "eslint .",
@@ -23,7 +23,8 @@
     "postinstall": "pnpm payload:types",
     "lint:fix": "eslint . --fix",
     "seed": "tsx scripts/seed.ts",
-    "seed:news": "tsx scripts/seed-news.ts"
+    "seed:news": "tsx scripts/seed-news.ts",
+    "payload:migrate:ci": "tsx scripts/migrate-ci.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.79.0",

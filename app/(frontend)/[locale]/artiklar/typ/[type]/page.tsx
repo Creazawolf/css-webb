@@ -58,7 +58,7 @@ export default async function ArtikeltypPage({ params, searchParams }: PageProps
     page,
     locale,
     articleType: type,
-  })
+  }).catch(() => ({ articles: [], totalPages: 0, totalDocs: 0 }))
 
   return (
     <section className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:px-8">
