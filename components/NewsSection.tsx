@@ -21,16 +21,17 @@ export default function NewsSection({ locale, articles }: NewsSectionProps) {
   if (articles.length === 0) return null
 
   return (
-    <section className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:px-8">
+    <section className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <SectionHeading
         title="Från redaktionen"
+        subtitle="Referat, betyg och krönikor skrivna av medlemmar"
         href={`/${locale}/artiklar` as Route}
         linkLabel="Alla artiklar"
       />
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {articles.map((article, i) => (
-          <Reveal key={article.id} delay={Math.min(i, 5) * 60}>
+          <Reveal key={article.id} className="h-full" delay={Math.min(i, 5) * 60}>
             <ArticleCard locale={locale} article={article} />
           </Reveal>
         ))}

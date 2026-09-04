@@ -12,50 +12,45 @@ const FORDELAR = [
   'Medlemspris på biljetter till Stamford Bridge',
 ]
 
+/**
+ * Sidans enda starka uppmaning. Guldknappen förekommer därför ingen
+ * annanstans på löpsedeln — blir guldet en vanlig etikett slutar det betyda
+ * "gör det här".
+ */
 export default function MembershipCTA({ locale, membershipFee }: MembershipCTAProps) {
   return (
-    <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#022B5C] via-[#034694] to-[#0A5BB5] px-6 py-9 sm:px-10 sm:py-11">
-      <div
-        className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#D4A843]/10"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-[#D4A843]/5"
-        aria-hidden="true"
-      />
-
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h2 className="font-display text-2xl font-bold uppercase tracking-wide text-white sm:text-3xl">
-            Bli medlem i CSS
-          </h2>
-          <p className="mt-2 max-w-lg text-[14px] leading-relaxed text-blue-100/90">
-            Gå med i Chelsea Supporters Sweden och bli en del av den blå
-            gemenskapen — från Malmö till Luleå.
-            {membershipFee ? ` Medlemskapet kostar ${membershipFee}.` : ''}
-          </p>
-          <ul className="mt-4 flex flex-col gap-2 text-[13px] font-medium text-white/80 sm:flex-row sm:flex-wrap sm:gap-x-5">
-            {FORDELAR.map((fordel) => (
-              <li key={fordel} className="flex items-center gap-2">
-                <span
-                  className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[#D4A843]"
-                  aria-hidden="true"
-                />
-                {fordel}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="shrink-0">
-          <Link
-            href={`/${locale}/medlemskap` as Route}
-            className="inline-flex items-center rounded-md bg-[#D4A843] px-6 py-3 text-[13px] font-bold uppercase tracking-[0.06em] text-[#022B5C] shadow-lg shadow-[#D4A843]/20 transition-all duration-200 hover:bg-[#E8C96A] hover:shadow-[#D4A843]/30"
-          >
-            Ansök om medlemskap
-          </Link>
-        </div>
+    <div className="flex flex-col gap-8 rounded-lg bg-[rgb(var(--color-chelsea-blue))] px-6 py-10 text-white sm:px-10 lg:flex-row lg:items-center lg:justify-between lg:gap-12 lg:px-14 lg:py-12">
+      <div>
+        <p className="text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-[rgb(var(--color-gold-light))]">
+          Medlemskap
+        </p>
+        <h2 className="font-display mt-3 max-w-[620px] text-[28px] font-bold leading-[1.08] tracking-[-0.005em] sm:text-[34px]">
+          Bli medlem i CSS
+        </h2>
+        <p className="font-serif mt-3 max-w-[560px] text-[15.5px] leading-[1.6] text-white/[0.82]">
+          Gå med i Chelsea Supporters Sweden och bli en del av den blå
+          gemenskapen — från Malmö till Luleå.
+          {membershipFee ? ` Medlemskapet kostar ${membershipFee}.` : ''}
+        </p>
+        <ul className="mt-6 flex flex-col gap-2.5 text-[12.5px] font-medium text-white/70 sm:flex-row sm:flex-wrap sm:gap-x-6">
+          {FORDELAR.map((fordel) => (
+            <li key={fordel} className="flex items-center gap-2">
+              <span
+                className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--color-gold))]"
+                aria-hidden="true"
+              />
+              {fordel}
+            </li>
+          ))}
+        </ul>
       </div>
+
+      <Link
+        href={`/${locale}/medlemskap` as Route}
+        className="inline-flex min-h-[44px] shrink-0 items-center justify-center self-start rounded-md bg-[rgb(var(--color-gold))] px-[26px] py-4 text-[13px] font-bold uppercase leading-none tracking-[0.08em] text-[rgb(var(--color-chelsea-blue-dark))] transition-colors duration-[250ms] ease-[var(--ease-out-soft)] hover:bg-[rgb(var(--color-gold-light))] lg:self-auto"
+      >
+        Ansök om medlemskap
+      </Link>
     </div>
   )
 }
