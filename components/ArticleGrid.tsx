@@ -21,12 +21,14 @@ export default function ArticleGrid({
 }: ArticleGridProps) {
   if (articles.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white/60 px-6 py-14 text-center">
-        <p className="text-[14px] text-slate-500">{emptyMessage}</p>
+      <div className="rounded-md border border-dashed border-[rgb(var(--color-rule-ctl))] bg-[rgb(var(--color-card))] px-6 py-14 text-center">
+        <p className="font-serif text-[16px] leading-[1.6] text-[rgb(var(--color-ink-2))]">
+          {emptyMessage}
+        </p>
         {emptyAction && (
           <Link
             href={emptyAction.href}
-            className="mt-4 inline-block rounded-md bg-[#034694] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.06em] text-white transition-colors hover:bg-[#022B5C]"
+            className="mt-5 inline-flex min-h-[44px] items-center justify-center rounded-md bg-[rgb(var(--color-chelsea-blue))] px-5 py-3 text-[12px] font-bold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[rgb(var(--color-chelsea-blue-dark))]"
           >
             {emptyAction.label}
           </Link>
@@ -36,7 +38,7 @@ export default function ArticleGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {articles.map((article, i) => (
         <Reveal key={article.id} delay={Math.min(i, 5) * 60}>
           <ArticleCard locale={locale} article={article} priority={i < 3} />

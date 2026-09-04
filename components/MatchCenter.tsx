@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Route } from 'next'
@@ -24,123 +24,267 @@ const EMPTY: MatchCenterData = {
   leagueName: '',
 }
 
+/** Samma spaltbredd som menyn och sidfoten, så kanterna ligger i linje. */
+const WRAP = 'mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8'
+
+const BTN_LINE =
+  'inline-flex min-h-[44px] items-center justify-center rounded-[6px] border border-[rgb(var(--color-rule-ctl))] px-5 py-[13px] text-[12px] font-bold uppercase leading-none tracking-[0.08em] text-[rgb(var(--color-ink-2))] transition-colors hover:border-[rgb(var(--color-chelsea-blue))] hover:text-[rgb(var(--color-chelsea-blue))]'
+
+const TH =
+  'pb-3 pt-[18px] text-[9.5px] font-bold uppercase leading-none tracking-[0.14em] text-[rgb(var(--color-muted))]'
+
+const TD = 'border-t border-[rgb(var(--color-rule))] py-[13px]'
+
+const ABBR = 'cursor-help no-underline'
+
+type Countdown = { d: string; h: string; m: string; s: string }
+
+/**
+ * Nedräkningen får bara räknas på klienten — servern och webbläsaren skulle
+ * annars rendera olika sekundvärden och React klaga på hydreringsfel.
+ */
+function useCountdown(isoDate: string | null): Countdown | null {
+  const [remaining, setRemaining] = useState<Countdown | null>(null)
+
+  // Byts matchen ska nedräkningen nollas direkt. Justeras under render —
+  // samma mönster som NavBar använder. En effekt hade orsakat en extra
+  // renderingsvända innan den gamla siffran försvann.
+  const [countingFor, setCountingFor] = useState(isoDate)
+  if (countingFor !== isoDate) {
+    setCountingFor(isoDate)
+    setRemaining(null)
+  }
+
+  useEffect(() => {
+    if (!isoDate) return
+
+    const target = new Date(isoDate).getTime()
+    if (Number.isNaN(target)) return
+
+    const pad = (n: number) => String(n).padStart(2, '0')
+
+    const tick = () => {
+      const ms = target - Date.now()
+      if (ms <= 0) {
+        setRemaining(null)
+        return
+      }
+      const total = Math.floor(ms / 1000)
+      setRemaining({
+        d: pad(Math.floor(total / 86400)),
+        h: pad(Math.floor((total % 86400) / 3600)),
+        m: pad(Math.floor((total % 3600) / 60)),
+        s: pad(total % 60),
+      })
+    }
+
+    tick()
+    const timer = setInterval(tick, 1000)
+    return () => clearInterval(timer)
+  }, [isoDate])
+
+  return remaining
+}
+
 /** Gemensam tomtext — matchdata kommer utifrån och kan saknas tillfälligt. */
 function EmptyState({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-1.5 py-8 text-center">
-      <svg
-        viewBox="0 0 24 24"
-        className="h-7 w-7 text-slate-300"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        aria-hidden="true"
-      >
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 8v4M12 16h.01" strokeLinecap="round" />
-      </svg>
-      <p className="max-w-[15rem] text-[13px] leading-relaxed text-slate-500">{children}</p>
-    </div>
+    <p className="font-serif py-10 text-[15px] leading-[1.6] text-[rgb(var(--color-muted))]">
+      {children}
+    </p>
   )
 }
 
-function TeamBadge({ logo, abbr, name }: { logo: string; abbr: string; name: string }) {
+function BoardTeam({ logo, abbr, name }: { logo: string; abbr: string; name: string }) {
   const isChelsea = name.toLowerCase().includes('chelsea')
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <span className="flex w-[84px] flex-none flex-col items-center gap-[9px]">
       {logo ? (
         <Image
           src={logo}
           alt=""
-          width={48}
-          height={48}
-          className="h-12 w-12 rounded-full object-contain"
+          width={44}
+          height={44}
+          className="h-11 w-11 rounded-full object-contain"
         />
       ) : (
-        <div
-          className={`flex h-12 w-12 items-center justify-center rounded-full ${
-            isChelsea ? 'bg-[#034694]' : 'bg-slate-400'
+        <span
+          className={`flex h-11 w-11 items-center justify-center rounded-full text-[13px] font-bold leading-none text-white ${
+            isChelsea ? 'bg-[rgb(var(--color-chelsea-blue))]' : 'bg-white/15'
           }`}
         >
-          <span className="font-display text-sm font-bold text-white">{abbr}</span>
-        </div>
+          {abbr}
+        </span>
       )}
-      <span className="max-w-[6rem] text-center text-[12px] font-semibold leading-tight text-slate-700">
+      <span className="text-center text-[11.5px] font-semibold leading-[1.25] text-white/[0.82]">
         {name}
       </span>
+    </span>
+  )
+}
+
+function BoardLabel({ text, live }: { text: string; live: boolean }) {
+  return (
+    <p className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase leading-none tracking-[0.20em] text-[rgb(var(--color-gold))]">
+      {live && (
+        <span
+          className="live-dot inline-block h-[7px] w-[7px] rounded-full bg-[rgb(var(--color-gold))]"
+          aria-hidden="true"
+        />
+      )}
+      {live ? 'Pågår nu' : text}
+    </p>
+  )
+}
+
+function BoardMeta({ match, children }: { match: MatchData; children?: React.ReactNode }) {
+  return (
+    <div className="min-w-0 border-white/[0.12] text-[12px] font-medium leading-[1.6] text-white/[0.58] sm:border-l sm:pl-[26px]">
+      <p>
+        {match.league}
+        {match.league && <br />}
+        <time dateTime={match.isoDate}>{match.date}</time>
+        {match.venue ? ` · ${match.venue}` : ''}
+      </p>
+      {children}
     </div>
   )
 }
 
-function MatchCard({
-  match,
-  label,
-  locale,
-}: {
-  match: MatchData | null
-  label: string
-  locale: string
-}) {
+function CountdownUnit({ value, label }: { value: string; label: string }) {
   return (
-    <div className="flex flex-col rounded-xl border border-slate-200/70 bg-white p-5 shadow-[var(--shadow-card)]">
-      <h3 className="font-display mb-4 text-center text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
+    <span className="text-center">
+      <span className="font-display tabular block text-[24px] font-bold leading-none">
+        {value}
+      </span>
+      <span className="mt-[5px] block text-[8.5px] font-semibold uppercase leading-none tracking-[0.16em] text-white/[0.45]">
         {label}
-      </h3>
+      </span>
+    </span>
+  )
+}
 
-      {!match ? (
-        <EmptyState>Matchdata är inte tillgänglig just nu.</EmptyState>
-      ) : (
-        <>
-          <p className="mb-3 text-center text-[11px] text-slate-500">
-            <time dateTime={match.isoDate}>{match.date}</time> &middot; {match.league}
-            {match.isLive && (
-              <span className="ml-2 rounded-full bg-rose-500 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
-                Live
-              </span>
-            )}
+/**
+ * Resultattavlan: senaste resultatet och nästa avspark i ett mörkt band tvärs
+ * över sidan. Saknas en av matcherna står tomtexten kvar i sin halva — vi
+ * hittar aldrig på ett resultat.
+ */
+function ScoreBoard({ data }: { data: MatchCenterData }) {
+  const { lastMatch, nextMatch } = data
+  const countdown = useCountdown(nextMatch?.isoDate ?? null)
+
+  if (!lastMatch && !nextMatch) {
+    return (
+      <div className="bg-[rgb(var(--color-night))] text-white">
+        <div className={`${WRAP} py-7`}>
+          <p className="font-serif text-[15px] leading-[1.6] text-white/[0.7]">
+            Matchdata är inte tillgänglig just nu.
           </p>
+        </div>
+      </div>
+    )
+  }
 
-          <div className="flex items-center justify-center gap-5">
-            <TeamBadge logo={match.homeLogo} abbr={match.homeAbbr} name={match.homeTeam} />
-
-            {match.homeGoals !== null && match.awayGoals !== null ? (
-              <div className="score-display text-4xl font-bold text-[#022B5C]">
-                {match.homeGoals}
-                <span className="mx-1 text-slate-300">:</span>
-                {match.awayGoals}
+  return (
+    <div className="bg-[rgb(var(--color-night))] text-white">
+      <div className={`${WRAP} grid grid-cols-1 md:grid-cols-[1fr_1px_1fr]`}>
+        <div className="flex flex-wrap items-center gap-x-7 gap-y-5 py-7">
+          {lastMatch ? (
+            <>
+              <div className="flex-none">
+                <BoardLabel text="Senaste match" live={lastMatch.isLive} />
+                <div className="flex items-center gap-[22px]">
+                  <BoardTeam
+                    logo={lastMatch.homeLogo}
+                    abbr={lastMatch.homeAbbr}
+                    name={lastMatch.homeTeam}
+                  />
+                  {lastMatch.homeGoals !== null && lastMatch.awayGoals !== null ? (
+                    <span className="font-display tabular text-[46px] font-bold leading-none tracking-[-0.035em]">
+                      {lastMatch.homeGoals}
+                      <span className="mx-[9px] text-white/[0.28]">&ndash;</span>
+                      {lastMatch.awayGoals}
+                    </span>
+                  ) : (
+                    <span className="font-display text-[16px] font-bold uppercase leading-none tracking-[0.16em] text-white/[0.32]">
+                      vs
+                    </span>
+                  )}
+                  <BoardTeam
+                    logo={lastMatch.awayLogo}
+                    abbr={lastMatch.awayAbbr}
+                    name={lastMatch.awayTeam}
+                  />
+                </div>
               </div>
-            ) : (
-              <span className="font-display text-2xl font-bold text-slate-300">VS</span>
-            )}
+              <BoardMeta match={lastMatch}>
+                {lastMatch.matchCentreUrl && (
+                  <a
+                    href={lastMatch.matchCentreUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2.5 inline-flex min-h-[44px] items-center text-[11.5px] font-bold uppercase tracking-[0.09em] text-[rgb(var(--color-gold))] hover:text-[rgb(var(--color-gold-light))]"
+                  >
+                    Matchcenter på chelseafc.com
+                  </a>
+                )}
+              </BoardMeta>
+            </>
+          ) : (
+            <div>
+              <BoardLabel text="Senaste match" live={false} />
+              <p className="font-serif text-[15px] leading-[1.6] text-white/[0.7]">
+                Ingen spelad match ännu.
+              </p>
+            </div>
+          )}
+        </div>
 
-            <TeamBadge logo={match.awayLogo} abbr={match.awayAbbr} name={match.awayTeam} />
-          </div>
+        <div className="hidden bg-white/[0.12] md:block" aria-hidden="true" />
 
-          <div className="mt-auto flex flex-col items-center gap-1 pt-5 text-center">
-            {match.venue ? (
-              <span className="text-[12px] text-slate-500">{match.venue}</span>
-            ) : null}
-            {match.matchCentreUrl ? (
-              <a
-                href={match.matchCentreUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[12px] font-semibold text-[#034694] hover:underline"
-              >
-                Matchcenter på chelseafc.com &rarr;
-              </a>
-            ) : (
-              <Link
-                href={`/${locale}/matcher/spelschema` as Route}
-                className="text-[12px] font-semibold text-[#034694] hover:underline"
-              >
-                Hela spelschemat
-              </Link>
-            )}
-          </div>
-        </>
-      )}
+        <div className="flex flex-wrap items-center gap-x-7 gap-y-5 border-t border-white/[0.12] py-7 md:border-t-0 md:pl-12">
+          {nextMatch ? (
+            <>
+              <div className="flex-none">
+                <BoardLabel text="Nästa match" live={nextMatch.isLive} />
+                <div className="flex items-center gap-[22px]">
+                  <BoardTeam
+                    logo={nextMatch.homeLogo}
+                    abbr={nextMatch.homeAbbr}
+                    name={nextMatch.homeTeam}
+                  />
+                  <span className="font-display text-[16px] font-bold uppercase leading-none tracking-[0.16em] text-white/[0.32]">
+                    vs
+                  </span>
+                  <BoardTeam
+                    logo={nextMatch.awayLogo}
+                    abbr={nextMatch.awayAbbr}
+                    name={nextMatch.awayTeam}
+                  />
+                </div>
+              </div>
+              <BoardMeta match={nextMatch}>
+                {countdown && (
+                  <div className="mt-3 flex gap-[14px]">
+                    <CountdownUnit value={countdown.d} label="dygn" />
+                    <CountdownUnit value={countdown.h} label="tim" />
+                    <CountdownUnit value={countdown.m} label="min" />
+                    <CountdownUnit value={countdown.s} label="sek" />
+                  </div>
+                )}
+              </BoardMeta>
+            </>
+          ) : (
+            <div>
+              <BoardLabel text="Nästa match" live={false} />
+              <p className="font-serif text-[15px] leading-[1.6] text-white/[0.7]">
+                Inga kommande matcher är inlagda ännu.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -150,19 +294,19 @@ function Form({ form }: { form: string[] }) {
   if (form.length === 0) return null
 
   const tone: Record<string, string> = {
-    W: 'bg-emerald-500',
-    D: 'bg-slate-300',
-    L: 'bg-rose-400',
+    W: 'bg-[#16a34a]',
+    D: 'bg-[#94a3b8]',
+    L: 'bg-[#dc2626]',
   }
   const label: Record<string, string> = { W: 'vinst', D: 'oavgjort', L: 'förlust' }
 
   return (
-    <span className="inline-flex gap-[3px] align-middle">
+    <span className="inline-flex gap-[4px] align-middle">
       {form.map((result, i) => (
         <span
           key={`${result}-${i}`}
-          title={label[result] ?? result}
-          className={`h-1.5 w-1.5 rounded-full ${tone[result] ?? 'bg-slate-200'}`}
+          aria-hidden="true"
+          className={`h-[7px] w-[7px] rounded-full ${tone[result] ?? 'bg-[rgb(var(--color-rule-2))]'}`}
         />
       ))}
       <span className="sr-only">{form.map((r) => label[r] ?? r).join(', ')}</span>
@@ -170,47 +314,108 @@ function Form({ form }: { form: string[] }) {
   )
 }
 
-function StandingsTable({ standings }: { standings: StandingRow[] }) {
+function StandingsTable({
+  standings,
+  leagueName,
+}: {
+  standings: StandingRow[]
+  leagueName: string
+}) {
   if (standings.length === 0) {
-    return <EmptyState>Tabellen är inte tillgänglig just nu.</EmptyState>
+    return (
+      <EmptyState>
+        Tabellen är inte tillgänglig just nu. Den fylls i så fort omgången är spelad.
+      </EmptyState>
+    )
   }
 
   return (
-    <table className="w-full text-left text-[12px]">
-      <caption className="sr-only">Tabellställning</caption>
-      <thead>
-        <tr className="text-[10px] uppercase tracking-[0.1em] text-slate-500">
-          <th scope="col" className="pb-2 font-semibold">#</th>
-          <th scope="col" className="pb-2 font-semibold">Lag</th>
-          <th scope="col" className="pb-2 text-center font-semibold" title="Spelade">S</th>
-          <th scope="col" className="pb-2 text-center font-semibold" title="Målskillnad">+/&minus;</th>
-          <th scope="col" className="pb-2 text-center font-semibold">Form</th>
-          <th scope="col" className="pb-2 text-right font-semibold" title="Poäng">P</th>
-        </tr>
-      </thead>
-      <tbody>
-        {standings.map((row) => {
-          const isChelsea = row.team.toLowerCase().includes('chelsea')
-          return (
-            <tr
-              key={row.teamId}
-              className={`border-t border-slate-100 ${
-                isChelsea ? 'table-row-highlight font-bold text-[#034694]' : 'text-slate-700'
-              }`}
-            >
-              <td className="py-2">{row.pos}</td>
-              <td className="py-2 font-semibold">{row.team}</td>
-              <td className="py-2 text-center">{row.played}</td>
-              <td className="py-2 text-center">
-                {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
-              </td>
-              <td className="py-2 text-center"><Form form={row.form} /></td>
-              <td className="py-2 text-right font-bold">{row.points}</td>
-            </tr>
-          )
-        })}
-      </tbody>
-    </table>
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse text-left text-[13.5px] font-medium">
+        <caption className="caption-top pt-5 text-left text-[12px] font-medium text-[rgb(var(--color-muted))]">
+          {leagueName || 'Tabellställning'}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col" className={`${TH} w-[34px]`}>
+              <abbr className={ABBR} title="Placering">
+                #
+              </abbr>
+            </th>
+            <th scope="col" className={TH}>
+              Lag
+            </th>
+            <th scope="col" className={`${TH} w-12 text-center`}>
+              <abbr className={ABBR} title="Spelade">
+                S
+              </abbr>
+            </th>
+            <th scope="col" className={`${TH} hidden w-12 text-center sm:table-cell`}>
+              <abbr className={ABBR} title="Vunna">
+                V
+              </abbr>
+            </th>
+            <th scope="col" className={`${TH} hidden w-12 text-center sm:table-cell`}>
+              <abbr className={ABBR} title="Oavgjorda">
+                O
+              </abbr>
+            </th>
+            <th scope="col" className={`${TH} hidden w-12 text-center sm:table-cell`}>
+              <abbr className={ABBR} title="Förlorade">
+                F
+              </abbr>
+            </th>
+            <th scope="col" className={`${TH} w-14 text-center`}>
+              <abbr className={ABBR} title="Målskillnad">
+                +/&minus;
+              </abbr>
+            </th>
+            <th scope="col" className={`${TH} hidden w-[92px] md:table-cell`}>
+              Form
+            </th>
+            <th scope="col" className={`${TH} w-10 text-right`}>
+              <abbr className={ABBR} title="Poäng">
+                P
+              </abbr>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {standings.map((row) => {
+            const isChelsea = row.team.toLowerCase().includes('chelsea')
+            const tone = isChelsea
+              ? 'font-bold text-[rgb(var(--color-chelsea-blue))]'
+              : 'text-[rgb(var(--color-ink-2))]'
+            return (
+              <tr key={row.teamId} className={isChelsea ? 'bg-[rgba(3,70,148,0.055)]' : ''}>
+                <td
+                  className={`${TD} ${tone}`}
+                  style={
+                    isChelsea
+                      ? { boxShadow: 'inset 3px 0 0 rgb(var(--color-chelsea-blue))' }
+                      : undefined
+                  }
+                >
+                  {row.pos}
+                </td>
+                <td className={`${TD} ${tone} ${isChelsea ? '' : 'font-semibold'}`}>{row.team}</td>
+                <td className={`${TD} ${tone} text-center`}>{row.played}</td>
+                <td className={`${TD} ${tone} hidden text-center sm:table-cell`}>{row.won}</td>
+                <td className={`${TD} ${tone} hidden text-center sm:table-cell`}>{row.drawn}</td>
+                <td className={`${TD} ${tone} hidden text-center sm:table-cell`}>{row.lost}</td>
+                <td className={`${TD} ${tone} text-center`}>
+                  {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
+                </td>
+                <td className={`${TD} ${tone} hidden md:table-cell`}>
+                  <Form form={row.form} />
+                </td>
+                <td className={`${TD} ${tone} text-right font-bold`}>{row.points}</td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -220,21 +425,24 @@ function UpcomingList({ matches }: { matches: MatchData[] }) {
   }
 
   return (
-    <ul className="divide-y divide-slate-100">
+    <ul className="mt-6">
       {matches.map((match) => (
-        <li key={match.isoDate + match.awayTeam} className="flex items-baseline gap-3 py-2">
+        <li
+          key={match.isoDate + match.awayTeam}
+          className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-[rgb(var(--color-rule))] py-4 first:border-t-0"
+        >
           <time
             dateTime={match.isoDate}
-            className="w-24 shrink-0 text-[11px] font-semibold text-slate-500"
+            className="tabular w-[120px] flex-none text-[12.5px] font-semibold leading-[1.4] text-[rgb(var(--color-ink-2))]"
           >
             {match.date}
           </time>
-          <div className="min-w-0">
-            <p className="truncate text-[12px] font-semibold text-slate-700">
-              {match.homeTeam} &ndash; {match.awayTeam}
-            </p>
-            <p className="truncate text-[11px] text-slate-400">{match.league}</p>
-          </div>
+          <span className="font-display min-w-0 flex-1 text-[16px] font-semibold leading-[1.25] text-[rgb(var(--color-text))]">
+            {match.homeTeam} &ndash; {match.awayTeam}
+          </span>
+          <span className="flex-none text-[11.5px] font-medium leading-none text-[rgb(var(--color-muted))]">
+            {match.league}
+          </span>
         </li>
       ))}
     </ul>
@@ -242,7 +450,7 @@ function UpcomingList({ matches }: { matches: MatchData[] }) {
 }
 
 /**
- * Matchcenter: senaste och nästa match plus tabell och kommande matcher.
+ * Matchcenter: resultattavla, tabell och kommande matcher.
  *
  * All data kommer från Chelseas egen sajt (se lib/chelsea-matches.ts). Saknas
  * den visar vi en tydlig tomtext — aldrig påhittade resultat, som skulle vara
@@ -254,77 +462,142 @@ export default function MatchCenter({ locale, herrar, damer }: MatchCenterProps)
 
   const data = (activeTeam === 'herrar' ? herrar : damer) ?? EMPTY
 
-  const pill = (active: boolean) =>
-    `rounded-full px-4 py-1.5 text-[12px] font-bold uppercase tracking-[0.06em] transition-colors ${
-      active
-        ? 'bg-[#034694] text-white'
-        : 'border border-slate-200 bg-white text-slate-600 hover:border-[#034694] hover:text-[#034694]'
-    }`
+  const teams = [
+    { key: 'herrar' as const, label: 'Herrar' },
+    { key: 'damer' as const, label: 'Damer' },
+  ]
 
   return (
-    <section className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-5 flex items-center gap-2" role="group" aria-label="Välj lag">
-        <button
-          type="button"
-          onClick={() => setActiveTeam('herrar')}
-          aria-pressed={activeTeam === 'herrar'}
-          className={pill(activeTeam === 'herrar')}
+    <section>
+      <div className={`${WRAP} flex justify-end pb-6`}>
+        <div
+          className="inline-flex flex-none rounded-full border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-paper-deep))] p-1"
+          role="group"
+          aria-label="Välj lag"
         >
-          Herrar
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTeam('damer')}
-          aria-pressed={activeTeam === 'damer'}
-          className={pill(activeTeam === 'damer')}
-        >
-          Damer
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <MatchCard match={data.lastMatch} label="Senaste match" locale={locale} />
-        <MatchCard match={data.nextMatch} label="Nästa match" locale={locale} />
-
-        <div className="flex flex-col rounded-xl border border-slate-200/70 bg-white p-5 shadow-[var(--shadow-card)]">
-          <div className="mb-4 flex border-b border-slate-100">
-            {tableTabs.map((tab) => (
+          {teams.map((team) => {
+            const active = activeTeam === team.key
+            return (
               <button
-                key={tab}
+                key={team.key}
                 type="button"
-                onClick={() => setActiveTab(tab)}
-                aria-pressed={activeTab === tab}
-                className={`px-3 pb-2.5 text-[12px] font-semibold tracking-[0.02em] transition-colors ${
-                  activeTab === tab
-                    ? 'border-b-2 border-[#034694] text-[#034694]'
-                    : 'text-slate-500 hover:text-slate-700'
+                onClick={() => setActiveTeam(team.key)}
+                aria-pressed={active}
+                className={`min-h-[44px] rounded-full px-6 text-[12px] font-bold uppercase leading-none tracking-[0.10em] transition-colors ${
+                  active
+                    ? 'bg-[rgb(var(--color-text))] text-white'
+                    : 'text-[rgb(var(--color-ink-2))] hover:text-[rgb(var(--color-chelsea-blue))]'
                 }`}
               >
-                {tab}
+                {team.label}
               </button>
-            ))}
+            )
+          })}
+        </div>
+      </div>
+
+      <ScoreBoard data={data} />
+
+      <div
+        className={`${WRAP} grid grid-cols-1 items-start gap-14 py-14 lg:grid-cols-[minmax(0,1fr)_360px]`}
+      >
+        <div className="min-w-0">
+          <div
+            className="flex border-b-2 border-[rgb(var(--color-text))]"
+            role="group"
+            aria-label="Visa"
+          >
+            {tableTabs.map((tab) => {
+              const active = activeTab === tab
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  aria-pressed={active}
+                  className={`font-display relative flex min-h-[44px] items-end px-5 pb-4 text-[13px] font-bold uppercase leading-none tracking-[0.13em] transition-colors first:pl-0 ${
+                    active
+                      ? 'text-[rgb(var(--color-text))]'
+                      : 'text-[rgb(var(--color-muted))] hover:text-[rgb(var(--color-text))]'
+                  }`}
+                >
+                  {tab}
+                  <span
+                    aria-hidden="true"
+                    className={`absolute -bottom-0.5 left-0 right-5 h-0.5 ${
+                      active ? 'bg-[rgb(var(--color-gold))]' : 'bg-transparent'
+                    }`}
+                  />
+                </button>
+              )
+            })}
           </div>
 
-          <div className="flex-1">
-            {activeTab === 'Tabell' && <StandingsTable standings={data.standings} />}
-            {activeTab === 'Kommande' && <UpcomingList matches={data.upcoming} />}
-          </div>
+          {activeTab === 'Tabell' ? (
+            <StandingsTable standings={data.standings} leagueName={data.leagueName} />
+          ) : (
+            <UpcomingList matches={data.upcoming} />
+          )}
 
-          <div className="mt-4 flex items-center justify-end gap-3 border-t border-slate-100 pt-3">
-            <Link
-              href={`/${locale}/matcher/spelschema` as Route}
-              className="text-[11px] font-semibold text-[#034694] hover:underline"
-            >
-              Spelschema
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href={`/${locale}/matcher/spelschema` as Route} className={BTN_LINE}>
+              Hela spelschemat
             </Link>
-            <Link
-              href={`/${locale}/matcher/tabell` as Route}
-              className="text-[11px] font-semibold text-[#034694] hover:underline"
-            >
+            <Link href={`/${locale}/matcher/tabell` as Route} className={BTN_LINE}>
               Full tabell
             </Link>
           </div>
         </div>
+
+        <aside className="min-w-0">
+          <div className="rounded-[6px] bg-[rgb(var(--color-chelsea-blue-dark))] px-6 py-[22px] text-white">
+            <p className="text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-[rgb(var(--color-gold))]">
+              Mötesplatser
+            </p>
+            <h2 className="font-display mt-2.5 text-[19px] font-semibold leading-[1.3]">
+              Var ses vi på matchdagen?
+            </h2>
+            <p className="font-serif mt-2 text-[14px] leading-[1.6] text-white/[0.78]">
+              Föreningens mötesplatser visar Chelseas matcher runt om i landet. Hitta den
+              närmaste.
+            </p>
+            <Link
+              href={`/${locale}/motesplatser` as Route}
+              className="mt-2 inline-flex min-h-[44px] items-center gap-[7px] text-[11.5px] font-bold uppercase leading-none tracking-[0.09em] text-[rgb(var(--color-gold))] hover:text-[rgb(var(--color-gold-light))]"
+            >
+              Se mötesplatser
+              <svg
+                viewBox="0 0 24 24"
+                className="h-3 w-3"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m9 6 6 6-6 6" />
+              </svg>
+            </Link>
+          </div>
+
+          <p className="font-serif mt-[18px] rounded-[6px] border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))] px-[18px] py-4 text-[14px] leading-[1.55] text-[rgb(var(--color-ink-2))]">
+            Tabell och matcher hämtas direkt från Chelsea FC och uppdateras löpande.
+            {data.nextMatch?.matchCentreUrl && (
+              <>
+                {' '}
+                <a
+                  href={data.nextMatch.matchCentreUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[rgb(var(--color-chelsea-blue))] underline underline-offset-[3px]"
+                >
+                  Se matchcentret för nästa match.
+                </a>
+              </>
+            )}
+          </p>
+        </aside>
       </div>
     </section>
   )

@@ -24,12 +24,9 @@ export default function ArticleCard({
 
   if (variant === 'row') {
     return (
-      <Link
-        href={href}
-        className="group flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-slate-50"
-      >
-        <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-md bg-slate-100">
-          {article.imageUrl ? (
+      <Link href={href} className="group flex items-center gap-3.5 py-3.5">
+        <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-md bg-[rgb(var(--color-chelsea-blue-dark))]">
+          {article.imageUrl && (
             <Image
               src={article.imageUrl}
               alt={article.imageAlt}
@@ -37,18 +34,16 @@ export default function ArticleCard({
               className="media-zoom object-cover"
               sizes="96px"
             />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#034694] to-[#022B5C]" />
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#034694]">
+          <span className="text-[10px] font-bold uppercase leading-none tracking-[0.15em] text-[rgb(var(--color-chelsea-blue))]">
             {article.label}
           </span>
-          <h3 className="mt-0.5 line-clamp-2 text-[14px] font-bold leading-snug text-slate-900 transition-colors group-hover:text-[#034694]">
+          <h3 className="font-display mt-2 line-clamp-2 text-[17px] font-semibold leading-[1.22] tracking-[0.005em] text-[rgb(var(--color-text))] transition-colors group-hover:text-[rgb(var(--color-chelsea-blue))]">
             {article.title}
           </h3>
-          <p className="mt-1 text-[11px] text-slate-400">
+          <p className="mt-2 text-[11.5px] font-medium leading-none text-[rgb(var(--color-muted))]">
             {formatDateSv(article.publishedAt)}
           </p>
         </div>
@@ -59,36 +54,34 @@ export default function ArticleCard({
   return (
     <Link
       href={href}
-      className="card-lift group flex flex-col overflow-hidden rounded-xl border border-slate-200/70 bg-white shadow-[var(--shadow-card)]"
+      className="card-lift group flex h-full flex-col overflow-hidden rounded-md border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))]"
     >
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
-        {article.imageUrl ? (
+      <div className="relative aspect-[416/260] w-full overflow-hidden bg-[rgb(var(--color-chelsea-blue-dark))]">
+        {article.imageUrl && (
           <Image
             src={article.imageUrl}
             alt={article.imageAlt}
             fill
             priority={priority}
             className="media-zoom object-cover"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
           />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-[#034694] to-[#022B5C]" />
         )}
-        <span className="absolute left-3 top-3 rounded-sm bg-[#034694] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white">
-          {article.label}
-        </span>
       </div>
 
-      <div className="flex flex-1 flex-col p-4">
-        <h3 className="text-[15px] font-bold leading-snug text-slate-900 transition-colors group-hover:text-[#034694]">
+      <div className="flex flex-1 flex-col px-5 pb-[22px] pt-5">
+        <span className="text-[10px] font-bold uppercase leading-none tracking-[0.15em] text-[rgb(var(--color-chelsea-blue))]">
+          {article.label}
+        </span>
+        <h3 className="font-display mt-2.5 text-[20px] font-semibold leading-[1.24] tracking-[0.005em] text-[rgb(var(--color-text))] transition-colors group-hover:text-[rgb(var(--color-chelsea-blue))]">
           {article.title}
         </h3>
         {article.excerpt && (
-          <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-slate-500">
+          <p className="font-serif mt-2.5 line-clamp-3 text-[14px] leading-[1.6] text-[rgb(var(--color-ink-2))]">
             {article.excerpt}
           </p>
         )}
-        <p className="mt-3 text-[12px] text-slate-400">
+        <p className="mt-auto pt-4 text-[11.5px] font-medium leading-none text-[rgb(var(--color-muted))]">
           {formatDateSv(article.publishedAt)}
         </p>
       </div>
