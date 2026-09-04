@@ -40,7 +40,7 @@ type PageProps = {
 // --- Moduler (var och en hämtar sin egen data) ---
 
 async function HeroModule({ locale }: { locale: string }) {
-  const articles = await getHeroPosts(3, locale).catch(() => [])
+  const articles = await getHeroPosts(5, locale).catch(() => [])
   return <HeroNewsGrid locale={locale} articles={articles} />
 }
 
@@ -51,7 +51,7 @@ async function MatchCenterModule({ locale }: { locale: string }) {
 
 async function NewsModule({ locale }: { locale: string }) {
   // Hoppa över de tre som redan ligger i toppuffen.
-  const hero = await getHeroPosts(3, locale).catch(() => [])
+  const hero = await getHeroPosts(5, locale).catch(() => [])
   const { articles } = await getPosts({
     limit: 6,
     locale,

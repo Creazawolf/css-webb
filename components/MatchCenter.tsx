@@ -469,7 +469,21 @@ export default function MatchCenter({ locale, herrar, damer }: MatchCenterProps)
 
   return (
     <section>
-      <div className={`${WRAP} flex justify-end pb-6`}>
+      <div className={`${WRAP} flex flex-wrap items-end justify-between gap-4 pb-6`}>
+        <div>
+          <span className="flex items-center gap-3">
+            <span
+              className="block h-[3px] w-[30px] rounded-sm bg-[rgb(var(--color-gold))]"
+              aria-hidden="true"
+            />
+            <span className="text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-[rgb(var(--color-gold-ink))]">
+              Matcher
+            </span>
+          </span>
+          <h2 className="font-display mt-3 text-[26px] font-bold uppercase leading-none tracking-[0.06em] text-[rgb(var(--color-text))]">
+            Matchcenter
+          </h2>
+        </div>
         <div
           className="inline-flex flex-none rounded-full border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-paper-deep))] p-1"
           role="group"

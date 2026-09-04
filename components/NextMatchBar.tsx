@@ -112,13 +112,13 @@ export default function NextMatchBar({ locale, match }: NextMatchBarProps) {
         <span className="flex min-w-0 items-center gap-3 text-[14px] font-semibold leading-none">
           {match.league && (
             <>
-              <span className="hidden truncate text-white/[0.62] lg:inline">
+              <span className="hidden whitespace-nowrap text-white/[0.62] xl:inline">
                 {match.league}
               </span>
-              <Dot className="hidden lg:block" />
+              <Dot className="hidden xl:block" />
             </>
           )}
-          <span className="truncate">
+          <span className="whitespace-nowrap">
             {isHome ? 'Chelsea' : opponent}
             <span className="mx-2 text-white/40">&ndash;</span>
             {isHome ? opponent : 'Chelsea'}
@@ -126,7 +126,7 @@ export default function NextMatchBar({ locale, match }: NextMatchBarProps) {
           {match.venue && (
             <>
               <Dot className="hidden xl:block" />
-              <span className="hidden truncate text-white/[0.62] xl:inline">
+              <span className="hidden whitespace-nowrap text-white/[0.62] xl:inline">
                 {match.venue}
               </span>
             </>

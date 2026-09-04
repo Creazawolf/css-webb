@@ -65,7 +65,6 @@ export const DEFAULT_NAV: NavItem[] = [
     ],
   },
   { label: 'Podden', href: '/podden', external: false, children: [] },
-  { label: 'Medlemskap', href: '/medlemskap', external: false, children: [] },
 ]
 
 export type SiteConfig = {

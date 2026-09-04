@@ -384,7 +384,10 @@ export default function NavBar({
         </Link>
 
         {/* Desktopmeny */}
-        <nav aria-label="Huvudmeny" className="hidden flex-1 items-stretch lg:flex">
+        <nav
+          aria-label="Huvudmeny"
+          className="hidden min-w-0 flex-1 items-stretch overflow-x-clip lg:flex"
+        >
           {items.map((item, index) => {
             const active = isActive(item)
             const hasChildren = item.children.length > 0
@@ -403,7 +406,7 @@ export default function NavBar({
                 )}
               </>
             )
-            const itemClass = `relative flex items-center px-[13px] font-semibold uppercase tracking-[0.11em] transition-colors duration-150 hover:text-[rgb(var(--color-chelsea-blue))] ${
+            const itemClass = `relative flex items-center px-[10px] font-semibold uppercase tracking-[0.09em] transition-colors duration-150 hover:text-[rgb(var(--color-chelsea-blue))] ${
               compact ? 'text-[11.5px]' : 'text-[12px]'
             } ${
               active || open
@@ -453,7 +456,7 @@ export default function NavBar({
         </nav>
 
         {/* Höger sida */}
-        <div className="ml-auto flex shrink-0 items-center gap-[14px]">
+        <div className="ml-auto flex shrink-0 items-center gap-[14px] pl-3">
           <a
             href={forumUrl}
             target="_blank"
