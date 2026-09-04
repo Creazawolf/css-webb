@@ -70,7 +70,7 @@ function SocialIcon({ platform, url }: { platform: string; url: string }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="text-white/70 transition-colors duration-200 hover:text-[#D4A843]"
+      className="inline-flex h-11 w-11 items-center justify-center rounded-full text-white/70 transition-colors duration-200 hover:text-[rgb(var(--color-gold-light))]"
     >
       {known ? (
         <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="currentColor" aria-hidden="true">
@@ -102,93 +102,110 @@ function linkHref(locale: string, href: string, external: boolean): Route {
   return `/${locale}${path}` as Route
 }
 
+const WRAP = 'mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8'
+
 export default function Footer({ locale, site, columns }: FooterProps) {
   const cols = columns.length > 0 ? columns : DEFAULT_COLUMNS
 
   return (
-    <footer className="mt-6 bg-[#011428]">
-      {/* Sociala medier */}
-      {site.socialLinks.length > 0 && (
-        <div className="border-b border-white/5">
-          <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/60">
+    <footer className="mt-6 bg-[rgb(var(--color-night))] text-white">
+      <div className={`${WRAP} pt-16`}>
+        <div className="grid gap-12 pb-14 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
+          <div>
+            <div className="flex items-center gap-3">
+              <Image
+                src={site.logoUrl ?? '/images/logo-white.png'}
+                alt=""
+                width={40}
+                height={40}
+                className="h-10 w-10 shrink-0 rounded-full bg-white/[0.09] p-1"
+              />
+              <span>
+                <span className="font-display block text-[15px] font-bold uppercase leading-[1.05] tracking-[0.04em]">
+                  Chelsea Supporters
+                </span>
+                <span className="mt-[3px] block text-[9px] font-bold uppercase tracking-[0.28em] text-[rgb(var(--color-gold))]">
+                  Sweden
+                </span>
+              </span>
+            </div>
+
+            <p className="mt-[18px] max-w-[280px] font-serif text-[14.5px] leading-[1.65] text-white/70">
+              {site.description}
+            </p>
+
+            {site.forumUrl && (
+              <a
+                href={site.forumUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-[18px] inline-flex min-h-[44px] items-center gap-[7px] text-[12.5px] font-semibold text-[rgb(var(--color-gold))] transition-colors duration-200 hover:text-[rgb(var(--color-gold-light))]"
+              >
+                Diskutera i The Shed
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-3 w-3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M7 17 17 7M9 7h8v8" />
+                </svg>
+              </a>
+            )}
+          </div>
+
+          {cols.map((col) => (
+            <div key={col.title}>
+              <h2 className="mb-[18px] text-[11px] font-bold uppercase tracking-[0.16em] text-white/55">
+                {col.title}
+              </h2>
+              <ul>
+                {col.links.map((link) => (
+                  <li key={`${col.title}-${link.label}-${link.href}`}>
+                    <Link
+                      href={linkHref(locale, link.href, link.external)}
+                      {...(link.external
+                        ? { target: '_blank', rel: 'noopener noreferrer' }
+                        : {})}
+                      className="inline-flex min-h-[32px] items-center text-[13.5px] leading-[1.4] text-white/[0.78] transition-colors duration-200 hover:text-[rgb(var(--color-gold-light))]"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Sociala medier */}
+        {site.socialLinks.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/10 py-3">
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/55">
               Följ oss
             </span>
-            <div className="flex items-center gap-4">
+            <div className="-mx-2 flex items-center">
               {site.socialLinks.map((s) => (
                 <SocialIcon key={s.url} platform={s.platform} url={s.url} />
               ))}
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="mx-auto grid w-full max-w-[1200px] grid-cols-2 gap-8 px-4 py-10 sm:grid-cols-3 sm:px-6 lg:grid-cols-5 lg:px-8">
-        <div className="col-span-2 sm:col-span-3 lg:col-span-2">
-          <div className="flex items-center gap-3">
-            <Image
-              src={site.logoUrl ?? '/images/logo-white.png'}
-              alt=""
-              width={40}
-              height={40}
-              className="h-9 w-9 rounded-full bg-white/10 p-0.5"
-            />
-            <div>
-              <span className="font-display block text-sm font-bold uppercase tracking-wide text-white">
-                Chelsea Supporters
-              </span>
-              <span className="block text-[10px] font-semibold uppercase tracking-[0.25em] text-[#D4A843]">
-                Sweden
-              </span>
-            </div>
-          </div>
-          <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-white/65">
-            {site.description}
-          </p>
-          {site.forumUrl && (
-            <a
-              href={site.forumUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#D4A843] transition-colors hover:text-[#E8C96A]"
-            >
-              Diskutera i The Shed →
-            </a>
-          )}
-        </div>
-
-        {cols.map((col) => (
-          <div key={col.title}>
-            <h2 className="font-display mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-white/70">
-              {col.title}
-            </h2>
-            <ul className="space-y-2">
-              {col.links.map((link) => (
-                <li key={`${col.title}-${link.label}-${link.href}`}>
-                  <Link
-                    href={linkHref(locale, link.href, link.external)}
-                    {...(link.external
-                      ? { target: '_blank', rel: 'noopener noreferrer' }
-                      : {})}
-                    className="text-[13px] text-white/70 transition-colors duration-200 hover:text-[#D4A843]"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-
-      <div className="border-t border-white/5">
-        <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center justify-between gap-2 px-4 py-4 sm:flex-row sm:px-6 lg:px-8">
-          <p className="text-[11px] text-white/55">
+        <div className="flex flex-col items-center justify-between gap-2 border-t border-white/10 py-5 text-[11.5px] text-white/[0.52] sm:flex-row">
+          <p>
             &copy; {new Date().getFullYear()} {site.siteName}
             {site.orgNumber ? ` · Org.nr ${site.orgNumber}` : ''}
           </p>
-          <p className="text-[11px] text-white/55">
-            <a href={`mailto:${site.email}`} className="transition-colors hover:text-white/50">
+          <p>
+            <a
+              href={`mailto:${site.email}`}
+              className="inline-flex min-h-[24px] items-center transition-colors duration-200 hover:text-[rgb(var(--color-gold-light))]"
+            >
               {site.email}
             </a>
           </p>

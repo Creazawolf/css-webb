@@ -103,6 +103,7 @@ export default async function FrontendLayout({ children, params }: FrontendLayou
         items={nav.items}
         siteName={site.siteName}
         logoUrl={site.logoUrl}
+        forumUrl={site.forumUrl}
         announcement={site.announcement}
       />
 

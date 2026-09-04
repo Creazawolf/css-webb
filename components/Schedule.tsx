@@ -9,6 +9,11 @@ const SV_MONTH_NAMES = [
   'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December',
 ] as const
 
+const TH =
+  'pb-3 pt-[18px] text-[9.5px] font-bold uppercase leading-none tracking-[0.14em] text-[rgb(var(--color-muted))]'
+
+const TD = 'border-t border-[rgb(var(--color-rule))] py-[13px]'
+
 type ScheduleProps = {
   herrar: MatchData[] | null
   damer: MatchData[] | null
@@ -36,27 +41,42 @@ function groupByMonth(matches: MatchData[]): GroupedFixtures {
   })
 }
 
-function TeamCell({ name, logo }: { name: string; logo: string }) {
+function TeamCell({ name, logo, align }: { name: string; logo: string; align: 'left' | 'right' }) {
   const isChelsea = name.toLowerCase().includes('chelsea')
+
   return (
-    <div className="flex items-center gap-2">
+    <span
+      className={`flex items-center gap-2.5 ${align === 'right' ? 'flex-row-reverse' : ''}`}
+    >
       {logo ? (
         <Image
           src={logo}
-          alt={name}
+          alt=""
           width={24}
           height={24}
-          className="h-6 w-6 rounded-full object-contain"
+          className="h-6 w-6 flex-none rounded-full object-contain"
         />
       ) : (
-        <div className={`flex h-6 w-6 items-center justify-center rounded-full ${isChelsea ? 'bg-[#034694]' : 'bg-slate-300'}`}>
-          <span className="text-[8px] font-bold text-white">{name.slice(0, 3).toUpperCase()}</span>
-        </div>
+        <span
+          className={`flex h-6 w-6 flex-none items-center justify-center rounded-full text-[8px] font-bold leading-none text-white ${
+            isChelsea
+              ? 'bg-[rgb(var(--color-chelsea-blue))]'
+              : 'bg-[rgb(var(--color-rule-2))]'
+          }`}
+        >
+          {name.slice(0, 3).toUpperCase()}
+        </span>
       )}
-      <span className={`text-[12px] whitespace-nowrap ${isChelsea ? 'font-bold text-[#034694]' : 'text-slate-700'}`}>
+      <span
+        className={`font-display whitespace-nowrap text-[15px] leading-[1.25] ${
+          isChelsea
+            ? 'font-bold text-[rgb(var(--color-chelsea-blue))]'
+            : 'font-semibold text-[rgb(var(--color-text))]'
+        }`}
+      >
         {name}
       </span>
-    </div>
+    </span>
   )
 }
 
@@ -66,77 +86,126 @@ export default function Schedule({ herrar, damer }: ScheduleProps) {
   const matches = activeTeam === 'herrar' ? herrar : damer
   const grouped = useMemo(() => (matches ? groupByMonth(matches) : []), [matches])
 
+  const teams = [
+    { key: 'herrar' as const, label: 'Herrar' },
+    { key: 'damer' as const, label: 'Damer' },
+  ]
+
   return (
     <div>
-      {/* Team selector pills */}
-      <div className="mb-6 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setActiveTeam('herrar')}
-          className={`rounded-full px-4 py-1.5 text-[12px] font-bold uppercase tracking-[0.06em] transition-colors ${
-            activeTeam === 'herrar'
-              ? 'bg-[#034694] text-white'
-              : 'border border-slate-200 bg-white text-slate-500 hover:border-[#034694] hover:text-[#034694]'
-          }`}
+      <div className="flex justify-end">
+        <div
+          className="inline-flex flex-none rounded-full border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-paper-deep))] p-1"
+          role="group"
+          aria-label="Välj lag"
         >
-          Herrar
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTeam('damer')}
-          className={`rounded-full px-4 py-1.5 text-[12px] font-bold uppercase tracking-[0.06em] transition-colors ${
-            activeTeam === 'damer'
-              ? 'bg-[#034694] text-white'
-              : 'border border-slate-200 bg-white text-slate-500 hover:border-[#034694] hover:text-[#034694]'
-          }`}
-        >
-          Damer
-        </button>
+          {teams.map((team) => {
+            const active = activeTeam === team.key
+            return (
+              <button
+                key={team.key}
+                type="button"
+                onClick={() => setActiveTeam(team.key)}
+                aria-pressed={active}
+                className={`min-h-[44px] rounded-full px-6 text-[12px] font-bold uppercase leading-none tracking-[0.10em] transition-colors ${
+                  active
+                    ? 'bg-[rgb(var(--color-text))] text-white'
+                    : 'text-[rgb(var(--color-ink-2))] hover:text-[rgb(var(--color-chelsea-blue))]'
+                }`}
+              >
+                {team.label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {!matches || matches.length === 0 ? (
-        <div className="rounded-lg border border-slate-200 bg-white p-8">
-          <p className="text-center text-sm text-slate-400">Inget spelschema tillgängligt</p>
-        </div>
+        <p className="font-serif py-10 text-[15px] leading-[1.6] text-[rgb(var(--color-muted))]">
+          Spelschemat är inte tillgängligt just nu.
+        </p>
       ) : (
-        <div className="space-y-6">
+        <div className="mt-8 space-y-12">
           {grouped.map((group) => (
-            <div key={group.label}>
-              <h3 className="font-display mb-3 text-sm font-bold uppercase tracking-[0.1em] text-slate-500">
+            <section key={group.label}>
+              <h2 className="font-display border-b-2 border-[rgb(var(--color-text))] pb-4 text-[13px] font-bold uppercase leading-none tracking-[0.16em] text-[rgb(var(--color-text))]">
                 {group.label}
-              </h3>
-              <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-                <table className="w-full text-[12px]">
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-left text-[13.5px] font-medium">
+                  <caption className="sr-only">Matcher i {group.label}</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col" className={`${TH} w-[130px]`}>
+                        Datum
+                      </th>
+                      <th scope="col" className={`${TH} text-right`}>
+                        Hemma
+                      </th>
+                      <th scope="col" className={`${TH} w-[86px] text-center`}>
+                        Resultat
+                      </th>
+                      <th scope="col" className={TH}>
+                        Borta
+                      </th>
+                      <th scope="col" className={`${TH} hidden sm:table-cell`}>
+                        Tävling
+                      </th>
+                      <th scope="col" className={`${TH} hidden md:table-cell`}>
+                        Arena
+                      </th>
+                    </tr>
+                  </thead>
                   <tbody>
                     {group.matches.map((match, i) => {
                       const isPlayed = match.homeGoals !== null && match.awayGoals !== null
                       return (
-                        <tr
-                          key={`${match.isoDate}-${i}`}
-                          className="border-t border-slate-50 first:border-t-0"
-                        >
-                          <td className="py-3 pl-4 pr-2 text-[11px] text-slate-400 whitespace-nowrap">
-                            {match.date}
+                        <tr key={`${match.isoDate}-${i}`}>
+                          <td className={`${TD} text-[rgb(var(--color-ink-2))]`}>
+                            <time
+                              dateTime={match.isoDate}
+                              className="tabular whitespace-nowrap text-[12.5px] font-semibold leading-[1.4]"
+                            >
+                              {match.date}
+                            </time>
                           </td>
-                          <td className="py-3 px-2">
-                            <TeamCell name={match.homeTeam} logo={match.homeLogo} />
+                          <td className={`${TD} text-right`}>
+                            <TeamCell
+                              name={match.homeTeam}
+                              logo={match.homeLogo}
+                              align="right"
+                            />
                           </td>
-                          <td className="py-3 px-2 text-center">
+                          <td className={`${TD} text-center`}>
                             {isPlayed ? (
-                              <span className="score-display font-bold text-[#022B5C]">
-                                {match.homeGoals} &ndash; {match.awayGoals}
+                              <span className="font-display tabular text-[17px] font-bold leading-none tracking-[-0.02em] text-[rgb(var(--color-text))]">
+                                {match.homeGoals}
+                                <span className="mx-1.5 text-[rgb(var(--color-rule-2))]">
+                                  &ndash;
+                                </span>
+                                {match.awayGoals}
                               </span>
                             ) : (
-                              <span className="font-bold text-slate-300">VS</span>
+                              <span className="font-display text-[13px] font-bold uppercase leading-none tracking-[0.14em] text-[rgb(var(--color-rule-2))]">
+                                vs
+                              </span>
                             )}
                           </td>
-                          <td className="py-3 px-2">
-                            <TeamCell name={match.awayTeam} logo={match.awayLogo} />
+                          <td className={TD}>
+                            <TeamCell
+                              name={match.awayTeam}
+                              logo={match.awayLogo}
+                              align="left"
+                            />
                           </td>
-                          <td className="py-3 px-2 text-[11px] text-slate-400 whitespace-nowrap hidden sm:table-cell">
+                          <td
+                            className={`${TD} hidden whitespace-nowrap text-[11.5px] text-[rgb(var(--color-muted))] sm:table-cell`}
+                          >
                             {match.league}
                           </td>
-                          <td className="py-3 pl-2 pr-4 text-[11px] text-slate-400 whitespace-nowrap hidden md:table-cell">
+                          <td
+                            className={`${TD} hidden whitespace-nowrap text-[11.5px] text-[rgb(var(--color-muted))] md:table-cell`}
+                          >
                             {match.venue}
                           </td>
                         </tr>
@@ -145,7 +214,7 @@ export default function Schedule({ herrar, damer }: ScheduleProps) {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </section>
           ))}
         </div>
       )}

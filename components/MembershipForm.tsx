@@ -6,15 +6,17 @@ import { useFormStatus } from 'react-dom'
 import { submitMembershipApplication } from '@/app/(frontend)/[locale]/medlemskap/actions'
 import { initialApplicationState } from '@/lib/membership-form'
 
+// Ramen måste nå 3:1 mot papperstonen, och fälten 44px så de går att träffa.
 const inputClass =
-  'w-full rounded-md border border-slate-300 bg-white px-3.5 py-2.5 text-[14px] text-slate-900 transition-colors placeholder:text-slate-400 focus:border-[#034694] focus:outline-none focus:ring-2 focus:ring-[#034694]/20'
+  'block w-full min-h-[44px] rounded-md border border-[rgb(var(--color-rule-ctl))] bg-[rgb(var(--color-card))] px-3.5 py-3 text-[14px] leading-[1.4] text-[rgb(var(--color-text))] transition-colors placeholder:text-[rgb(var(--color-muted))] focus:border-[rgb(var(--color-chelsea-blue))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-chelsea-blue))]/25'
 
-const labelClass = 'block text-[13px] font-semibold text-slate-700'
+const labelClass =
+  'block text-[11px] font-bold uppercase tracking-[0.14em] text-[rgb(var(--color-muted))]'
 
 function FieldError({ message }: { message?: string | undefined }) {
   if (!message) return null
   return (
-    <p className="mt-1 text-[12px] font-medium text-red-600" role="alert">
+    <p className="mt-1.5 text-[12px] font-semibold text-[#B02A1B]" role="alert">
       {message}
     </p>
   )
@@ -27,7 +29,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex items-center justify-center rounded-md bg-[#034694] px-6 py-3 text-[13px] font-bold uppercase tracking-[0.06em] text-white transition-colors hover:bg-[#022B5C] disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex min-h-[44px] items-center justify-center rounded-md bg-[rgb(var(--color-chelsea-blue))] px-[26px] py-4 text-[13px] font-bold uppercase leading-none tracking-[0.08em] text-white transition-colors hover:bg-[rgb(var(--color-chelsea-blue-dark))] disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? 'Skickar…' : 'Skicka ansökan'}
     </button>
@@ -43,10 +45,10 @@ export default function MembershipForm() {
   if (state.status === 'success') {
     return (
       <div
-        className="rounded-xl border border-green-200 bg-green-50 p-6 text-center"
+        className="rounded-md border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))] px-6 py-10 text-center"
         role="status"
       >
-        <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-green-600">
+        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-[#1F7A4C]">
           <svg
             viewBox="0 0 24 24"
             className="h-6 w-6 text-white"
@@ -60,10 +62,10 @@ export default function MembershipForm() {
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <h3 className="font-display text-lg font-bold uppercase tracking-wide text-[#022B5C]">
+        <h3 className="font-display text-[26px] font-bold uppercase leading-none tracking-[0.06em] text-[rgb(var(--color-text))]">
           Ansökan mottagen
         </h3>
-        <p className="mx-auto mt-2 max-w-md text-[14px] leading-relaxed text-slate-600">
+        <p className="font-serif mx-auto mt-3 max-w-md text-[16px] leading-[1.6] text-[rgb(var(--color-ink-2))]">
           {state.message}
         </p>
       </div>
@@ -71,20 +73,20 @@ export default function MembershipForm() {
   }
 
   return (
-    <form action={formAction} className="space-y-4" noValidate>
+    <form action={formAction} className="space-y-5" noValidate>
       {state.status === 'error' && state.message && (
         <div
-          className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-[13px] font-medium text-red-700"
+          className="rounded-md border border-[#B02A1B]/40 bg-[#B02A1B]/[0.06] px-4 py-3 text-[13px] font-semibold text-[#B02A1B]"
           role="alert"
         >
           {state.message}
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={labelClass}>
-            Namn <span className="text-red-500">*</span>
+            Namn <span className="text-[#B02A1B]">*</span>
           </label>
           <input
             id="name"
@@ -92,7 +94,7 @@ export default function MembershipForm() {
             type="text"
             required
             autoComplete="name"
-            className={`${inputClass} mt-1.5`}
+            className={`${inputClass} mt-2`}
             aria-invalid={Boolean(state.errors.name)}
           />
           <FieldError message={state.errors.name} />
@@ -100,7 +102,7 @@ export default function MembershipForm() {
 
         <div>
           <label htmlFor="email" className={labelClass}>
-            E-post <span className="text-red-500">*</span>
+            E-post <span className="text-[#B02A1B]">*</span>
           </label>
           <input
             id="email"
@@ -108,7 +110,7 @@ export default function MembershipForm() {
             type="email"
             required
             autoComplete="email"
-            className={`${inputClass} mt-1.5`}
+            className={`${inputClass} mt-2`}
             aria-invalid={Boolean(state.errors.email)}
           />
           <FieldError message={state.errors.email} />
@@ -123,7 +125,7 @@ export default function MembershipForm() {
             name="phone"
             type="tel"
             autoComplete="tel"
-            className={`${inputClass} mt-1.5`}
+            className={`${inputClass} mt-2`}
             aria-invalid={Boolean(state.errors.phone)}
           />
           <FieldError message={state.errors.phone} />
@@ -138,9 +140,9 @@ export default function MembershipForm() {
             name="city"
             type="text"
             autoComplete="address-level2"
-            className={`${inputClass} mt-1.5`}
+            className={`${inputClass} mt-2`}
           />
-          <p className="mt-1 text-[12px] text-slate-400">
+          <p className="font-serif mt-2 text-[13.5px] leading-[1.5] text-[rgb(var(--color-muted))]">
             Hjälper oss ordna träffar där du bor.
           </p>
         </div>
@@ -154,7 +156,7 @@ export default function MembershipForm() {
           id="membershipType"
           name="membershipType"
           defaultValue="standard"
-          className={`${inputClass} mt-1.5`}
+          className={`${inputClass} mt-2`}
         >
           <option value="standard">Standard</option>
           <option value="familj">Familj</option>
@@ -170,19 +172,19 @@ export default function MembershipForm() {
           id="message"
           name="message"
           rows={4}
-          className={`${inputClass} mt-1.5 resize-y`}
+          className={`${inputClass} font-serif mt-2 resize-y text-[15px] leading-[1.6]`}
           placeholder="Något du vill berätta? Hur länge har du hållit på Chelsea?"
         />
       </div>
 
-      <label className="flex items-start gap-2.5">
+      <label className="flex min-h-[44px] cursor-pointer items-center gap-3">
         <input
           type="checkbox"
           name="newsletter"
           defaultChecked
-          className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#034694] focus:ring-[#034694]"
+          className="h-5 w-5 shrink-0 rounded border-[rgb(var(--color-rule-ctl))] text-[rgb(var(--color-chelsea-blue))] accent-[rgb(var(--color-chelsea-blue))]"
         />
-        <span className="text-[13px] leading-relaxed text-slate-600">
+        <span className="font-serif text-[15px] leading-[1.5] text-[rgb(var(--color-ink-2))]">
           Ja tack, skicka mig föreningens nyhetsbrev.
         </span>
       </label>
@@ -193,9 +195,9 @@ export default function MembershipForm() {
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
-      <div className="pt-2">
+      <div className="border-t border-[rgb(var(--color-rule))] pt-6">
         <SubmitButton />
-        <p className="mt-3 text-[12px] leading-relaxed text-slate-400">
+        <p className="font-serif mt-4 max-w-[52ch] text-[13.5px] leading-[1.6] text-[rgb(var(--color-muted))]">
           Vi sparar bara namn, kontaktuppgifter och ort — inget personnummer.
           Uppgifterna används enbart för medlemsadministration och du kan när som
           helst be oss radera dem.

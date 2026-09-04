@@ -30,34 +30,53 @@ function diff(target: number, now: number): Remaining | null {
   }
 }
 
-
 function Unit({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex flex-col items-center">
-      <span className="tabular font-display text-lg font-bold leading-none text-white sm:text-xl">
+    <span className="flex items-baseline">
+      <span className="font-display tabular text-[17px] font-bold leading-none tracking-[0.02em] text-white">
         {String(value).padStart(2, '0')}
       </span>
-      <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/65">
+      <span className="ml-px text-[9px] font-semibold uppercase leading-none tracking-[0.14em] text-white/50">
         {label}
       </span>
-    </div>
+    </span>
+  )
+}
+
+function Dot({ className = '' }: { className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`h-[5px] w-[5px] flex-none rounded-full bg-white/[0.28] ${className}`}
+    />
   )
 }
 
 /**
- * Smal rad direkt under menyn med nästa match och en levande nedräkning.
+ * Smalt band direkt under menyn: nästa match och en levande nedräkning.
  *
- * Nedräkningen räknas först på klienten — servern och klienten skulle annars
- * rendera olika sekundvärden och React skulle klaga på hydreringsfel.
+ * Nedräkningen räknas bara på klienten — servern och webbläsaren skulle annars
+ * rendera olika sekundvärden och React klaga på hydreringsfel. Samma mönster
+ * som Matchcenter använder.
  */
 export default function NextMatchBar({ locale, match }: NextMatchBarProps) {
   const [remaining, setRemaining] = useState<Remaining | null>(null)
   const [started, setStarted] = useState(false)
 
-  useEffect(() => {
-    if (!match) return
+  // Byts matchen ska nedräkningen nollas direkt. Justeras under render — en
+  // effekt hade gett en extra renderingsvända med den gamla siffran kvar.
+  const isoDate = match?.isoDate ?? null
+  const [countingFor, setCountingFor] = useState(isoDate)
+  if (countingFor !== isoDate) {
+    setCountingFor(isoDate)
+    setRemaining(null)
+    setStarted(false)
+  }
 
-    const target = new Date(match.isoDate).getTime()
+  useEffect(() => {
+    if (!isoDate) return
+
+    const target = new Date(isoDate).getTime()
     if (Number.isNaN(target)) return
 
     const tick = () => {
@@ -69,68 +88,95 @@ export default function NextMatchBar({ locale, match }: NextMatchBarProps) {
     tick()
     const timer = setInterval(tick, 1000)
     return () => clearInterval(timer)
-  }, [match])
+  }, [isoDate])
 
   if (!match) return null
 
   const isHome = match.homeTeam.toLowerCase().includes('chelsea')
   const opponent = isHome ? match.awayTeam : match.homeTeam
+  const live = started || match.isLive
 
   return (
-    <div className="border-b border-white/5 bg-[#022B5C]">
-      <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2.5 sm:px-6 lg:px-8">
-        {/* Etikett */}
-        <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] text-[#D4A843]">
-          {started ? (
-            <>
-              <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-red-500" />
-              Matchdags
-            </>
-          ) : (
-            'Nästa match'
+    <div className="bg-[rgb(var(--color-night))] text-white">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-x-7 gap-y-2 px-4 py-3 sm:px-6 lg:min-h-[62px] lg:flex-nowrap lg:gap-x-7 lg:py-0 lg:px-8">
+        <span className="flex flex-none items-center gap-2 text-[10px] font-bold uppercase leading-none tracking-[0.20em] text-[rgb(var(--color-gold))]">
+          {live && (
+            <span
+              className="live-dot inline-block h-[7px] w-[7px] rounded-full bg-[rgb(var(--color-gold))]"
+              aria-hidden="true"
+            />
           )}
+          {live ? 'Pågår nu' : 'Nästa match'}
         </span>
 
-        {/* Lagen */}
-        <div className="flex min-w-0 items-center gap-2 text-[13px] font-semibold text-white">
+        <span className="flex min-w-0 items-center gap-3 text-[14px] font-semibold leading-none">
+          {match.league && (
+            <>
+              <span className="hidden truncate text-white/[0.62] lg:inline">
+                {match.league}
+              </span>
+              <Dot className="hidden lg:block" />
+            </>
+          )}
           <span className="truncate">
             {isHome ? 'Chelsea' : opponent}
-            <span className="mx-1.5 text-white/30">–</span>
+            <span className="mx-2 text-white/40">&ndash;</span>
             {isHome ? opponent : 'Chelsea'}
           </span>
-          <span className="hidden rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/70 sm:inline-block">
-            {isHome ? 'Hemma' : 'Borta'}
-          </span>
-        </div>
-
-        {/* Avspark */}
-        <span className="hidden text-[12px] text-white/70 md:inline">
-          {match.date} · {match.league}
+          {match.venue && (
+            <>
+              <Dot className="hidden xl:block" />
+              <span className="hidden truncate text-white/[0.62] xl:inline">
+                {match.venue}
+              </span>
+            </>
+          )}
+          <Dot className="hidden sm:block" />
+          <time
+            dateTime={match.isoDate}
+            className="hidden flex-none text-white/[0.62] sm:inline"
+          >
+            {match.date}
+          </time>
         </span>
 
-        {/* Nedräkning */}
-        <div className="ml-auto flex items-center gap-3">
+        <span className="ml-auto flex flex-none items-baseline gap-[5px]">
           {remaining ? (
-            <div className="flex items-center gap-3">
-              {remaining.days > 0 && <Unit value={remaining.days} label="dgr" />}
+            <>
+              <Unit value={remaining.days} label="dygn" />
               <Unit value={remaining.hours} label="tim" />
               <Unit value={remaining.minutes} label="min" />
               <Unit value={remaining.seconds} label="sek" />
-            </div>
+            </>
           ) : (
-            /* Innan klienten hunnit räkna, och när matchen har startat */
-            <span className="text-[12px] font-semibold text-white/75">
-              {started ? 'Pågår nu' : match.date}
-            </span>
+            /* Innan klienten hunnit räkna, och när matchen har startat. */
+            <time
+              dateTime={match.isoDate}
+              className="text-[12px] font-semibold leading-none text-white/75"
+            >
+              {match.date}
+            </time>
           )}
+        </span>
 
-          <Link
-            href={`/${locale}/motesplatser` as Route}
-            className="hidden shrink-0 rounded-md bg-[#D4A843] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-[#022B5C] transition-colors hover:bg-[#E8C96A] sm:inline-block"
+        <Link
+          href={`/${locale}/motesplatser` as Route}
+          className="ml-1 hidden min-h-[44px] flex-none items-center gap-[7px] border-l border-white/[0.14] pl-7 text-[11.5px] font-bold uppercase leading-none tracking-[0.09em] text-[rgb(var(--color-gold))] transition-colors hover:text-[rgb(var(--color-gold-light))] sm:inline-flex"
+        >
+          Se matchen med oss
+          <svg
+            viewBox="0 0 24 24"
+            className="h-3 w-3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
           >
-            Se matchen med oss
-          </Link>
-        </div>
+            <path d="m9 6 6 6-6 6" />
+          </svg>
+        </Link>
       </div>
     </div>
   )

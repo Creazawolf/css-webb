@@ -4,6 +4,7 @@ import config from '@payload-config'
 import type { Metadata } from 'next'
 
 import Reveal from '@/components/Reveal'
+import SectionHeading from '@/components/SectionHeading'
 import { mediaUrl } from '@/lib/posts'
 import { EVENT_TYPE_LABELS, getSiteConfig } from '@/lib/site'
 import type { Event } from '@/payload-types'
@@ -72,32 +73,32 @@ function EventRow({ event }: { event: Event }) {
   const image = mediaUrl(event.featuredImage, 'card')
 
   return (
-    <article className="card-lift group flex flex-col gap-4 overflow-hidden rounded-xl border border-slate-200/70 bg-white p-4 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:p-5">
+    <article className="card-lift group flex flex-col gap-5 overflow-hidden rounded-md border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))] p-5 sm:flex-row sm:items-center">
       {/* Datumblock */}
-      <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-lg bg-[#022B5C] text-white">
-        <span className="font-display text-2xl font-bold leading-none">
+      <div className="flex h-[68px] w-[68px] shrink-0 flex-col items-center justify-center rounded-md bg-[rgb(var(--color-night))] text-white">
+        <span className="font-display tabular text-[26px] font-bold leading-none">
           {Number.isNaN(d.getTime()) ? '–' : d.getDate()}
         </span>
-        <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D4A843]">
+        <span className="mt-1.5 text-[9.5px] font-bold uppercase leading-none tracking-[0.16em] text-[rgb(var(--color-gold))]">
           {Number.isNaN(d.getTime()) ? '' : MONTHS_SHORT[d.getMonth()]}
         </span>
       </div>
 
       <div className="min-w-0 flex-1">
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#D4A843]">
+        <span className="text-[10px] font-bold uppercase leading-none tracking-[0.15em] text-[rgb(var(--color-chelsea-blue))]">
           {EVENT_TYPE_LABELS[event.eventType] ?? 'Evenemang'}
           {event.city ? ` · ${event.city}` : ''}
         </span>
-        <h3 className="font-display mt-1 text-lg font-bold leading-snug text-[#022B5C]">
+        <h3 className="font-display mt-2.5 text-[20px] font-semibold leading-[1.24] tracking-[0.005em] text-[rgb(var(--color-text))]">
           {event.title}
         </h3>
-        <p className="mt-1 text-[13px] text-slate-500">
+        <p className="mt-2 text-[11.5px] font-medium leading-[1.4] text-[rgb(var(--color-muted))]">
           {formatFull(event.date)} · {event.location}
         </p>
       </div>
 
       {image && (
-        <div className="relative hidden h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-slate-100 lg:block">
+        <div className="relative hidden h-20 w-32 shrink-0 overflow-hidden rounded-md bg-[rgb(var(--color-chelsea-blue-dark))] lg:block">
           <Image src={image} alt="" fill className="media-zoom object-cover" sizes="128px" />
         </div>
       )}
@@ -107,7 +108,7 @@ function EventRow({ event }: { event: Event }) {
           href={event.registrationLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="shrink-0 rounded-md bg-[#034694] px-4 py-2.5 text-center text-[12px] font-bold uppercase tracking-[0.06em] text-white transition-colors hover:bg-[#022B5C]"
+          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-md bg-[rgb(var(--color-chelsea-blue))] px-5 py-3 text-center text-[12px] font-bold uppercase leading-none tracking-[0.08em] text-white transition-colors hover:bg-[rgb(var(--color-chelsea-blue-dark))]"
         >
           Anmäl dig
         </a>
@@ -124,35 +125,39 @@ export default async function EvenemangPage({ params }: PageProps) {
   ])
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 py-10 sm:px-6 lg:px-8">
-      <div className="max-w-2xl">
-        <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-[#022B5C] sm:text-4xl">
+    <div className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+      <header className="max-w-[680px]">
+        <div className="flex items-center gap-3">
+          <span
+            className="block h-[3px] w-[30px] rounded-[2px] bg-[rgb(var(--color-gold))]"
+            aria-hidden="true"
+          />
+          <span className="text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-[rgb(var(--color-gold-ink))]">
+            Föreningen
+          </span>
+        </div>
+        <h1 className="font-display mt-3.5 text-[34px] font-bold leading-[0.98] tracking-[-0.012em] text-[rgb(var(--color-text))] sm:text-[50px]">
           Evenemang
         </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-slate-600">
+        <p className="font-serif mt-3 max-w-[520px] text-[16px] leading-[1.55] text-[rgb(var(--color-ink-2))]">
           Pubkvällar, resor till London och årsmöten. Allt som händer i föreningen
           samlat på ett ställe.
         </p>
-      </div>
+      </header>
 
-      <section className="mt-9">
-        <div className="mb-5 flex items-center gap-3">
-          <span className="section-marker" aria-hidden="true" />
-          <h2 className="font-display text-xl font-bold uppercase tracking-wide text-[#022B5C]">
-            På gång
-          </h2>
-        </div>
+      <section className="mt-12">
+        <SectionHeading title="På gång" />
 
         {upcoming.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-white/60 px-6 py-14 text-center">
-            <p className="text-[14px] text-slate-500">
+          <div className="rounded-md border border-dashed border-[rgb(var(--color-rule-ctl))] bg-[rgb(var(--color-card))] px-6 py-14 text-center">
+            <p className="font-serif text-[16px] leading-[1.6] text-[rgb(var(--color-ink-2))]">
               Inga evenemang är inplanerade just nu.
             </p>
-            <p className="mt-2 text-[13px] text-slate-400">
+            <p className="font-serif mx-auto mt-2 max-w-lg text-[15px] leading-[1.6] text-[rgb(var(--color-muted))]">
               Vill du dra igång något i din stad? Mejla{' '}
               <a
                 href={`mailto:${site.email}`}
-                className="font-semibold text-[#034694] hover:underline"
+                className="font-semibold text-[rgb(var(--color-chelsea-blue))] underline underline-offset-[3px] hover:text-[rgb(var(--color-chelsea-blue-dark))]"
               >
                 {site.email}
               </a>
@@ -160,7 +165,7 @@ export default async function EvenemangPage({ params }: PageProps) {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {upcoming.map((event, i) => (
               <Reveal key={event.id} delay={Math.min(i, 6) * 50}>
                 <EventRow event={event} />
@@ -171,14 +176,9 @@ export default async function EvenemangPage({ params }: PageProps) {
       </section>
 
       {past.length > 0 && (
-        <section className="mt-12">
-          <div className="mb-5 flex items-center gap-3">
-            <span className="section-marker opacity-40" aria-hidden="true" />
-            <h2 className="font-display text-xl font-bold uppercase tracking-wide text-slate-400">
-              Tidigare
-            </h2>
-          </div>
-          <div className="space-y-3 opacity-70">
+        <section className="mt-14">
+          <SectionHeading title="Tidigare" />
+          <div className="space-y-4">
             {past.map((event) => (
               <EventRow key={event.id} event={event} />
             ))}

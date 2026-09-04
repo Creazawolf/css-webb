@@ -56,19 +56,30 @@ export default async function CmsPage({ params }: Props) {
   const heroUrl = mediaUrl(page.heroImage, 'og')
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-[#022B5C] sm:text-4xl">
-        {page.title}
-      </h1>
+    <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+      <header>
+        <div className="flex items-center gap-3">
+          <span
+            className="block h-[3px] w-[30px] rounded-[2px] bg-[rgb(var(--color-gold))]"
+            aria-hidden="true"
+          />
+          <span className="text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-[rgb(var(--color-gold-ink))]">
+            Chelsea Supporters Sweden
+          </span>
+        </div>
+        <h1 className="font-display mt-3.5 text-[34px] font-bold leading-[0.98] tracking-[-0.012em] text-[rgb(var(--color-text))] sm:text-[50px]">
+          {page.title}
+        </h1>
 
-      {page.intro && (
-        <p className="mt-4 text-lg font-medium leading-relaxed text-slate-600">
-          {page.intro}
-        </p>
-      )}
+        {page.intro && (
+          <p className="font-serif mt-5 text-[19px] leading-[1.5] text-pretty text-[rgb(var(--color-ink-2))] sm:text-[22px]">
+            {page.intro}
+          </p>
+        )}
+      </header>
 
       {heroUrl && (
-        <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-xl bg-slate-100">
+        <div className="relative mt-10 aspect-[16/9] overflow-hidden rounded-md bg-[rgb(var(--color-chelsea-blue-dark))]">
           <Image
             src={heroUrl}
             alt=""
@@ -80,7 +91,7 @@ export default async function CmsPage({ params }: Props) {
         </div>
       )}
 
-      <div className="mt-9">
+      <div className="mt-12 border-t border-[rgb(var(--color-rule))] pt-12">
         <PageBlocks locale={locale} blocks={page.content} />
       </div>
     </div>

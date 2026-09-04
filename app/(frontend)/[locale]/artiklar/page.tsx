@@ -24,6 +24,9 @@ type PageProps = {
 /** Filterflikarna längs toppen — samma indelning som artikeltyperna. */
 const TYPE_FILTERS = ['referat', 'spelarbetyg', 'infor', 'kronika'] as const
 
+const CHIP =
+  'inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full px-4 text-[11.5px] font-semibold uppercase leading-none tracking-[0.06em] transition-colors'
+
 export default async function ArtiklarPage({ params, searchParams }: PageProps) {
   const { locale } = await params
   const { sida } = await searchParams
@@ -38,27 +41,39 @@ export default async function ArtiklarPage({ params, searchParams }: PageProps) 
   )
 
   return (
-    <section className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-[#022B5C]">
+    <section className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+      <header className="max-w-[680px]">
+        <div className="flex items-center gap-3">
+          <span
+            className="block h-[3px] w-[30px] rounded-[2px] bg-[rgb(var(--color-gold))]"
+            aria-hidden="true"
+          />
+          <span className="text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-[rgb(var(--color-gold-ink))]">
+            Redaktionen
+          </span>
+        </div>
+        <h1 className="font-display mt-3.5 text-[34px] font-bold leading-[0.98] tracking-[-0.012em] text-[rgb(var(--color-text))] sm:text-[50px]">
           Artiklar
         </h1>
-        <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-slate-500">
+        <p className="font-serif mt-3 max-w-[520px] text-[16px] leading-[1.55] text-[rgb(var(--color-ink-2))]">
           Allt vi skriver om Chelsea — referat, spelarbetyg, inför varje match och
           krönikor från medlemmarna.
         </p>
-      </div>
+      </header>
 
       {/* Typfilter */}
-      <div className="scrollbar-none mb-7 flex gap-2 overflow-x-auto pb-1">
-        <span className="whitespace-nowrap rounded-full bg-[#034694] px-4 py-1.5 text-[12px] font-bold uppercase tracking-[0.06em] text-white">
+      <div className="scrollbar-none mb-9 mt-9 flex gap-1.5 overflow-x-auto border-b border-[rgb(var(--color-rule))] pb-6">
+        <span
+          aria-current="page"
+          className={`${CHIP} bg-[rgb(var(--color-text))] text-white`}
+        >
           Alla
         </span>
         {TYPE_FILTERS.map((type) => (
           <Link
             key={type}
             href={`/${locale}/artiklar/typ/${type}` as Route}
-            className="whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-1.5 text-[12px] font-bold uppercase tracking-[0.06em] text-slate-500 transition-colors hover:border-[#034694] hover:text-[#034694]"
+            className={`${CHIP} border border-[rgb(var(--color-rule-ctl))] text-[rgb(var(--color-ink-2))] hover:border-[rgb(var(--color-chelsea-blue))] hover:text-[rgb(var(--color-chelsea-blue))]`}
           >
             {ARTICLE_TYPE_LABELS[type]}
           </Link>

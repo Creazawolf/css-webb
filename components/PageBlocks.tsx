@@ -15,6 +15,10 @@ type PageBlocksProps = {
   blocks: Blocks | null | undefined
 }
 
+/** Panelrubrik — samma etikettstil som faktarutan i artikelspalten. */
+const PANEL_HEADING =
+  'text-[10px] font-bold uppercase leading-none tracking-[0.17em] text-[rgb(var(--color-muted))]'
+
 function ctaHref(locale: string, url: string): Route {
   if (/^https?:\/\//.test(url) || url.startsWith('mailto:')) return url as Route
   return `/${locale}${url.startsWith('/') ? '' : '/'}${url}` as Route
@@ -36,7 +40,7 @@ function BlockContent({ locale, block }: { locale: string; block: Block }) {
 
       return (
         <figure>
-          <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-slate-100">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-[rgb(var(--color-paper-deep))]">
             <Image
               src={url}
               alt={alt}
@@ -46,7 +50,7 @@ function BlockContent({ locale, block }: { locale: string; block: Block }) {
             />
           </div>
           {block.caption && (
-            <figcaption className="mt-2 text-center text-[12px] text-slate-500">
+            <figcaption className="font-serif pt-3 text-[13px] italic leading-[1.5] text-[rgb(var(--color-ink-2))]">
               {block.caption}
             </figcaption>
           )}
@@ -56,15 +60,20 @@ function BlockContent({ locale, block }: { locale: string; block: Block }) {
 
     case 'factsBlock':
       return (
-        <div className="rounded-xl border border-slate-200/70 bg-white p-5 shadow-[var(--shadow-card)] sm:p-6">
-          <h2 className="font-display mb-4 text-base font-bold uppercase tracking-wide text-[#022B5C]">
+        <div className="rounded-md border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))] px-6 py-[22px]">
+          <h2 className={`${PANEL_HEADING} border-b border-[rgb(var(--color-rule))] pb-3.5`}>
             {block.heading}
           </h2>
-          <dl className="divide-y divide-slate-100">
+          <dl>
             {(block.items ?? []).map((item) => (
-              <div key={item.id ?? item.label} className="flex justify-between gap-4 py-2.5">
-                <dt className="text-[13px] text-slate-500">{item.label}</dt>
-                <dd className="text-right text-[13px] font-semibold text-slate-800">
+              <div
+                key={item.id ?? item.label}
+                className="flex justify-between gap-6 border-t border-[rgb(var(--color-rule))] py-[13px] first:border-t-0"
+              >
+                <dt className="text-[12px] font-medium text-[rgb(var(--color-muted))]">
+                  {item.label}
+                </dt>
+                <dd className="text-right text-[12.5px] font-semibold text-[rgb(var(--color-text))]">
                   {item.value}
                 </dd>
               </div>
@@ -75,18 +84,20 @@ function BlockContent({ locale, block }: { locale: string; block: Block }) {
 
     case 'ctaBlock':
       return (
-        <div className="overflow-hidden rounded-xl bg-gradient-to-r from-[#022B5C] to-[#034694] px-6 py-8 sm:px-8">
-          <h2 className="font-display text-xl font-bold uppercase tracking-wide text-white">
-            {block.heading}
-          </h2>
-          {block.body && (
-            <p className="mt-2 max-w-lg text-[14px] leading-relaxed text-blue-100/80">
-              {block.body}
-            </p>
-          )}
+        <div className="flex flex-col gap-8 rounded-lg bg-[rgb(var(--color-chelsea-blue))] px-7 py-10 text-white sm:px-12 sm:py-12 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="font-display max-w-[620px] text-[26px] font-bold leading-[1.08] tracking-[-0.005em] sm:text-[34px]">
+              {block.heading}
+            </h2>
+            {block.body && (
+              <p className="font-serif mt-3 max-w-[560px] text-[15.5px] leading-[1.6] text-white/[0.82]">
+                {block.body}
+              </p>
+            )}
+          </div>
           <Link
             href={ctaHref(locale, block.buttonUrl)}
-            className="mt-5 inline-block rounded-md bg-[#D4A843] px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-[#022B5C] transition-colors hover:bg-[#E8C96A]"
+            className="inline-flex min-h-[44px] flex-none items-center justify-center self-start rounded-md bg-[rgb(var(--color-gold))] px-[26px] py-4 text-[13px] font-bold uppercase leading-none tracking-[0.08em] text-[rgb(var(--color-chelsea-blue-dark))] transition-colors hover:bg-[rgb(var(--color-gold-light))] lg:self-auto"
           >
             {block.buttonLabel}
           </Link>
@@ -97,21 +108,21 @@ function BlockContent({ locale, block }: { locale: string; block: Block }) {
       return (
         <div>
           {block.heading && (
-            <h2 className="font-display mb-4 text-xl font-bold uppercase tracking-wide text-[#022B5C]">
+            <h2 className="font-display mb-6 border-b-2 border-[rgb(var(--color-text))] pb-[22px] text-[22px] font-bold uppercase leading-none tracking-[0.06em] text-[rgb(var(--color-text))] sm:text-[26px]">
               {block.heading}
             </h2>
           )}
-          <div className="space-y-2.5">
+          <div className="rounded-md border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))] px-6">
             {(block.items ?? []).map((item) => (
               <details
                 key={item.id ?? item.question}
-                className="group rounded-lg border border-slate-200/70 bg-white px-4 py-3 shadow-[var(--shadow-card)]"
+                className="group border-t border-[rgb(var(--color-rule))] first:border-t-0"
               >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[14px] font-semibold text-slate-800 marker:hidden">
+                <summary className="font-display flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-5 py-[15px] text-[16px] font-semibold leading-[1.25] text-[rgb(var(--color-text))] transition-colors marker:hidden hover:text-[rgb(var(--color-chelsea-blue))]">
                   {item.question}
                   <svg
                     viewBox="0 0 24 24"
-                    className="h-4 w-4 shrink-0 text-[#034694] transition-transform duration-200 group-open:rotate-45"
+                    className="h-4 w-4 shrink-0 text-[rgb(var(--color-chelsea-blue))] transition-transform duration-200 group-open:rotate-45"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -122,7 +133,7 @@ function BlockContent({ locale, block }: { locale: string; block: Block }) {
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                 </summary>
-                <p className="mt-2.5 whitespace-pre-line text-[14px] leading-relaxed text-slate-600">
+                <p className="font-serif whitespace-pre-line pb-5 text-[16px] leading-[1.7] text-[rgb(var(--color-ink-2))]">
                   {item.answer}
                 </p>
               </details>
@@ -144,7 +155,7 @@ export default function PageBlocks({ locale, blocks }: PageBlocksProps) {
   if (!blocks || blocks.length === 0) return null
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {blocks.map((block, i) => (
         <Reveal key={block.id ?? `${block.blockType}-${i}`} delay={Math.min(i, 4) * 60}>
           <BlockContent locale={locale} block={block} />

@@ -35,6 +35,9 @@ const CONTACT_REASONS = [
   },
 ]
 
+const DARK_PANEL_HEADING =
+  'text-[10px] font-bold uppercase leading-none tracking-[0.17em] text-white/60'
+
 export default async function KontaktPage({ params }: PageProps) {
   const { locale } = await params
   // En redaktör kan lägga upp en sida med slug "kontakt" för att fylla på
@@ -45,51 +48,59 @@ export default async function KontaktPage({ params }: PageProps) {
   ])
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 py-10 sm:px-6 lg:px-8">
-      <div className="max-w-2xl">
-        <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-[#022B5C] sm:text-4xl">
+    <div className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+      <header className="max-w-[680px]">
+        <div className="flex items-center gap-3">
+          <span
+            className="block h-[3px] w-[30px] rounded-[2px] bg-[rgb(var(--color-gold))]"
+            aria-hidden="true"
+          />
+          <span className="text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-[rgb(var(--color-gold-ink))]">
+            Föreningen
+          </span>
+        </div>
+        <h1 className="font-display mt-3.5 text-[34px] font-bold leading-[0.98] tracking-[-0.012em] text-[rgb(var(--color-text))] sm:text-[50px]">
           Kontakt
         </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-slate-600">
+        <p className="font-serif mt-3 max-w-[520px] text-[16px] leading-[1.55] text-[rgb(var(--color-ink-2))]">
           {page?.intro ??
             'Hör gärna av dig — vi är en ideell förening och svarar så fort vi hinner.'}
         </p>
-      </div>
+      </header>
 
-      <div className="mt-9 grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
         <Reveal className="lg:col-span-1">
-          <div className="rounded-xl bg-[#022B5C] p-6 text-white">
-            <h2 className="font-display text-base font-bold uppercase tracking-wide">
+          <div className="rounded-md bg-[rgb(var(--color-night))] px-6 py-[22px] text-white">
+            <h2 className={`${DARK_PANEL_HEADING} border-b border-white/[0.12] pb-3.5`}>
               Skriv till oss
             </h2>
             <a
               href={`mailto:${site.email}`}
-              className="mt-3 block text-[15px] font-semibold text-[#D4A843] transition-colors hover:text-[#E8C96A]"
+              className="mt-4 inline-flex min-h-[44px] items-center text-[15px] font-semibold text-[rgb(var(--color-gold-light))] transition-colors hover:text-[rgb(var(--color-gold))]"
             >
               {site.email}
             </a>
 
             {site.orgNumber && (
-              <p className="mt-5 border-t border-white/10 pt-4 text-[12px] text-white/65">
-                Organisationsnummer
-                <br />
-                <span className="text-white/70">{site.orgNumber}</span>
-              </p>
+              <div className="mt-2 border-t border-white/[0.12] pt-4">
+                <p className={DARK_PANEL_HEADING}>Organisationsnummer</p>
+                <p className="mt-2 text-[12.5px] font-semibold text-white/[0.85]">
+                  {site.orgNumber}
+                </p>
+              </div>
             )}
 
             {site.socialLinks.length > 0 && (
-              <div className="mt-5 border-t border-white/10 pt-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/65">
-                  Sociala medier
-                </p>
-                <ul className="mt-2 space-y-1.5">
+              <div className="mt-5 border-t border-white/[0.12] pt-4">
+                <p className={DARK_PANEL_HEADING}>Sociala medier</p>
+                <ul className="mt-1">
                   {site.socialLinks.map((s) => (
                     <li key={s.url}>
                       <a
                         href={s.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[13px] capitalize text-white/80 transition-colors hover:text-[#D4A843]"
+                        className="inline-flex min-h-[44px] items-center text-[13px] font-medium capitalize text-white/[0.78] transition-colors hover:text-[rgb(var(--color-gold-light))]"
                       >
                         {s.platform}
                       </a>
@@ -102,12 +113,14 @@ export default async function KontaktPage({ params }: PageProps) {
         </Reveal>
 
         <div className="lg:col-span-2">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             {CONTACT_REASONS.map((reason, i) => (
-              <Reveal key={reason.title} delay={i * 60}>
-                <div className="h-full rounded-xl border border-slate-200/70 bg-white p-5 shadow-[var(--shadow-card)]">
-                  <h2 className="text-[14px] font-bold text-slate-900">{reason.title}</h2>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-slate-500">
+              <Reveal key={reason.title} className="h-full" delay={i * 60}>
+                <div className="h-full rounded-md border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))] px-5 pb-[22px] pt-5">
+                  <h2 className="font-display text-[19px] font-semibold leading-[1.22] tracking-[0.005em] text-[rgb(var(--color-text))]">
+                    {reason.title}
+                  </h2>
+                  <p className="font-serif mt-2.5 text-[14px] leading-[1.6] text-[rgb(var(--color-ink-2))]">
                     {reason.body}
                   </p>
                 </div>
@@ -118,7 +131,7 @@ export default async function KontaktPage({ params }: PageProps) {
       </div>
 
       {page?.content && page.content.length > 0 && (
-        <div className="mx-auto mt-12 max-w-3xl">
+        <div className="mx-auto mt-16 max-w-3xl">
           <PageBlocks locale={locale} blocks={page.content} />
         </div>
       )}

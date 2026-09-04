@@ -2,6 +2,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 
 import Reveal from '@/components/Reveal'
+import SectionHeading from '@/components/SectionHeading'
 import { getSiteConfig, getVenues } from '@/lib/site'
 
 export const revalidate = 3600
@@ -48,27 +49,36 @@ export default async function MotesplatserPage({ params }: PageProps) {
   const cities = Object.keys(byCity).sort((a, b) => a.localeCompare(b, 'sv'))
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 py-10 sm:px-6 lg:px-8">
-      <div className="max-w-2xl">
-        <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-[#022B5C] sm:text-4xl">
+    <div className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+      <header className="max-w-[680px]">
+        <div className="flex items-center gap-3">
+          <span
+            className="block h-[3px] w-[30px] rounded-[2px] bg-[rgb(var(--color-gold))]"
+            aria-hidden="true"
+          />
+          <span className="text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-[rgb(var(--color-gold-ink))]">
+            Föreningen
+          </span>
+        </div>
+        <h1 className="font-display mt-3.5 text-[34px] font-bold leading-[0.98] tracking-[-0.012em] text-[rgb(var(--color-text))] sm:text-[50px]">
           Mötesplatser
         </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-slate-600">
+        <p className="font-serif mt-3 max-w-[520px] text-[16px] leading-[1.55] text-[rgb(var(--color-ink-2))]">
           Matcher är roligare tillsammans. Här är ställena där medlemmar i CSS ses
           och ser Chelsea — dyk upp, alla är välkomna.
         </p>
-      </div>
+      </header>
 
       {venues.length === 0 ? (
-        <div className="mt-8 rounded-xl border border-dashed border-slate-300 bg-white/60 px-6 py-14 text-center">
-          <p className="text-[14px] text-slate-500">
+        <div className="mt-12 rounded-md border border-dashed border-[rgb(var(--color-rule-ctl))] bg-[rgb(var(--color-card))] px-6 py-14 text-center">
+          <p className="font-serif text-[16px] leading-[1.6] text-[rgb(var(--color-ink-2))]">
             Inga mötesplatser är inlagda ännu.
           </p>
-          <p className="mt-2 text-[13px] text-slate-400">
+          <p className="font-serif mx-auto mt-2 max-w-lg text-[15px] leading-[1.6] text-[rgb(var(--color-muted))]">
             Ses ni någonstans i din stad? Hör av er till{' '}
             <a
               href={`mailto:${site.email}`}
-              className="font-semibold text-[#034694] hover:underline"
+              className="font-semibold text-[rgb(var(--color-chelsea-blue))] underline underline-offset-[3px] hover:text-[rgb(var(--color-chelsea-blue-dark))]"
             >
               {site.email}
             </a>{' '}
@@ -76,53 +86,48 @@ export default async function MotesplatserPage({ params }: PageProps) {
           </p>
         </div>
       ) : (
-        <div className="mt-9 space-y-10">
+        <div className="mt-12 space-y-14">
           {cities.map((city) => (
             <section key={city}>
-              <div className="mb-4 flex items-center gap-3">
-                <span className="section-marker" aria-hidden="true" />
-                <h2 className="font-display text-xl font-bold uppercase tracking-wide text-[#022B5C]">
-                  {city}
-                </h2>
-              </div>
+              <SectionHeading title={city} />
 
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {byCity[city]!.map((venue, i) => (
-                  <Reveal key={venue.id} delay={Math.min(i, 4) * 60}>
-                    <article className="card-lift group flex h-full flex-col overflow-hidden rounded-xl border border-slate-200/70 bg-white shadow-[var(--shadow-card)]">
+                  <Reveal key={venue.id} className="h-full" delay={Math.min(i, 4) * 60}>
+                    <article className="card-lift group flex h-full flex-col overflow-hidden rounded-md border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))]">
                       {venue.imageUrl && (
-                        <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
+                        <div className="relative aspect-[416/260] w-full overflow-hidden bg-[rgb(var(--color-chelsea-blue-dark))]">
                           <Image
                             src={venue.imageUrl}
                             alt=""
                             fill
                             className="media-zoom object-cover"
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
                           />
                         </div>
                       )}
 
-                      <div className="flex flex-1 flex-col p-5">
-                        <h3 className="font-display text-lg font-bold text-[#022B5C]">
+                      <div className="flex flex-1 flex-col px-5 pb-[22px] pt-5">
+                        <h3 className="font-display text-[20px] font-semibold leading-[1.24] tracking-[0.005em] text-[rgb(var(--color-text))]">
                           {venue.name}
                         </h3>
                         {venue.address && (
-                          <p className="mt-1 flex items-start gap-1.5 text-[13px] text-slate-500">
-                            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#D4A843]" />
+                          <p className="mt-2 flex items-start gap-1.5 text-[11.5px] font-medium leading-[1.4] text-[rgb(var(--color-muted))]">
+                            <MapPin className="mt-px h-3.5 w-3.5 shrink-0 text-[rgb(var(--color-gold-ink))]" />
                             {venue.address}
                           </p>
                         )}
                         {venue.description && (
-                          <p className="mt-3 flex-1 text-[13px] leading-relaxed text-slate-600">
+                          <p className="font-serif mt-3 flex-1 text-[14px] leading-[1.6] text-[rgb(var(--color-ink-2))]">
                             {venue.description}
                           </p>
                         )}
 
-                        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-slate-100 pt-3 text-[12px]">
+                        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t border-[rgb(var(--color-rule))] pt-4 text-[11.5px] font-medium">
                           {venue.contactName && (
-                            <span className="text-slate-500">
+                            <span className="text-[rgb(var(--color-muted))]">
                               Fråga efter{' '}
-                              <span className="font-semibold text-slate-700">
+                              <span className="font-semibold text-[rgb(var(--color-ink-2))]">
                                 {venue.contactName}
                               </span>
                             </span>
@@ -132,9 +137,9 @@ export default async function MotesplatserPage({ params }: PageProps) {
                               href={venue.mapsUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="font-semibold text-[#034694] hover:underline"
+                              className="font-bold uppercase tracking-[0.09em] text-[rgb(var(--color-chelsea-blue))] transition-colors hover:text-[rgb(var(--color-chelsea-blue-dark))]"
                             >
-                              Visa på karta →
+                              Visa på karta
                             </a>
                           )}
                         </div>

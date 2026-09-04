@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import MembershipForm from '@/components/MembershipForm'
 import Reveal from '@/components/Reveal'
+import SectionHeading from '@/components/SectionHeading'
 import { getSiteConfig } from '@/lib/site'
 
 export const revalidate = 3600
@@ -31,6 +32,11 @@ const FORDELAR = [
   },
 ]
 
+const PANEL = 'rounded-md border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))] px-6 py-[22px]'
+
+const PANEL_HEADING =
+  'text-[10px] font-bold uppercase leading-none tracking-[0.17em] text-[rgb(var(--color-muted))]'
+
 type PageProps = {
   params: Promise<{ locale: string }>
 }
@@ -40,47 +46,59 @@ export default async function MedlemskapPage({ params }: PageProps) {
   const site = await getSiteConfig(locale)
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 py-10 sm:px-6 lg:px-8">
-      <div className="max-w-2xl">
-        <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-[#022B5C] sm:text-4xl">
+    <div className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+      <header className="max-w-[680px]">
+        <div className="flex items-center gap-3">
+          <span
+            className="block h-[3px] w-[30px] rounded-[2px] bg-[rgb(var(--color-gold))]"
+            aria-hidden="true"
+          />
+          <span className="text-[11px] font-bold uppercase leading-none tracking-[0.16em] text-[rgb(var(--color-gold-ink))]">
+            Föreningen
+          </span>
+        </div>
+        <h1 className="font-display mt-3.5 text-[34px] font-bold leading-[0.98] tracking-[-0.012em] text-[rgb(var(--color-text))] sm:text-[50px]">
           Bli medlem i CSS
         </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-slate-600">
+        <p className="font-serif mt-3 text-[16px] leading-[1.55] text-[rgb(var(--color-ink-2))]">
           Chelsea Supporters Sweden är till för alla som håller på Chelsea. Som
           medlem blir du en del av gemenskapen — och du gör det möjligt för oss
           att fortsätta ordna träffar, resor och innehåll på svenska.
           {site.membershipFee ? ` Medlemskapet kostar ${site.membershipFee}.` : ''}
         </p>
-      </div>
+      </header>
 
-      <div className="mt-9 grid grid-cols-1 gap-8 lg:grid-cols-5">
+      <div className="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-5 lg:gap-12">
         {/* Formulär */}
         <div className="lg:col-span-3">
-          <div className="rounded-xl border border-slate-200/70 bg-white p-5 shadow-[var(--shadow-card)] sm:p-7">
-            <h2 className="font-display mb-5 text-lg font-bold uppercase tracking-wide text-[#022B5C]">
-              Ansökan
-            </h2>
+          <SectionHeading title="Ansökan" />
+          <div className="rounded-md border border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))] p-6 sm:p-8">
             <MembershipForm />
           </div>
         </div>
 
         {/* Förmåner och betalning */}
-        <aside className="space-y-4 lg:col-span-2">
+        <aside className="space-y-6 lg:col-span-2">
           <Reveal>
-            <div className="rounded-xl border border-slate-200/70 bg-white p-5 shadow-[var(--shadow-card)]">
-              <h2 className="font-display mb-4 text-base font-bold uppercase tracking-wide text-[#022B5C]">
+            <div className={PANEL}>
+              <h2 className={`${PANEL_HEADING} border-b border-[rgb(var(--color-rule))] pb-3.5`}>
                 Detta får du
               </h2>
-              <ul className="space-y-4">
+              <ul>
                 {FORDELAR.map((f) => (
-                  <li key={f.title} className="flex gap-3">
+                  <li
+                    key={f.title}
+                    className="flex gap-3 border-t border-[rgb(var(--color-rule))] py-4 first:border-t-0"
+                  >
                     <span
-                      className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[#D4A843]"
+                      className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--color-gold))]"
                       aria-hidden="true"
                     />
                     <div>
-                      <p className="text-[13px] font-bold text-slate-800">{f.title}</p>
-                      <p className="mt-0.5 text-[13px] leading-relaxed text-slate-500">
+                      <p className="font-display text-[16px] font-semibold leading-[1.25] text-[rgb(var(--color-text))]">
+                        {f.title}
+                      </p>
+                      <p className="font-serif mt-1.5 text-[14px] leading-[1.6] text-[rgb(var(--color-ink-2))]">
                         {f.body}
                       </p>
                     </div>
@@ -92,31 +110,31 @@ export default async function MedlemskapPage({ params }: PageProps) {
 
           {(site.swish || site.bankgiro) && (
             <Reveal delay={80}>
-              <div className="rounded-xl bg-[#022B5C] p-5 text-white">
-                <h2 className="font-display mb-3 text-base font-bold uppercase tracking-wide">
+              <div className="rounded-md bg-[rgb(var(--color-night))] px-6 py-[22px] text-white">
+                <h2 className="border-b border-white/[0.12] pb-3.5 text-[10px] font-bold uppercase leading-none tracking-[0.17em] text-white/60">
                   Så betalar du
                 </h2>
-                <p className="text-[13px] leading-relaxed text-blue-100/90">
+                <p className="font-serif py-4 text-[14px] leading-[1.6] text-white/[0.78]">
                   Skicka in ansökan först — vi bekräftar via e-post och skickar
                   betalningsinformation.
                 </p>
-                <dl className="mt-4 space-y-2 text-[13px]">
+                <dl>
                   {site.swish && (
-                    <div className="flex justify-between border-b border-white/10 pb-2">
-                      <dt className="text-white/70">Swish</dt>
-                      <dd className="font-semibold">{site.swish}</dd>
+                    <div className="flex justify-between gap-6 border-t border-white/[0.12] py-[13px]">
+                      <dt className="text-[12px] font-medium text-white/60">Swish</dt>
+                      <dd className="text-right text-[12.5px] font-semibold">{site.swish}</dd>
                     </div>
                   )}
                   {site.bankgiro && (
-                    <div className="flex justify-between border-b border-white/10 pb-2">
-                      <dt className="text-white/70">Bankgiro</dt>
-                      <dd className="font-semibold">{site.bankgiro}</dd>
+                    <div className="flex justify-between gap-6 border-t border-white/[0.12] py-[13px]">
+                      <dt className="text-[12px] font-medium text-white/60">Bankgiro</dt>
+                      <dd className="text-right text-[12.5px] font-semibold">{site.bankgiro}</dd>
                     </div>
                   )}
                   {site.membershipFee && (
-                    <div className="flex justify-between">
-                      <dt className="text-white/70">Avgift</dt>
-                      <dd className="font-semibold text-[#D4A843]">
+                    <div className="flex justify-between gap-6 border-t border-white/[0.12] py-[13px]">
+                      <dt className="text-[12px] font-medium text-white/60">Avgift</dt>
+                      <dd className="text-right text-[12.5px] font-semibold text-[rgb(var(--color-gold-light))]">
                         {site.membershipFee}
                       </dd>
                     </div>
@@ -127,16 +145,16 @@ export default async function MedlemskapPage({ params }: PageProps) {
           )}
 
           <Reveal delay={140}>
-            <div className="rounded-xl border border-slate-200/70 bg-white p-5 text-[13px] leading-relaxed text-slate-500 shadow-[var(--shadow-card)]">
+            <p className="font-serif border-t border-[rgb(var(--color-rule))] pt-6 text-[14px] leading-[1.6] text-[rgb(var(--color-ink-2))]">
               Frågor om medlemskapet? Mejla oss på{' '}
               <a
                 href={`mailto:${site.email}`}
-                className="font-semibold text-[#034694] hover:underline"
+                className="font-semibold text-[rgb(var(--color-chelsea-blue))] underline underline-offset-[3px] hover:text-[rgb(var(--color-chelsea-blue-dark))]"
               >
                 {site.email}
               </a>
               .
-            </div>
+            </p>
           </Reveal>
         </aside>
       </div>
