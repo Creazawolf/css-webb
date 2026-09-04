@@ -93,6 +93,11 @@ export default async function ArtikeltypPage({ params, searchParams }: PageProps
 
       <div className="mb-9 mt-9 border-b border-[rgb(var(--color-rule))]" />
 
+      {/* Korttitlarna är h3. Utan den här nivån emellan hoppar sidan från
+          h1 direkt till h3, vilket gör rubrikträdet ogenomträngligt för
+          den som navigerar med skärmläsare. */}
+      <h2 className="sr-only">{label}</h2>
+
       <ArticleGrid
         locale={locale}
         articles={articles}

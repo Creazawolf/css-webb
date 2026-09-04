@@ -62,7 +62,11 @@ export function toArticleCard(post: Post): ArticleCard {
     title: post.title,
     slug: post.slug ?? '',
     excerpt: post.excerpt ?? '',
-    label: category || ARTICLE_TYPE_LABELS[articleType] || 'Nyhet',
+    // Kickern visar artikeltypen, inte kategorin. Typerna är samma ord som
+    // filtren och /artiklar/typ-sidorna använder, så en läsare som ser
+    // "Spelarbetyg" på ett kort hittar samma ord i menyn. Kategorin är
+    // redaktörens fria etikett och används för filtrering, inte som märkning.
+    label: ARTICLE_TYPE_LABELS[articleType] || category || 'Nyhet',
     articleType,
     category,
     categorySlug,
