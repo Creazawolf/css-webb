@@ -11,15 +11,33 @@
   --color-chelsea-blue-light: 10 91 181;
   --color-gold: 212 168 67;
   --color-gold-light: 232 201 106;
+  /* Guld som TEXT på papper — ren guldton klarar inte kontrastkravet. */
+  --color-gold-ink: 138 106 30;
 
   /* Djupaste blå — sidfot, mörka sektioner */
   --color-night: 1 20 44;
 
-  --color-text: 15 23 42;
-  --color-muted: 100 116 139;
-  --color-surface: 247 248 250;
+  /* --- Ytor ---
+     Papperstonen är den enskilt största skillnaden mot den gamla dräkten:
+     en varm off-white i stället för kylig blågrå gör att blått och guld
+     läser som tryck i stället för som gränssnitt. */
+  --color-paper: 244 242 238;
+  --color-paper-deep: 235 231 224;
   --color-card: 255 255 255;
-  --color-border: 226 232 240;
+
+  --color-text: 16 27 43;
+  --color-ink-2: 61 71 87;
+  --color-muted: 92 102 115;
+
+  --color-rule: 223 218 210;
+  --color-rule-2: 200 193 181;
+  /* Ramar på kontroller behöver 3:1 mot papperstonen — de dekorativa
+     linjefärgerna ovan ligger långt under. */
+  --color-rule-ctl: 139 132 116;
+
+  /* Kvar för bakåtkompatibilitet med komponenter som ännu inte lagts om. */
+  --color-surface: 244 242 238;
+  --color-border: 223 218 210;
 
   --color-brand-50: 240 246 255;
   --color-brand-100: 221 236 255;
@@ -80,7 +98,7 @@
 
   body {
     min-height: 100vh;
-    background: rgb(var(--color-surface));
+    background: rgb(var(--color-paper));
     color: rgb(var(--color-text));
     font-family: var(--font-inter), Inter, system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -106,7 +124,13 @@
 
 /* Rubrikfont */
 .font-display {
-  font-family: var(--font-oswald), 'Oswald', system-ui, sans-serif;
+  font-family: var(--font-oswald), 'Oswald', system-ui, 'Arial Narrow', sans-serif;
+}
+
+/* Brödtextserif. Oswald och Inter räcker för rubriker och gränssnitt, men
+   inte för att läsa en krönika i. */
+.font-serif {
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, 'Times New Roman', serif;
 }
 
 /* ==========================================================================
@@ -325,9 +349,10 @@ html[data-js='on'] .reveal:not([data-revealed='true']) {
    ========================================================================== */
 
 .article-content {
-  font-size: 1.125rem;
-  line-height: 1.75;
-  color: #1e293b;
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, 'Times New Roman', serif;
+  font-size: 1.1875rem;
+  line-height: 1.78;
+  color: #1a2433;
 }
 
 .article-content > * + * {
@@ -347,7 +372,8 @@ html[data-js='on'] .reveal:not([data-revealed='true']) {
 .article-content h3 {
   margin-top: 1.75em;
   margin-bottom: 0.4em;
-  font-size: 1.25rem;
+  font-family: var(--font-oswald), 'Oswald', system-ui, sans-serif;
+  font-size: 1.35rem;
   font-weight: 700;
   line-height: 1.4;
   color: #0f172a;
@@ -382,15 +408,18 @@ html[data-js='on'] .reveal:not([data-revealed='true']) {
   margin-top: 0.4em;
 }
 
+/* Citatet är typografiskt, inte en ruta med kantfärg. */
 .article-content blockquote {
   margin-inline: 0;
-  padding: 1em 1.25em;
-  border-left: 4px solid #d4a843;
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  background: #faf8f3;
-  color: #334155;
-  font-size: 1.15rem;
-  font-style: italic;
+  padding: 1.4em 0 1.5em;
+  border-top: 3px solid rgb(var(--color-gold));
+  border-bottom: 1px solid rgb(var(--color-rule));
+  font-family: var(--font-oswald), 'Oswald', system-ui, sans-serif;
+  font-size: 1.7rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  color: #022b5c;
 }
 
 .article-content blockquote p:last-child {

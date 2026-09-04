@@ -78,7 +78,7 @@ export default async function FrontendLayout({ children, params }: FrontendLayou
   const [site, nav] = await Promise.all([getSiteConfig(locale), getNavigation(locale)])
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f7f8fa] text-slate-900">
+    <div className="flex min-h-screen flex-col bg-[rgb(var(--color-paper))] text-[rgb(var(--color-text))]">
       {/*
         Talar om för CSS:en att JavaScript kör, innan sidan målas första
         gången. Utan den här flaggan visas allt reveal-innehåll direkt
