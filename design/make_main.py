@@ -34,7 +34,7 @@ CSS = HEADER_CSS + FOOTER_CSS + """
   .byl b{color:var(--ink-2);font-weight:600}
 
   .rail-h{display:flex;align-items:center;gap:12px;padding-bottom:16px}
-  .rail-t{font:700 13px/1 var(--disp);letter-spacing:.18em;text-transform:uppercase;
+  .rail-t{font:700 13px/1 var(--disp);letter-spacing:.16em;text-transform:uppercase;
           color:var(--ink)}
   .rail li{padding:18px 0;border-top:1px solid var(--rule)}
   .rail li:first-child{border-top:1px solid var(--rule-2)}
@@ -53,7 +53,8 @@ CSS = HEADER_CSS + FOOTER_CSS + """
         margin-top:7px}
   .chips{display:flex;gap:6px;flex-wrap:wrap}
   .chip{font:600 11.5px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
-        padding:8px 13px;border-radius:999px;cursor:pointer;border:1px solid var(--rule-2);
+        display:inline-flex;align-items:center;min-height:44px;padding:0 16px;
+        border-radius:999px;cursor:pointer;border:1px solid var(--rule-ctl);
         background:transparent;color:var(--ink-2);transition:all .18s var(--ease)}
   .chip:hover{border-color:var(--blue);color:var(--blue)}
 
@@ -167,14 +168,14 @@ BODY = (
     <span class="mb-fix">
       <span style="color:rgba(255,255,255,.62)">Premier League</span>
       <span class="mb-dot"></span>
-      <span>Arsenal <span style="color:rgba(255,255,255,.4);margin:0 6px">—</span> Chelsea</span>
+      <span>Arsenal <span style="color:rgba(255,255,255,.4);margin:0 8px">–</span> Chelsea</span>
       <span class="mb-dot"></span>
       <span style="color:rgba(255,255,255,.62)">Emirates Stadium</span>
       <span class="mb-dot"></span>
       <span style="color:rgba(255,255,255,.62)">sön 6 sep 17:30</span>
     </span>
     <span class="mb-cd">
-      <span class="mb-u">{{cd.d}}<span class="mb-us">d</span></span>
+      <span class="mb-u">{{cd.d}}<span class="mb-us">dygn</span></span>
       <span class="mb-u">{{cd.h}}<span class="mb-us">tim</span></span>
       <span class="mb-u">{{cd.m}}<span class="mb-us">min</span></span>
       <span class="mb-u">{{cd.s}}<span class="mb-us">sek</span></span>
@@ -217,10 +218,10 @@ BODY = (
     '<div class="rail-h">' + gold_rule(20, '{{accent}}') +
       '<span class="rail-t">Senaste</span></div>'
     '<ul class="rail">'
+    + rail_item('Inför match', 'Inför Arsenal borta: tre frågor före derbyt', '4 sep · Redaktionen')
+    + rail_item('Föreningsnytt', 'Bussen till London i november är fullbokad', '2 sep · Styrelsen')
     + rail_item('Spelarbetyg', 'Spelarbetyg: Chelsea – Brighton', '31 aug · Redaktionen')
     + rail_item('Matchreferat', 'Fyra framåt, tre bakåt och tre poäng kvar i London', '30 aug · Redaktionen')
-    + rail_item('Inför match', 'Inför Arsenal borta: tre frågor före derbyt', '4 sep · Redaktionen')
-    + rail_item('Föreningen', 'Bussen till London i november är fullbokad', '2 sep · Styrelsen')
     + '</ul>'
     '<a href="#" style="display:inline-flex;align-items:center;gap:7px;margin-top:22px;'
     'font:700 11.5px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;'
@@ -237,16 +238,16 @@ BODY = (
     '<div><h2 class="sh-t">Från redaktionen</h2>'
     '<p class="sh-s">Referat, betyg och krönikor skrivna av medlemmar</p></div>'
     '<div class="chips">'
-      '<button type="button" class="chip" style="{{f0.style}}" onClick="{{f0.pick}}">Alla</button>'
-      '<button type="button" class="chip" style="{{f1.style}}" onClick="{{f1.pick}}">Referat</button>'
-      '<button type="button" class="chip" style="{{f2.style}}" onClick="{{f2.pick}}">Spelarbetyg</button>'
-      '<button type="button" class="chip" style="{{f3.style}}" onClick="{{f3.pick}}">Krönika</button>'
-      '<button type="button" class="chip" style="{{f4.style}}" onClick="{{f4.pick}}">Intervju</button>'
-      '<button type="button" class="chip" style="{{f5.style}}" onClick="{{f5.pick}}">Inför</button>'
+      '<button type="button" class="chip" style="{{f0.style}}" onClick="{{f0.pick}}" aria-pressed="{{f0.on}}">Alla</button>'
+      '<button type="button" class="chip" style="{{f1.style}}" onClick="{{f1.pick}}" aria-pressed="{{f1.on}}">Matchreferat</button>'
+      '<button type="button" class="chip" style="{{f2.style}}" onClick="{{f2.pick}}" aria-pressed="{{f2.on}}">Spelarbetyg</button>'
+      '<button type="button" class="chip" style="{{f3.style}}" onClick="{{f3.pick}}" aria-pressed="{{f3.on}}">Krönika</button>'
+      '<button type="button" class="chip" style="{{f4.style}}" onClick="{{f4.pick}}" aria-pressed="{{f4.on}}">Intervju</button>'
+      '<button type="button" class="chip" style="{{f5.style}}" onClick="{{f5.pick}}" aria-pressed="{{f5.on}}">Inför match</button>'
     '</div>'
   '</div>'
   '<div class="grid3">'
-  + card(1, 'Matchreferat', 'Chelsea 2–0 Luton: rutinerat värre i cupen',
+  + card(1, 'Matchreferat', 'Chelsea 2–0 Luton: en cupkväll utan dramatik',
          'Aldrig hotat, aldrig direkt spännande — och precis så man vill ha en cupkväll i augusti.',
          '28 aug · 4 min')
   + card(2, 'Intervju', 'Möt gänget som drog igång CSS Göteborg',
@@ -258,7 +259,7 @@ BODY = (
   + card(4, 'Spelarbetyg', 'Spelarbetyg: Fulham – Chelsea',
          'En trea i botten och en åtta på mittfältet. Hela laget betygsatt av redaktionen.',
          '25 aug · 3 min')
-  + card(5, 'Inför match', 'Inför Leeds hemma: tre frågor före cupkvällen',
+  + card(5, 'Inför match', 'Inför Leeds hemma: vem får chansen i cupen?',
          'Roterar vi hela laget igen, och vem får chansen mellan stolparna?',
          '3 sep · 4 min')
   + card(6, 'Matchreferat', 'Fulham 2–3 Chelsea: sent, snålt och skönt',
@@ -288,7 +289,7 @@ BODY += (
       '<p class="panel-h">Senaste match · Premier League</p>'
       '<div class="score">'
         '<span class="team">' + crest('CHE', '#034694', '#fff', 40, 12) + '<span>Chelsea</span></span>'
-        '<span class="score-n">4<span style="color:var(--rule-2);margin:0 6px">:</span>3</span>'
+        '<span class="score-n">4<span style="color:var(--rule-2);margin:0 8px">–</span>3</span>'
         '<span class="team">' + crest('BHA', '#0057B8', '#fff', 40, 12) + '<span>Brighton</span></span>'
       '</div>'
       '<p style="text-align:center;font:500 11.5px/1.5 var(--sans);color:var(--muted);'
@@ -300,7 +301,7 @@ BODY += (
     '<div class="panel">'
       '<p class="panel-h">Nästa match · Premier League</p>'
       '<div class="score">'
-        '<span class="team">' + crest('ARS', '#EF0107', '#fff', 40, 12) + '<span>Arsenal</span></span>'
+        '<span class="team">' + crest('ARS', '#C81326', '#fff', 40, 12) + '<span>Arsenal</span></span>'
         '<span style="font:700 15px/1 var(--disp);letter-spacing:.14em;color:var(--rule-2)">VS</span>'
         '<span class="team">' + crest('CHE', '#034694', '#fff', 40, 12) + '<span>Chelsea</span></span>'
       '</div>'
@@ -314,7 +315,7 @@ BODY += (
       '<p class="panel-h">Premier League</p>'
       '<table class="tbl">'
         '<caption style="position:absolute;width:1px;height:1px;overflow:hidden;'
-        'clip:rect(0,0,0,0)">Tabellställning, topp fyra</caption>'
+        'clip:rect(0,0,0,0)">Tabellställning, topp fem</caption>'
         '<thead><tr><th scope="col">#</th><th scope="col">Lag</th>'
         '<th scope="col" style="text-align:center">S</th>'
         '<th scope="col" style="text-align:center">+/−</th>'
@@ -325,7 +326,7 @@ BODY += (
         + trow(2, 'Arsenal', 2, '+4', 6, ['V', 'V'])
         + trow(3, 'Hull City', 2, '+3', 6, ['V', 'V'])
         + trow(4, 'Chelsea', 2, '+2', 6, ['V', 'V'], me=True)
-        + trow(5, 'Brentford', 2, '+3', 4, ['O', 'V'])
+        + trow(5, 'Brentford', 2, '+3', 4, ['V', 'O'])
         + '</tbody></table>'
     '</div>'
 
@@ -345,9 +346,9 @@ BODY += (
   '</div>'
   '<div class="grid4">'
   + ncard("Women's Team", 'An open letter to Chelsea supporters from captain Erin Cuthbert')
-  + ncard("Women's Team", 'Erin Cuthbert named new Chelsea Women captain')
   + ncard("Men's Team", 'Carabao Cup ticket news: sales opening for members')
   + ncard('Video', "Vote for your Men's Goal of the Month")
+  + ncard('Video', 'Full Match: Chelsea vs Luton Town')
   + '</div>'
 '</div></section>'
 
@@ -380,7 +381,7 @@ BODY += (
                 [8,15,26,19,32,12,22,30,17,9,24,34,20,13,27,16,10,21,29,14,
                  8,18,25,11,31,17,9,23,15,7])
       + '</span>'
-      '<span style="font:500 12px/1 var(--sans);color:var(--muted);flex:none">1 tim 04 min</span>'
+      '<span style="font:500 12px/1 var(--sans);color:var(--muted);flex:none">[LÄNGD]</span>'
     '</div>'
   '</div>'
 '</div></section>'
@@ -388,7 +389,7 @@ BODY += (
 # --- Medlemskap ------------------------------------------------------------
 '<section class="wrap" style="padding-bottom:72px"><div class="cta">'
   '<div>'
-    '<p class="kick" style="color:{{accent}}">Bli medlem</p>'
+    '<p class="kick" style="color:var(--gold-lt)">Bli medlem</p>'
     '<h2 style="font:700 34px/1.08 var(--disp);letter-spacing:-.005em;margin-top:12px;'
     'max-width:620px">Sitt inte ensam framför matchen i höst</h2>'
     '<p style="font:400 15.5px/1.6 var(--serif);color:rgba(255,255,255,.82);'
@@ -448,6 +449,7 @@ class Component extends DCLogic {
       vals['f' + i] = {
         pick: () => this.setState({ filter: i }),
         style: on ? 'background:#101B2B;border-color:#101B2B;color:#ffffff' : '',
+        on: on ? 'true' : 'false',
       };
     });
 
@@ -463,7 +465,7 @@ class Component extends DCLogic {
 """
 
 PROPS = ('{"accent":{"editor":"color","default":"#D4A843",'
-         '"options":["#D4A843","#E8C96A","#B8912F","#0A5BB5"],"section":"Tema"},'
+         '"options":["#D4A843","#E8C96A","#B8912F","#C9A227"],"section":"Tema"},'
          '"density":{"editor":"enum","options":["Luftig","Kompakt"],'
          '"default":"Luftig","section":"Tema"},'
          '"$preview":{"width":1440,"height":4560}}')

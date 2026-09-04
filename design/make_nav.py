@@ -53,9 +53,9 @@ CSS = HEADER_CSS + """
   .mbar{display:flex;align-items:center;justify-content:space-between;
         padding:0 18px;height:62px;background:var(--card);
         border-bottom:1px solid var(--rule)}
-  .burger{width:26px;height:18px;position:relative;border:0;background:transparent;
-          cursor:pointer;padding:0}
-  .burger i{position:absolute;left:0;height:2px;width:26px;border-radius:2px;
+  .burger{width:44px;height:44px;position:relative;border:0;background:transparent;
+          cursor:pointer;padding:0;display:flex;align-items:center;justify-content:flex-end}
+  .burger i{position:absolute;right:0;height:2px;width:26px;border-radius:2px;
     background:var(--ink);transition:transform .3s var(--ease),opacity .3s var(--ease)}
   .mdraw{background:var(--night);color:#fff;padding:8px 22px 26px}
   .mdraw li{border-top:1px solid rgba(255,255,255,.10)}
@@ -63,6 +63,7 @@ CSS = HEADER_CSS + """
     padding:17px 0;font:600 21px/1 var(--disp);letter-spacing:.04em;
     text-transform:uppercase;color:#fff}
   .mdraw li a:hover{color:var(--gold)}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
   .mhero{padding:20px 18px}
 """
 
@@ -123,12 +124,12 @@ MEGA = (
   '<div class="mega-in">'
     '<div><h4>Efter typ</h4><ul>'
       '<li><a href="#">Matchreferat<small>Varje match, samma kväll</small></a></li>'
-      '<li><a href="#">Spelarbetyg<small>Hela laget, satt av redaktionen</small></a></li>'
-      '<li><a href="#">Inför match<small>Laguppställning, form och oddsen</small></a></li>'
+      '<li><a href="#">Spelarbetyg<small>Hela laget betygsatt av redaktionen</small></a></li>'
+      '<li><a href="#">Inför match<small>Laguppställning, form och odds</small></a></li>'
     '</ul></div>'
     '<div><h4>Läsning</h4><ul>'
-      '<li><a href="#">Krönikor<small>Längre texter av medlemmar</small></a></li>'
-      '<li><a href="#">Intervjuer<small>Profiler i och utanför föreningen</small></a></li>'
+      '<li><a href="#">Krönika<small>Längre texter av medlemmar</small></a></li>'
+      '<li><a href="#">Intervju<small>Profiler i och utanför föreningen</small></a></li>'
       '<li><a href="#">Föreningsnytt<small>Årsmöten, resor och beslut</small></a></li>'
     '</ul></div>'
     '<div>'
@@ -176,9 +177,9 @@ PHONE_NAV = (
   '</span>'
   '<button type="button" class="burger" onClick="{{m.toggle}}" '
   'aria-label="Öppna meny" aria-expanded="{{m.expanded}}">'
-    '<i style="top:0;transform:{{m.t1}}"></i>'
-    '<i style="top:8px;opacity:{{m.o2}}"></i>'
-    '<i style="top:16px;transform:{{m.t3}}"></i>'
+    '<i style="top:13px;transform:{{m.t1}}"></i>'
+    '<i style="top:21px;opacity:{{m.o2}}"></i>'
+    '<i style="top:29px;transform:{{m.t3}}"></i>'
   '</button>'
 '</div>'
 )
@@ -215,10 +216,10 @@ BODY = (
       '<div style="display:{{m.showDraw}}">'
         '<nav class="mdraw" aria-label="Meny"><ul>'
           '<li><a href="#">Löpsedel</a></li>'
-          '<li><a href="#">Artiklar<span style="color:var(--gold);font-size:15px">+</span></a></li>'
-          '<li><a href="#">Matcher<span style="color:var(--gold);font-size:15px">+</span></a></li>'
-          '<li><a href="#">Föreningen<span style="color:var(--gold);font-size:15px">+</span></a></li>'
-          '<li><a href="#">Guider<span style="color:var(--gold);font-size:15px">+</span></a></li>'
+          '<li><a href="#">Artiklar<span style="color:var(--gold);font-size:15px" aria-hidden="true">+</span><span class="sr">, har undermeny</span></a></li>'
+          '<li><a href="#">Matcher<span style="color:var(--gold);font-size:15px" aria-hidden="true">+</span><span class="sr">, har undermeny</span></a></li>'
+          '<li><a href="#">Föreningen<span style="color:var(--gold);font-size:15px" aria-hidden="true">+</span><span class="sr">, har undermeny</span></a></li>'
+          '<li><a href="#">Guider<span style="color:var(--gold);font-size:15px" aria-hidden="true">+</span><span class="sr">, har undermeny</span></a></li>'
           '<li><a href="#">Podden</a></li>'
         '</ul>'
         '<a class="btn btn-gold" href="#" style="margin-top:24px;width:100%;'
@@ -265,11 +266,13 @@ BODY = (
                 '<b style="font-family:var(--sans);font-size:12.5px;font-weight:600;'
                 'color:var(--ink);display:block;margin-bottom:3px">%s</b>%s</li>' % (h, b)
                 for h, b in [
-                  ('Träffytor', 'Allt klickbart är minst 44 px högt, även på mobil.'),
+                  ('Träffytor', 'Knappar och menyrader är minst 44 px höga. '
+                   'Ingen träffyta är mindre än 24 px.'),
                   ('Guld betyder en sak', 'Guld markerar var du är och en enda '
                    'uppmaning per vy. Aldrig dekoration.'),
                   ('Undermenyer öppnas', 'Panelen öppnas på klick, inte hover — '
-                   'det fungerar likadant med tangentbord och pekskärm.'),
+                   'det fungerar likadant med tangentbord och pekskärm. '
+                   'Pilen visar vilka poster som har en undermeny.'),
                   ('The Shed ligger kvar', 'Forumet bor på SvenskaFans och '
                    'länkas alltid ut med en tydlig ikon.'),
                 ])

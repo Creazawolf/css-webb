@@ -11,8 +11,8 @@ FONTS = ('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
 TOKENS = """
   :root{
     --paper:#F4F2EE; --paper-deep:#EBE7E0; --card:#FFFFFF;
-    --ink:#101B2B; --ink-2:#3D4757; --muted:#6B7482;
-    --rule:#DFDAD2; --rule-2:#C8C1B5;
+    --ink:#101B2B; --ink-2:#3D4757; --muted:#5C6673;
+    --rule:#DFDAD2; --rule-2:#C8C1B5; --rule-ctl:#8B8474;
     --blue:#034694; --blue-dk:#022B5C; --blue-lt:#0A5BB5; --night:#01142C;
     --gold:#D4A843; --gold-lt:#E8C96A; --gold-ink:#8A6A1E;
     --ease:cubic-bezier(.22,1,.36,1);
@@ -50,14 +50,14 @@ TOKENS = """
   .rule3{height:3px;background:linear-gradient(90deg,var(--blue-dk),var(--blue) 55%,var(--gold))}
   .hr{height:1px;background:var(--rule);border:0}
 
-  .btn{display:inline-flex;align-items:center;gap:8px;font:700 12px/1 var(--sans);
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;font:700 12px/1 var(--sans);
        letter-spacing:.08em;text-transform:uppercase;border-radius:6px;
        padding:13px 20px;transition:background-color .2s var(--ease),color .2s var(--ease)}
   .btn-gold{background:var(--gold);color:var(--blue-dk)}
   .btn-gold:hover{background:var(--gold-lt);color:var(--blue-dk)}
   .btn-blue{background:var(--blue);color:#fff}
   .btn-blue:hover{background:var(--blue-dk);color:#fff}
-  .btn-line{border:1px solid var(--rule-2);color:var(--ink-2);background:transparent}
+  .btn-line{border:1px solid var(--rule-ctl);color:var(--ink-2);background:transparent}
   .btn-line:hover{border-color:var(--blue);color:var(--blue)}
 
   ::selection{background:var(--gold);color:var(--blue-dk)}
@@ -196,7 +196,7 @@ def footer():
         <p style="margin-top:18px;max-width:280px;font:400 13.5px/1.65 var(--sans);
                   color:rgba(255,255,255,.68)">
           Sveriges supporterförening för Chelsea FC. Matchkvällar, resor,
-          referat och gemenskap — sedan 1996.
+          referat och gemenskap sedan [GRUNDAT ÅR].
         </p>
         <a href="#" style="margin-top:18px;display:inline-flex;align-items:center;gap:7px;
            font:600 12.5px/1 var(--sans);color:var(--gold)">

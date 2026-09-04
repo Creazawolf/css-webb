@@ -14,9 +14,10 @@ CSS = """
         padding-top:12px;border-top:1px solid var(--rule)}
   .sh{display:flex;align-items:flex-end;justify-content:space-between;
       padding-bottom:14px;border-bottom:2px solid var(--ink);margin-bottom:2px}
-  .sh-t{font:700 17px/1 var(--disp);letter-spacing:.11em;text-transform:uppercase}
+  .sh-t{font:700 17px/1 var(--disp);letter-spacing:.06em;text-transform:uppercase;margin:0}
   .sh-l{font:700 10.5px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;
-        color:var(--blue)}
+        color:var(--blue);display:inline-flex;align-items:center;min-height:44px;
+        padding-left:12px}
   .row{padding:15px 0;border-top:1px solid var(--rule);display:flex;gap:14px;
        align-items:flex-start}
   .row:first-child{border-top:0}
@@ -43,22 +44,28 @@ BODY = (
     + mono(18).replace('class="phm"', '').replace('position:absolute', '') + '</span>'
     '<span style="font:700 15px/1 var(--disp);letter-spacing:.05em;'
     'text-transform:uppercase;color:var(--blue-dk)">CSS</span></span>'
-  '<span style="display:flex;align-items:center;gap:16px">'
-    '<span style="font:700 10.5px/1 var(--sans);letter-spacing:.08em;'
-    'text-transform:uppercase;color:var(--blue)">Bli medlem</span>'
-    '<span style="display:block;width:24px" aria-hidden="true">'
-    '<span style="display:block;height:2px;background:var(--ink);border-radius:2px"></span>'
-    '<span style="display:block;height:2px;background:var(--ink);border-radius:2px;'
-    'margin-top:6px"></span>'
-    '<span style="display:block;height:2px;background:var(--ink);border-radius:2px;'
-    'margin-top:6px"></span></span>'
+  '<span style="display:flex;align-items:center;gap:8px">'
+    '<a href="#" style="display:inline-flex;align-items:center;min-height:44px;'
+    'padding:0 4px;font:700 10.5px/1 var(--sans);letter-spacing:.08em;'
+    'text-transform:uppercase;color:var(--blue)">Bli medlem</a>'
+    '<button type="button" aria-label="Öppna meny" aria-expanded="false" '
+    'style="width:44px;height:44px;border:0;background:transparent;cursor:pointer;'
+    'display:flex;flex-direction:column;align-items:flex-end;justify-content:center;'
+    'gap:6px;padding:0">'
+    '<span style="display:block;width:24px;height:2px;background:var(--ink);'
+    'border-radius:2px" aria-hidden="true"></span>'
+    '<span style="display:block;width:24px;height:2px;background:var(--ink);'
+    'border-radius:2px" aria-hidden="true"></span>'
+    '<span style="display:block;width:24px;height:2px;background:var(--ink);'
+    'border-radius:2px" aria-hidden="true"></span>'
+    '</button>'
   '</span>'
 '</div>'
 
 '<div class="band">'
   '<span style="font:700 9px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;'
-  'color:var(--gold);flex:none">Nästa</span>'
-  '<span style="font:600 12.5px/1 var(--sans)">Arsenal — Chelsea</span>'
+  'color:var(--gold);flex:none">Nästa match</span>'
+  '<span style="font:600 12.5px/1 var(--sans)">Arsenal – Chelsea</span>'
   '<span style="margin-left:auto;font:600 12px/1 var(--disp);'
   'font-variant-numeric:tabular-nums;color:rgba(255,255,255,.72);flex:none">'
   'sön 17:30</span>'
@@ -69,21 +76,21 @@ BODY = (
   + mono(58) + '</span>'
   '<span class="kickrow">' + gold_rule(22)
   + '<span class="kick" style="color:var(--gold-ink)">Krönika</span></span>'
-  '<h2 class="h2">Sju mål på Stamford Bridge — och ändå är det försvaret '
-  'vi pratar om</h2>'
+  '<h1 class="h2">Sju mål på Stamford Bridge — och ändå är det försvaret '
+  'vi pratar om</h1>'
   '<p class="stand">Chelsea vann med 4–3 mot Brighton. Underhållande, nervöst, '
   'och precis den sortens match som avgör hur säsongen känns i mars.</p>'
-  '<p class="meta">Redaktionen · 31 aug · 6 min läsning</p>'
+  '<p class="meta">Redaktionen · 31 aug · 6 min läsning läsning</p>'
 '</div>'
 
 '<div class="pad" style="padding-top:30px">'
-  '<div class="sh"><span class="sh-t">Senaste</span>'
+  '<div class="sh"><h2 class="sh-t">Senaste</h2>'
   '<span class="sh-l">Alla →</span></div>'
   + ''.join(
       '<a class="row" href="#"><span style="flex:1">'
       '<span class="row-k">%s</span><span class="row-t">%s</span>'
       '<span class="row-m">%s</span></span>'
-      '<span class="ph" style="width:76px;height:76px;border-radius:5px;flex:none;'
+      '<span class="ph" style="width:76px;height:76px;border-radius:6px;flex:none;'
       'margin-top:2px">%s</span></a>' % (k, t, m, mono(26))
       for k, t, m in [
         ('Spelarbetyg', 'Spelarbetyg: Chelsea – Brighton', '31 aug'),
@@ -93,7 +100,7 @@ BODY = (
 + '</div>'
 
 '<div class="pad" style="padding-top:30px">'
-  '<div class="sh"><span class="sh-t">Matchcenter</span>'
+  '<div class="sh"><h2 class="sh-t">Matchcenter</h2>'
   '<span class="sh-l">Öppna →</span></div>'
   '<div class="panel">'
     '<p style="font:700 9.5px/1 var(--sans);letter-spacing:.16em;'
@@ -104,7 +111,7 @@ BODY = (
       + '<span>Chelsea</span></span>'
       '<span style="font:700 34px/1 var(--disp);font-variant-numeric:tabular-nums;'
       'letter-spacing:-.03em;color:var(--blue-dk)">4'
-      '<span style="color:var(--rule-2);margin:0 5px">:</span>3</span>'
+      '<span style="color:var(--rule-2);margin:0 7px">–</span>3</span>'
       '<span class="team">' + crest('BHA', '#0057B8', '#fff', 36, 11)
       + '<span>Brighton</span></span>'
     '</div>'
@@ -117,18 +124,18 @@ BODY = (
   '<div class="pad" style="display:flex;align-items:flex-end;'
   'justify-content:space-between;padding-bottom:14px;'
   'border-bottom:2px solid rgba(255,255,255,.22);margin-bottom:16px">'
-    '<span class="sh-t" style="color:#fff">Från Chelsea FC</span>'
-    '<span class="sh-l" style="color:var(--gold)">chelseafc.com ↗</span>'
+    '<h2 class="sh-t" style="color:#fff">Från Chelsea FC</h2>'
+    '<a class="sh-l" href="#" target="_blank" style="color:var(--gold-lt)">chelseafc.com ↗</a>'
   '</div>'
   '<div class="pad"><div class="rail">'
     + ''.join(
-      '<span class="ncard"><span class="ph" style="aspect-ratio:214 / 120;'
+      '<a class="ncard" href="#" target="_blank"><span class="ph" style="aspect-ratio:214 / 120;'
       'display:block">%s</span>'
       '<span style="display:block;padding:13px 14px 15px">'
       '<span style="font:700 9px/1 var(--sans);letter-spacing:.15em;'
       'text-transform:uppercase;color:var(--gold)">%s</span>'
       '<span style="display:block;font:600 15px/1.28 var(--disp);color:#fff;'
-      'margin-top:8px">%s</span></span></span>' % (mono(38), k, t)
+      'margin-top:8px">%s</span></span></a>' % (mono(38), k, t)
       for k, t in [
         ("Women's Team", 'An open letter to Chelsea supporters from captain Erin Cuthbert'),
         ("Men's Team", 'Carabao Cup ticket news: sales opening for members'),

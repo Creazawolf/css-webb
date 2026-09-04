@@ -31,7 +31,7 @@ CSS = HEADER_CSS + FOOTER_CSS + """
   .tools p{font:700 9.5px/1 var(--sans);letter-spacing:.15em;text-transform:uppercase;
            color:var(--muted);margin-bottom:12px}
   .tool-row{display:flex;gap:8px}
-  .tool{width:36px;height:36px;border-radius:999px;border:1px solid var(--rule-2);
+  .tool{width:44px;height:44px;border-radius:999px;border:1px solid var(--rule-ctl);
     background:transparent;color:var(--ink-2);cursor:pointer;display:flex;
     align-items:center;justify-content:center;font:600 12px/1 var(--sans);
     transition:border-color .18s var(--ease),color .18s var(--ease),
@@ -47,20 +47,18 @@ CSS = HEADER_CSS + FOOTER_CSS + """
   .prose a{color:var(--blue);text-decoration:underline;text-underline-offset:3px;
            text-decoration-thickness:1px}
   .prose a:hover{color:var(--gold-ink)}
-  .drop::first-letter{float:left;font-family:var(--disp);font-weight:700;
+  .dropcap::first-letter{float:left;font-family:var(--disp);font-weight:700;
     font-size:4.1em;line-height:.82;padding:.06em .12em 0 0;color:var(--blue)}
   .pull{border-top:3px solid var(--gold);border-bottom:1px solid var(--rule);
         padding:24px 0 26px}
   .pull q{font:600 27px/1.25 var(--disp);letter-spacing:-.005em;color:var(--blue-dk);
           quotes:none;display:block}
-  .pull cite{display:block;margin-top:14px;font:500 11.5px/1 var(--sans);
-    letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-style:normal}
 
   .rail{position:sticky;top:24px}
   .fact{background:var(--card);border:1px solid var(--rule);border-radius:6px;
         padding:22px 24px}
   .fact h3{font:700 10px/1 var(--sans);letter-spacing:.17em;text-transform:uppercase;
-    color:var(--muted);padding-bottom:14px;border-bottom:1px solid var(--rule)}
+    color:var(--muted);padding-bottom:14px;border-bottom:1px solid var(--rule);margin:0}
   .fact dl{display:grid;grid-template-columns:auto 1fr;gap:0;margin:0}
   .fact dt{font:500 12px/1 var(--sans);color:var(--muted);padding:13px 0;
            border-top:1px solid var(--rule)}
@@ -70,7 +68,7 @@ CSS = HEADER_CSS + FOOTER_CSS + """
 
   .also{margin-top:24px}
   .also h3{font:700 10px/1 var(--sans);letter-spacing:.17em;text-transform:uppercase;
-    color:var(--muted);padding-bottom:14px;border-bottom:2px solid var(--ink)}
+    color:var(--muted);padding-bottom:14px;border-bottom:1px solid var(--rule);margin:0}
   .also li{padding:15px 0;border-top:1px solid var(--rule)}
   .also li:first-child{border-top:0}
   .also-k{font:700 9.5px/1 var(--sans);letter-spacing:.15em;text-transform:uppercase;
@@ -96,7 +94,7 @@ CSS = HEADER_CSS + FOOTER_CSS + """
 
 def card(kick, title, meta):
     return ('<a class="card lift gz" href="#">'
-            '<span class="ph" style="aspect-ratio:416 / 250;display:block">'
+            '<span class="ph" style="aspect-ratio:416 / 260;display:block">'
             '<span class="zoom" style="position:absolute;inset:0">%s</span></span>'
             '<span class="card-b"><span class="card-k">%s</span>'
             '<span class="card-t hl">%s</span>'
@@ -116,7 +114,7 @@ BODY = (
   '<nav class="crumbs" aria-label="Brödsmulor">'
     '<a href="#">Artiklar</a>'
     '<span aria-hidden="true" style="color:var(--rule-2)">/</span>'
-    '<a href="#">Krönikor</a>'
+    '<a href="#">Krönika</a>'
   '</nav>'
 
   '<header class="ahead">'
@@ -131,7 +129,7 @@ BODY = (
       + crest('R', '#022B5C', '#fff', 40, 14) +
       '<div style="flex:1">'
         '<p class="abyl-n">Redaktionen</p>'
-        '<p class="abyl-m">Publicerad 31 augusti 2026 · 6 minuters läsning</p>'
+        '<p class="abyl-m">Publicerad 31 augusti 2026 · 6 min läsning</p>'
       '</div>'
       '<a href="#" style="font:700 11px/1 var(--sans);letter-spacing:.09em;'
       'text-transform:uppercase;color:var(--blue)">Dela</a>'
@@ -151,12 +149,12 @@ BODY = (
     '<div class="tools">'
       '<p>Textstorlek</p>'
       '<div class="tool-row">'
-        '<button type="button" class="tool" style="{{s0.style}}" onClick="{{s0.pick}}" '
+        '<button type="button" class="tool" style="{{s0.style}}" onClick="{{s0.pick}}" aria-pressed="{{s0.on}}" '
         'aria-label="Mindre text">A</button>'
         '<button type="button" class="tool" style="{{s1.style}}; font-size:14px" '
-        'onClick="{{s1.pick}}" aria-label="Normal text">A</button>'
+        'onClick="{{s1.pick}}" aria-pressed="{{s1.on}}" aria-label="Normal text">A</button>'
         '<button type="button" class="tool" style="{{s2.style}}; font-size:17px" '
-        'onClick="{{s2.pick}}" aria-label="Större text">A</button>'
+        'onClick="{{s2.pick}}" aria-pressed="{{s2.on}}" aria-label="Större text">A</button>'
       '</div>'
       '<p style="margin-top:28px">Dela</p>'
       '<div class="tool-row">'
@@ -171,7 +169,7 @@ BODY = (
 
     # brödtext
     '<article class="prose" style="font-size:var(--fs)">'
-      '<p class="drop">Det tog nitton minuter innan den här matchen bestämde sig '
+      '<p class="dropcap">Det dröjde en stund innan den här matchen bestämde sig '
       'för vad den skulle vara. Fram till dess hade den varit prydlig, '
       'kontrollerad och lite trist. Sedan öppnade sig ytorna, och de stängdes '
       'aldrig igen.</p>'
@@ -184,17 +182,16 @@ BODY = (
       '<h2>Det som fungerade</h2>'
       '<p>Framåt finns det inte mycket att klaga på. Rörelsen mellan leden var '
       'den bästa hittills den här säsongen, och för första gången såg mittfältet '
-      'ut att veta vem som skulle göra vad när bollen vanns högt. Det gav fyra '
-      'mål mot ett lag som förra säsongen släppte in näst minst i ligan.</p>'
+      'ut att veta vem som skulle göra vad när bollen vanns högt. Fyra mål mot '
+      'ett lag som brukar hålla tätt är ingen slump.</p>'
       '<ul>'
-        '<li>Presspelet höll i drygt en timme, vilket är längre än mot Fulham.</li>'
-        '<li>Kantspelet gav sju inlägg som faktiskt nådde en blå tröja.</li>'
-        '<li>Vi vann fem av de sex första närkamperna efter paus.</li>'
+        '<li>Presspelet höll långt in i andra halvlek, längre än mot Fulham.</li>'
+        '<li>Kantspelet hittade fram, och inläggen nådde faktiskt en blå tröja.</li>'
+        '<li>Efter paus vann vi de flesta av närkamperna på mittplan.</li>'
       '</ul>'
 
       '<blockquote class="pull"><q>Ett lag som gör fyra mål varje match behöver '
-      'inte vara perfekt bakåt. Men det behöver vara förutsägbart.</q>'
-      '<cite>Ur krönikan</cite></blockquote>'
+      'inte vara perfekt bakåt. Men det behöver vara förutsägbart.</q></blockquote>'
 
       '<h2>Det som oroar</h2>'
       '<p>Alla tre baklängesmålen kom i situationer där vi hade numerärt '
@@ -279,6 +276,7 @@ class Component extends DCLogic {
         style: this.state.size === i
           ? 'background:#101B2B;border-color:#101B2B;color:#ffffff'
           : '',
+        on: this.state.size === i ? 'true' : 'false',
       };
     });
     return vals;

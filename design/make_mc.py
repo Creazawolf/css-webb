@@ -11,7 +11,7 @@ CSS = HEADER_CSS + FOOTER_CSS + """
   .seg{display:inline-flex;padding:4px;background:var(--paper-deep);border-radius:999px;
        border:1px solid var(--rule);flex:none}
   .seg button{font:700 12px/1 var(--sans);letter-spacing:.10em;text-transform:uppercase;
-    padding:11px 22px;border-radius:999px;border:0;cursor:pointer;background:transparent;
+    min-height:44px;padding:0 24px;border-radius:999px;border:0;cursor:pointer;background:transparent;
     color:var(--ink-2);transition:background-color .2s var(--ease),color .2s var(--ease)}
   .seg button:hover{color:var(--blue)}
 
@@ -55,6 +55,9 @@ CSS = HEADER_CSS + FOOTER_CSS + """
   .lt tr.me td{color:var(--blue);font-weight:700;background:rgba(3,70,148,.055)}
   .lt tr.me td:first-child{box-shadow:inset 3px 0 0 var(--blue)}
   .dot{display:inline-block;width:7px;height:7px;border-radius:999px;margin-right:4px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);
+      white-space:nowrap}
+  abbr{text-decoration:none;border:0;cursor:help}
 
   .fx li{display:flex;align-items:center;gap:20px;padding:16px 0;
          border-top:1px solid var(--rule)}
@@ -64,7 +67,7 @@ CSS = HEADER_CSS + FOOTER_CSS + """
   .fx-t{font:600 16px/1.25 var(--disp);color:var(--ink);flex:1}
   .fx-c{font:500 11.5px/1 var(--sans);color:var(--muted);flex:none}
 
-  .side-h{font:700 13px/1 var(--disp);letter-spacing:.16em;text-transform:uppercase;
+  .side-h{font:700 13px/1 var(--disp);letter-spacing:.16em;margin:0;text-transform:uppercase;
           color:var(--ink);padding-bottom:16px;border-bottom:2px solid var(--ink)}
   .side li{padding:18px 0;border-top:1px solid var(--rule)}
   .side li:first-child{border-top:0}
@@ -121,12 +124,17 @@ def board(show_hole, cd, last, nxt):
       '</div></div>') % show_hole
 
 def score(a, b):
-    return ('%s<span style="color:rgba(255,255,255,.28);margin:0 7px">:</span>%s' % (a, b))
+    return ('%s<span style="color:rgba(255,255,255,.28);margin:0 9px">–</span>%s' % (a, b))
 
 FORM = {'V': '#16a34a', 'O': '#94a3b8', 'F': '#f43f5e'}
+FORM_ORD = {'V': 'vinst', 'O': 'oavgjort', 'F': 'förlust'}
 
 def trow(pos, team, pl, w, dr, lo, gd, pts, form, me=False):
-    dots = ''.join('<span class="dot" style="background:%s"></span>' % FORM[f] for f in form)
+    dots = ''.join('<span class="dot" style="background:%s" title="%s"></span>'
+                   % (FORM[f], FORM_ORD[f]) for f in form)
+    if form:
+        dots += ('<span class="sr">%s</span>'
+                 % ', '.join(FORM_ORD[f] for f in form))
     return ('<tr class="%s"><td>%s</td><td style="font-weight:600">%s</td>'
             '<td style="text-align:center">%s</td><td style="text-align:center">%s</td>'
             '<td style="text-align:center">%s</td><td style="text-align:center">%s</td>'
@@ -136,14 +144,16 @@ def trow(pos, team, pl, w, dr, lo, gd, pts, form, me=False):
             % ('me' if me else '', pos, team, pl, w, dr, lo, gd, dots, pts))
 
 def table(show_hole, caption, rows, note=None):
-    head = ('<thead><tr><th scope="col" style="width:34px">#</th><th scope="col">Lag</th>'
-            '<th scope="col" style="text-align:center;width:48px">S</th>'
-            '<th scope="col" style="text-align:center;width:48px">V</th>'
-            '<th scope="col" style="text-align:center;width:48px">O</th>'
-            '<th scope="col" style="text-align:center;width:48px">F</th>'
-            '<th scope="col" style="text-align:center;width:56px">+/−</th>'
-            '<th scope="col" style="width:78px">Form</th>'
-            '<th scope="col" style="text-align:right;width:40px">P</th></tr></thead>')
+    cols = [('S', 'Spelade'), ('V', 'Vunna'), ('O', 'Oavgjorda'), ('F', 'Förlorade')]
+    mid = ''.join('<th scope="col" style="text-align:center;width:48px">'
+                  '<abbr title="%s">%s</abbr></th>' % (long, short) for short, long in cols)
+    head = ('<thead><tr><th scope="col" style="width:34px">'
+            '<abbr title="Placering">#</abbr></th><th scope="col">Lag</th>' + mid +
+            '<th scope="col" style="text-align:center;width:56px">'
+            '<abbr title="Målskillnad">+/−</abbr></th>'
+            '<th scope="col" style="width:92px">Form</th>'
+            '<th scope="col" style="text-align:right;width:40px">'
+            '<abbr title="Poäng">P</abbr></th></tr></thead>')
     cap = ('<caption style="caption-side:top;text-align:left;font:500 12px/1 var(--sans);'
            'color:var(--muted);padding:20px 0 0">%s</caption>' % caption)
     body = '<tbody>' + ''.join(rows) + '</tbody>'
@@ -173,8 +183,8 @@ BODY = (
     'hämtat direkt från Chelsea FC.</p>'
   '</div>'
   '<div class="seg" role="group" aria-label="Välj lag">'
-    '<button type="button" style="{{t0.style}}" onClick="{{t0.pick}}">Herrar</button>'
-    '<button type="button" style="{{t1.style}}" onClick="{{t1.pick}}">Damer</button>'
+    '<button type="button" style="{{t0.style}}" onClick="{{t0.pick}}" aria-pressed="{{t0.on}}">Herrar</button>'
+    '<button type="button" style="{{t1.style}}" onClick="{{t1.pick}}" aria-pressed="{{t1.on}}">Damer</button>'
   '</div>'
 '</div></section>'
 
@@ -194,21 +204,21 @@ BODY = (
 
 + '<section class="wrap"><div class="cols"><div>'
   '<div class="tabs" role="group" aria-label="Visa">'
-    '<button type="button" style="{{b0.style}}" onClick="{{b0.pick}}">Tabell'
+    '<button type="button" style="{{b0.style}}" onClick="{{b0.pick}}" aria-pressed="{{b0.on}}">Tabell'
     '<span class="tabmark" style="background:{{b0.mark}}"></span></button>'
-    '<button type="button" style="{{b1.style}}" onClick="{{b1.pick}}">Kommande'
+    '<button type="button" style="{{b1.style}}" onClick="{{b1.pick}}" aria-pressed="{{b1.on}}">Kommande'
     '<span class="tabmark" style="background:{{b1.mark}}"></span></button>'
   '</div>'
 
 + table('{{tblH}}', 'Premier League · 2026/27', [
-    trow(1, 'Manchester City', 2, 2, 0, 0, '+4', 6, 'VV'),
+    trow(1, 'Man City', 2, 2, 0, 0, '+4', 6, 'VV'),
     trow(2, 'Arsenal', 2, 2, 0, 0, '+4', 6, 'VV'),
     trow(3, 'Hull City', 2, 2, 0, 0, '+3', 6, 'VV'),
     trow(4, 'Chelsea', 2, 2, 0, 0, '+2', 6, 'VV', me=True),
     trow(5, 'Brentford', 2, 1, 1, 0, '+3', 4, 'OV'),
     trow(6, 'Newcastle', 2, 1, 1, 0, '+2', 4, 'VO'),
     trow(7, 'Everton', 2, 1, 1, 0, '+2', 4, 'OV'),
-    trow(8, 'Leeds United', 2, 1, 1, 0, '+1', 4, 'OV'),
+    trow(8, 'Leeds', 2, 1, 1, 0, '+1', 4, 'OV'),
   ])
 
 + table('{{tblD}}', 'Barclays Women’s Super League · 2026/27', [
@@ -216,8 +226,8 @@ BODY = (
     trow(2, 'Aston Villa Women', 0, 0, 0, 0, '0', 0, ''),
     trow(3, 'Birmingham City Women', 0, 0, 0, 0, '0', 0, ''),
     trow(4, 'Brighton Women', 0, 0, 0, 0, '0', 0, ''),
-    trow(5, 'Everton Women', 0, 0, 0, 0, '0', 0, ''),
-    trow(6, 'Chelsea Women', 0, 0, 0, 0, '0', 0, '', me=True),
+    trow(5, 'Chelsea Women', 0, 0, 0, 0, '0', 0, '', me=True),
+    trow(6, 'Everton Women', 0, 0, 0, 0, '0', 0, ''),
     trow(7, 'Leicester City Women', 0, 0, 0, 0, '0', 0, ''),
     trow(8, 'Liverpool Women', 0, 0, 0, 0, '0', 0, ''),
   ], note='Serien har inte startat än. Tabellen fylls i så fort den första '
@@ -246,7 +256,7 @@ BODY = (
   '</div>'
 
   '<aside>'
-    '<p class="side-h">Från matcherna</p>'
+    '<h2 class="side-h">Från matcherna</h2>'
     '<ul class="side">'
       '<li><a class="gz" href="#" style="display:block">'
       '<span class="side-k">Spelarbetyg</span>'
@@ -264,9 +274,9 @@ BODY = (
     '<div style="margin-top:28px;padding:22px 24px;background:var(--blue-dk);'
     'border-radius:6px;color:#fff">'
       '<p class="kick" style="color:var(--gold)">Mötesplatser</p>'
-      '<p style="font:600 19px/1.3 var(--disp);margin-top:10px">Var ses vi på söndag?</p>'
+      '<h2 style="font:600 19px/1.3 var(--disp);margin-top:10px">Var ses vi på söndag?</h2>'
       '<p style="font:400 14px/1.6 var(--serif);color:rgba(255,255,255,.78);'
-      'margin-top:8px">Nio pubar i landet visar Arsenal–Chelsea. Hitta närmaste.</p>'
+      'margin-top:8px">[ANTAL] pubar i landet visar Arsenal–Chelsea. Hitta den närmaste.</p>'
       '<a href="#" style="display:inline-flex;align-items:center;gap:7px;margin-top:14px;'
       'font:700 11.5px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;'
       'color:var(--gold)">Se mötesplatser'
@@ -334,17 +344,19 @@ class Component extends DCLogic {
       tblD: show(team === 1 && tab === 0),
       fxH: show(team === 0 && tab === 1),
       fxD: show(team === 1 && tab === 1),
-      t0: { pick: () => this.setState({ team: 0 }), style: team === 0 ? on : '' },
-      t1: { pick: () => this.setState({ team: 1 }), style: team === 1 ? on : '' },
+      t0: { pick: () => this.setState({ team: 0 }), style: team === 0 ? on : '', on: team === 0 ? 'true' : 'false' },
+      t1: { pick: () => this.setState({ team: 1 }), style: team === 1 ? on : '', on: team === 1 ? 'true' : 'false' },
       b0: {
         pick: () => this.setState({ tab: 0 }),
         style: tab === 0 ? 'color:#101B2B' : '',
-        mark: tab === 0 ? '#D4A843' : 'transparent'
+        mark: tab === 0 ? '#D4A843' : 'transparent',
+        on: tab === 0 ? 'true' : 'false'
       },
       b1: {
         pick: () => this.setState({ tab: 1 }),
         style: tab === 1 ? 'color:#101B2B' : '',
-        mark: tab === 1 ? '#D4A843' : 'transparent'
+        mark: tab === 1 ? '#D4A843' : 'transparent',
+        on: tab === 1 ? 'true' : 'false'
       }
     };
   }
