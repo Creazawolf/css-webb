@@ -1,0 +1,279 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&amp;display=swap">
+  <style>
+  :root{
+    --paper:#F4F2EE; --paper-deep:#EBE7E0; --card:#FFFFFF;
+    --ink:#101B2B; --ink-2:#3D4757; --muted:#6B7482;
+    --rule:#DFDAD2; --rule-2:#C8C1B5;
+    --blue:#034694; --blue-dk:#022B5C; --blue-lt:#0A5BB5; --night:#01142C;
+    --gold:#D4A843; --gold-lt:#E8C96A; --gold-ink:#8A6A1E;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --disp:'Oswald',system-ui,'Arial Narrow',sans-serif;
+    --serif:'Newsreader',Georgia,'Times New Roman',serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  a:hover{color:var(--blue)}
+  h1,h2,h3,h4,p,ul,ol,figure{margin:0}
+  ul{padding:0;list-style:none}
+
+  .kick{font:700 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase}
+  .disp{font-family:var(--disp);font-weight:700;letter-spacing:-.005em}
+  .num{font-family:var(--disp);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+  /* Platshållare för bild — medvetet grafisk, inte ett försök till foto */
+  .ph{position:relative;background:var(--blue-dk);overflow:hidden}
+  .ph::before{content:'';position:absolute;inset:0;
+    background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 1px,transparent 1px 10px)}
+  .phm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.20}
+
+  .lift{transition:transform .25s var(--ease),box-shadow .25s var(--ease),
+        border-color .25s var(--ease)}
+  .lift:hover{transform:translateY(-3px);
+    box-shadow:0 4px 12px rgba(2,32,69,.09),0 14px 32px rgba(2,32,69,.10)}
+  .zoom{transition:transform .6s var(--ease)}
+  .gz:hover .zoom{transform:scale(1.045)}
+  .gz:hover .hl{color:var(--blue)}
+  .hl{transition:color .2s var(--ease)}
+
+  .rule3{height:3px;background:linear-gradient(90deg,var(--blue-dk),var(--blue) 55%,var(--gold))}
+  .hr{height:1px;background:var(--rule);border:0}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;font:700 12px/1 var(--sans);
+       letter-spacing:.08em;text-transform:uppercase;border-radius:6px;
+       padding:13px 20px;transition:background-color .2s var(--ease),color .2s var(--ease)}
+  .btn-gold{background:var(--gold);color:var(--blue-dk)}
+  .btn-gold:hover{background:var(--gold-lt);color:var(--blue-dk)}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-blue:hover{background:var(--blue-dk);color:#fff}
+  .btn-line{border:1px solid var(--rule-2);color:var(--ink-2);background:transparent}
+  .btn-line:hover{border-color:var(--blue);color:var(--blue)}
+
+  ::selection{background:var(--gold);color:var(--blue-dk)}
+
+  .hdr{background:var(--card);border-bottom:1px solid var(--rule);
+       position:relative;z-index:20}
+  .hdr-in{max-width:1440px;margin:0 auto;padding:0 64px;height:76px;
+          display:flex;align-items:center;gap:40px}
+  .brand{display:flex;align-items:center;gap:12px;flex:none}
+  .brand-mark{width:40px;height:40px;border-radius:999px;background:var(--blue);
+    display:flex;align-items:center;justify-content:center;flex:none}
+  .brand-name{font:700 18px/1.05 var(--disp);letter-spacing:.04em;
+    text-transform:uppercase;color:var(--blue-dk);display:block}
+  .brand-sub{font:700 9.5px/1 var(--sans);letter-spacing:.28em;
+    text-transform:uppercase;color:var(--gold-ink);display:block;margin-top:3px}
+  .nav{display:flex;align-items:center;gap:2px;flex:1}
+  .nav a{position:relative;padding:26px 13px;font:600 12px/1 var(--sans);
+    letter-spacing:.11em;text-transform:uppercase;color:var(--ink-2);
+    transition:color .18s var(--ease)}
+  .nav a:hover{color:var(--blue)}
+  .nav a[aria-current]{color:var(--blue-dk)}
+  .nav-mark{position:absolute;left:13px;right:13px;bottom:-1px;height:2px;border-radius:2px}
+  .nav-caret{margin-left:5px;opacity:.45}
+  .hdr-cta{display:flex;align-items:center;gap:14px;flex:none}
+  .shed{font:600 12px/1 var(--sans);letter-spacing:.06em;color:var(--muted);
+    display:inline-flex;align-items:center;gap:6px;transition:color .18s var(--ease)}
+  .shed:hover{color:var(--blue)}
+
+  .ft{background:var(--night);color:#fff;padding:64px 64px 0}
+  .ft-in{max-width:1440px;margin:0 auto}
+  .ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;
+           padding-bottom:56px}
+  .ft h4{font:700 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;
+         color:rgba(255,255,255,.55);margin-bottom:18px}
+  .ft li+li{margin-top:11px}
+  .ft li a{font:400 13.5px/1.4 var(--sans);color:rgba(255,255,255,.78);
+           transition:color .18s var(--ease)}
+  .ft li a:hover{color:var(--gold-lt)}
+  .ft-bot{border-top:1px solid rgba(255,255,255,.10);padding:20px 0;
+    display:flex;justify-content:space-between;align-items:center;
+    font:400 11.5px/1 var(--sans);color:rgba(255,255,255,.52)}
+
+  .wrap{max-width:1440px;margin:0 auto;padding:0 64px}
+
+  .crumbs{font:500 11.5px/1 var(--sans);letter-spacing:.06em;color:var(--muted);
+          padding:26px 0 0;display:flex;gap:9px;align-items:center}
+  .crumbs a:hover{color:var(--blue)}
+
+  .ahead{padding:26px 0 40px;max-width:960px}
+  .atitle{font:700 60px/.96 var(--disp);letter-spacing:-.018em;color:var(--ink);
+          margin-top:18px;text-wrap:balance}
+  .astand{font:400 22px/1.5 var(--serif);color:var(--ink-2);margin-top:20px;
+          max-width:820px;text-wrap:pretty}
+  .abyl{display:flex;align-items:center;gap:16px;margin-top:30px;padding:16px 0;
+        border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+        max-width:820px}
+  .abyl-n{font:600 13.5px/1.3 var(--sans);color:var(--ink)}
+  .abyl-m{font:500 11.5px/1.3 var(--sans);color:var(--muted);margin-top:3px}
+
+  figure figcaption{display:flex;gap:14px;padding-top:12px;
+    font:500 11.5px/1.5 var(--sans);color:var(--muted);max-width:960px}
+  figcaption em{font-family:var(--serif);font-size:13px;font-style:italic;
+                color:var(--ink-2);flex:1}
+
+  .abody{display:grid;grid-template-columns:196px 720px 1fr;gap:48px;
+         padding:56px 0 24px;align-items:start}
+
+  .tools{position:sticky;top:24px}
+  .tools p{font:700 9.5px/1 var(--sans);letter-spacing:.15em;text-transform:uppercase;
+           color:var(--muted);margin-bottom:12px}
+  .tool-row{display:flex;gap:8px}
+  .tool{width:36px;height:36px;border-radius:999px;border:1px solid var(--rule-2);
+    background:transparent;color:var(--ink-2);cursor:pointer;display:flex;
+    align-items:center;justify-content:center;font:600 12px/1 var(--sans);
+    transition:border-color .18s var(--ease),color .18s var(--ease),
+               background-color .18s var(--ease)}
+  .tool:hover{border-color:var(--blue);color:var(--blue)}
+
+  .prose{font-family:var(--serif);font-weight:400;line-height:1.78;color:#1A2433}
+  .prose p+p,.prose ul,.prose h2,.prose blockquote,.prose figure{margin-top:1.5em}
+  .prose h2{font:600 30px/1.18 var(--disp);letter-spacing:.002em;color:var(--ink);
+            margin-top:2em}
+  .prose ul{padding-left:1.15em;list-style:disc}
+  .prose li+li{margin-top:.45em}
+  .prose a{color:var(--blue);text-decoration:underline;text-underline-offset:3px;
+           text-decoration-thickness:1px}
+  .prose a:hover{color:var(--gold-ink)}
+  .drop::first-letter{float:left;font-family:var(--disp);font-weight:700;
+    font-size:4.1em;line-height:.82;padding:.06em .12em 0 0;color:var(--blue)}
+  .pull{border-top:3px solid var(--gold);border-bottom:1px solid var(--rule);
+        padding:24px 0 26px}
+  .pull q{font:600 27px/1.25 var(--disp);letter-spacing:-.005em;color:var(--blue-dk);
+          quotes:none;display:block}
+  .pull cite{display:block;margin-top:14px;font:500 11.5px/1 var(--sans);
+    letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-style:normal}
+
+  .rail{position:sticky;top:24px}
+  .fact{background:var(--card);border:1px solid var(--rule);border-radius:6px;
+        padding:22px 24px}
+  .fact h3{font:700 10px/1 var(--sans);letter-spacing:.17em;text-transform:uppercase;
+    color:var(--muted);padding-bottom:14px;border-bottom:1px solid var(--rule)}
+  .fact dl{display:grid;grid-template-columns:auto 1fr;gap:0;margin:0}
+  .fact dt{font:500 12px/1 var(--sans);color:var(--muted);padding:13px 0;
+           border-top:1px solid var(--rule)}
+  .fact dd{font:600 12.5px/1 var(--sans);color:var(--ink);padding:13px 0;margin:0;
+           text-align:right;border-top:1px solid var(--rule)}
+  .fact dt:first-of-type,.fact dd:first-of-type{border-top:0}
+
+  .also{margin-top:24px}
+  .also h3{font:700 10px/1 var(--sans);letter-spacing:.17em;text-transform:uppercase;
+    color:var(--muted);padding-bottom:14px;border-bottom:2px solid var(--ink)}
+  .also li{padding:15px 0;border-top:1px solid var(--rule)}
+  .also li:first-child{border-top:0}
+  .also-k{font:700 9.5px/1 var(--sans);letter-spacing:.15em;text-transform:uppercase;
+          color:var(--blue)}
+  .also-t{font:600 16px/1.25 var(--disp);color:var(--ink);margin-top:7px;display:block}
+
+  .authorcard{display:flex;gap:20px;align-items:center;max-width:964px;
+    margin:8px 0 0 244px;padding:26px 0;border-top:2px solid var(--ink);
+    border-bottom:1px solid var(--rule)}
+
+  .sh{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+      padding-bottom:22px;margin-bottom:28px;border-bottom:2px solid var(--ink)}
+  .sh-t{font:700 26px/1 var(--disp);letter-spacing:.06em;text-transform:uppercase}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}
+  .card{background:var(--card);border:1px solid var(--rule);border-radius:6px;
+        overflow:hidden;display:flex;flex-direction:column;height:100%}
+  .card-b{padding:20px 20px 22px;display:flex;flex-direction:column;flex:1}
+  .card-k{font:700 10px/1 var(--sans);letter-spacing:.15em;text-transform:uppercase;
+          color:var(--blue)}
+  .card-t{font:600 20px/1.24 var(--disp);margin-top:10px;color:var(--ink)}
+  .card-m{font:500 11.5px/1 var(--sans);color:var(--muted);margin-top:auto;padding-top:16px}
+
+  </style>
+</helmet>
+<div style="width:1440px;background:var(--paper);--fs:{{fs}}px">
+<header class="hdr">
+  <div class="rule3"></div>
+  <div class="hdr-in">
+    <a class="brand" href="#" aria-label="Chelsea Supporters Sweden — startsidan">
+      <span class="brand-mark"><svg  width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span>
+      <span>
+        <span class="brand-name">Chelsea Supporters</span>
+        <span class="brand-sub">Sweden</span>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Huvudmeny"><a href="#">Löpsedel</a><a href="#" aria-current="page">Artiklar<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg><span class="nav-mark" style="background:var(--gold)"></span></a><a href="#">Matcher<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Föreningen<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Guider<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Podden</a></nav>
+    <div class="hdr-cta">
+      <a class="shed" href="#">The Shed
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 17 17 7M9 7h8v8"/></svg>
+      </a>
+      <a class="btn btn-blue" href="#">Bli medlem</a>
+    </div>
+  </div>
+</header><div class="wrap"><nav class="crumbs" aria-label="Brödsmulor"><a href="#">Artiklar</a><span aria-hidden="true" style="color:var(--rule-2)">/</span><a href="#">Krönikor</a></nav><header class="ahead"><div style="display:flex;align-items:center;gap:12px"><span style="display:block;width:30px;height:3px;background:var(--gold);border-radius:2px" aria-hidden="true"></span><span class="kick" style="color:var(--gold-ink)">Krönika</span></div><h1 class="atitle">Sju mål på Stamford Bridge — och ändå är det försvaret vi pratar om</h1><p class="astand">Chelsea vann med 4–3 mot Brighton. Det var underhållande, det var nervöst, och det var precis den sortens match som avgör hur den här säsongen kommer att kännas när vi tittar tillbaka i mars.</p><div class="abyl"><span style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;background:#022B5C;color:#fff;font:700 14px/1 'Inter',sans-serif;letter-spacing:.02em;flex:none">R</span><div style="flex:1"><p class="abyl-n">Redaktionen</p><p class="abyl-m">Publicerad 31 augusti 2026 · 6 minuters läsning</p></div><a href="#" style="font:700 11px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--blue)">Dela</a></div></header><figure><span class="ph" style="aspect-ratio:1312 / 590;display:block;border-radius:6px"><svg class="phm" width="110" height="110" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span><figcaption><em>Stamford Bridge, söndag eftermiddag. [BILDTEXT]</em><span style="flex:none">Foto: [FOTOGRAF]</span></figcaption></figure><div class="abody"><div class="tools"><p>Textstorlek</p><div class="tool-row"><button type="button" class="tool" style="{{s0.style}}" onClick="{{s0.pick}}" aria-label="Mindre text">A</button><button type="button" class="tool" style="{{s1.style}}; font-size:14px" onClick="{{s1.pick}}" aria-label="Normal text">A</button><button type="button" class="tool" style="{{s2.style}}; font-size:17px" onClick="{{s2.pick}}" aria-label="Större text">A</button></div><p style="margin-top:28px">Dela</p><div class="tool-row"><button type="button" class="tool" aria-label="Dela länk"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg></button><button type="button" class="tool" aria-label="Dela i sociala medier"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button><button type="button" class="tool" aria-label="Diskutera i The Shed"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"/></svg></button></div></div><article class="prose" style="font-size:var(--fs)"><p class="drop">Det tog nitton minuter innan den här matchen bestämde sig för vad den skulle vara. Fram till dess hade den varit prydlig, kontrollerad och lite trist. Sedan öppnade sig ytorna, och de stängdes aldrig igen.</p><p>Fyra–tre låter som en bra dag. Och på ett sätt var det en bra dag: tre poäng, fullsatt arena och en publik som gick hem med benen skakiga. Men den som satt kvar en stund efter slutsignalen och tittade på hur de tre baklängesmålen kom till hade svårt att komma ifrån känslan av att vi sett den här filmen förut.</p><h2>Det som fungerade</h2><p>Framåt finns det inte mycket att klaga på. Rörelsen mellan leden var den bästa hittills den här säsongen, och för första gången såg mittfältet ut att veta vem som skulle göra vad när bollen vanns högt. Det gav fyra mål mot ett lag som förra säsongen släppte in näst minst i ligan.</p><ul><li>Presspelet höll i drygt en timme, vilket är längre än mot Fulham.</li><li>Kantspelet gav sju inlägg som faktiskt nådde en blå tröja.</li><li>Vi vann fem av de sex första närkamperna efter paus.</li></ul><blockquote class="pull"><q>Ett lag som gör fyra mål varje match behöver inte vara perfekt bakåt. Men det behöver vara förutsägbart.</q><cite>Ur krönikan</cite></blockquote><h2>Det som oroar</h2><p>Alla tre baklängesmålen kom i situationer där vi hade numerärt överläge. Det är inte ett problem med spelarna, det är ett problem med vem som bestämmer. Någon måste äga straffområdet, och just nu turas fyra personer om att göra det.</p><p>Nästa söndag väntar Arsenal borta. Det är den match där den här sortens oreda blir dyr. Läs gärna <a href="#">inför-texten</a> och <a href="#">spelarbetygen</a> innan avspark.</p></article><aside class="rail"><div class="fact"><h3>Matchfakta</h3><dl><dt>Turnering</dt><dd>Premier League</dd><dt>Datum</dt><dd>sön 30 aug 2026</dd><dt>Arena</dt><dd>Stamford Bridge</dd><dt>Resultat</dt><dd>Chelsea 4–3 Brighton</dd><dt>Målskyttar</dt><dd>[MÅLSKYTTAR]</dd></dl></div><div class="also"><h3>Läs också</h3><ul><li><a class="gz" href="#" style="display:block"><span class="also-k">Spelarbetyg</span><span class="also-t hl">Spelarbetyg: Chelsea – Brighton</span></a></li><li><a class="gz" href="#" style="display:block"><span class="also-k">Matchreferat</span><span class="also-t hl">Fyra framåt, tre bakåt och tre poäng kvar i London</span></a></li><li><a class="gz" href="#" style="display:block"><span class="also-k">Inför match</span><span class="also-t hl">Inför Arsenal borta: tre frågor före derbyt</span></a></li></ul></div></aside></div><div class="authorcard"><span style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:999px;background:#022B5C;color:#fff;font:700 17px/1 'Inter',sans-serif;letter-spacing:.02em;flex:none">R</span><div style="flex:1"><p style="font:600 15px/1.3 var(--sans);color:var(--ink)">Redaktionen</p><p style="font:400 14px/1.6 var(--serif);color:var(--ink-2);margin-top:6px;max-width:560px">Chelsea Supporters Sweden skrivs av medlemmar. Vill du vara med? Hör av dig till redaktionen.</p></div><a class="btn btn-line" href="#" style="flex:none">Skriv för oss</a></div></div><section class="wrap" style="padding-top:64px;padding-bottom:72px"><div class="sh"><h2 class="sh-t">Mer från redaktionen</h2><a href="#" style="font:700 11.5px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--blue);padding-bottom:4px">Alla artiklar</a></div><div class="grid3"><a class="card lift gz" href="#"><span class="ph" style="aspect-ratio:416 / 250;display:block"><span class="zoom" style="position:absolute;inset:0"><svg class="phm" width="50" height="50" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span></span><span class="card-b"><span class="card-k">Matchreferat</span><span class="card-t hl">Chelsea 2–0 Luton: rutinerat värre i cupen</span><span class="card-m">28 aug · 4 min</span></span></a><a class="card lift gz" href="#"><span class="ph" style="aspect-ratio:416 / 250;display:block"><span class="zoom" style="position:absolute;inset:0"><svg class="phm" width="50" height="50" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span></span><span class="card-b"><span class="card-k">Intervju</span><span class="card-t hl">Möt gänget som drog igång CSS Göteborg</span><span class="card-m">27 aug · 7 min</span></span></a><a class="card lift gz" href="#"><span class="ph" style="aspect-ratio:416 / 250;display:block"><span class="zoom" style="position:absolute;inset:0"><svg class="phm" width="50" height="50" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span></span><span class="card-b"><span class="card-k">Krönika</span><span class="card-t hl">Damlaget förtjänar mer än en notis längst ner</span><span class="card-m">26 aug · 5 min</span></span></a></div></section>
+<footer class="ft">
+  <div class="ft-in">
+    <div class="ft-grid">
+      <div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="width:40px;height:40px;border-radius:999px;
+                background:rgba(255,255,255,.09);display:flex;align-items:center;
+                justify-content:center"><svg  width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span>
+          <span>
+            <span style="font:700 15px/1.05 var(--disp);letter-spacing:.04em;
+                  text-transform:uppercase;display:block">Chelsea Supporters</span>
+            <span style="font:700 9px/1 var(--sans);letter-spacing:.28em;
+                  text-transform:uppercase;color:var(--gold);display:block;
+                  margin-top:3px">Sweden</span>
+          </span>
+        </div>
+        <p style="margin-top:18px;max-width:280px;font:400 13.5px/1.65 var(--sans);
+                  color:rgba(255,255,255,.68)">
+          Sveriges supporterförening för Chelsea FC. Matchkvällar, resor,
+          referat och gemenskap — sedan 1996.
+        </p>
+        <a href="#" style="margin-top:18px;display:inline-flex;align-items:center;gap:7px;
+           font:600 12.5px/1 var(--sans);color:var(--gold)">
+          Diskutera i The Shed
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+      </div><div><h4>Innehåll</h4><ul><li><a href="#">Löpsedel</a></li><li><a href="#">Artiklar</a></li><li><a href="#">Matchreferat</a></li><li><a href="#">Spelarbetyg</a></li><li><a href="#">ChelseaPodden</a></li></ul></div><div><h4>Matcher</h4><ul><li><a href="#">Matchcenter</a></li><li><a href="#">Spelschema</a></li><li><a href="#">Tabell</a></li><li><a href="#">Mötesplatser</a></li><li><a href="#">Biljetter</a></li></ul></div><div><h4>Föreningen</h4><ul><li><a href="#">Bli medlem</a></li><li><a href="#">Evenemang</a></li><li><a href="#">Om oss</a></li><li><a href="#">Redaktionen</a></li><li><a href="#">Kontakt</a></li></ul></div>
+    </div>
+    <div class="ft-bot">
+      <span>© 2026 Chelsea Supporters Sweden · Org.nr [ORGANISATIONSNUMMER]</span>
+      <span>info@chelseasweden.se</span>
+    </div>
+  </div>
+</footer></div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":3820}}'>
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { size: 1 };
+  }
+  renderVals() {
+    const sizes = [17, 19, 21];
+    const vals = { fs: sizes[this.state.size] };
+    sizes.forEach((_, i) => {
+      vals['s' + i] = {
+        pick: () => this.setState({ size: i }),
+        style: this.state.size === i
+          ? 'background:#101B2B;border-color:#101B2B;color:#ffffff'
+          : '',
+      };
+    });
+    return vals;
+  }
+}
+
+</script>
+</body>
+</html>

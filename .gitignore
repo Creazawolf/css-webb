@@ -149,3 +149,9 @@ app/(payload)/admin/importMap.js
 # Kompileringscache från tsx/Node när scripts/ körs (seed, migrate-ci)
 /node-compile-cache/
 /tsx-*/
+
+# Designcanvas: källfilerna sparas, den seedade sidan och testbilder gör det inte
+design/matchtidningen.html
+design/*.png
+design/__pycache__/
+__pycache__/

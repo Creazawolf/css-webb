@@ -1,0 +1,197 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&amp;display=swap">
+  <style>
+  :root{
+    --paper:#F4F2EE; --paper-deep:#EBE7E0; --card:#FFFFFF;
+    --ink:#101B2B; --ink-2:#3D4757; --muted:#6B7482;
+    --rule:#DFDAD2; --rule-2:#C8C1B5;
+    --blue:#034694; --blue-dk:#022B5C; --blue-lt:#0A5BB5; --night:#01142C;
+    --gold:#D4A843; --gold-lt:#E8C96A; --gold-ink:#8A6A1E;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --disp:'Oswald',system-ui,'Arial Narrow',sans-serif;
+    --serif:'Newsreader',Georgia,'Times New Roman',serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  a:hover{color:var(--blue)}
+  h1,h2,h3,h4,p,ul,ol,figure{margin:0}
+  ul{padding:0;list-style:none}
+
+  .kick{font:700 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase}
+  .disp{font-family:var(--disp);font-weight:700;letter-spacing:-.005em}
+  .num{font-family:var(--disp);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+  /* Platshållare för bild — medvetet grafisk, inte ett försök till foto */
+  .ph{position:relative;background:var(--blue-dk);overflow:hidden}
+  .ph::before{content:'';position:absolute;inset:0;
+    background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 1px,transparent 1px 10px)}
+  .phm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.20}
+
+  .lift{transition:transform .25s var(--ease),box-shadow .25s var(--ease),
+        border-color .25s var(--ease)}
+  .lift:hover{transform:translateY(-3px);
+    box-shadow:0 4px 12px rgba(2,32,69,.09),0 14px 32px rgba(2,32,69,.10)}
+  .zoom{transition:transform .6s var(--ease)}
+  .gz:hover .zoom{transform:scale(1.045)}
+  .gz:hover .hl{color:var(--blue)}
+  .hl{transition:color .2s var(--ease)}
+
+  .rule3{height:3px;background:linear-gradient(90deg,var(--blue-dk),var(--blue) 55%,var(--gold))}
+  .hr{height:1px;background:var(--rule);border:0}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;font:700 12px/1 var(--sans);
+       letter-spacing:.08em;text-transform:uppercase;border-radius:6px;
+       padding:13px 20px;transition:background-color .2s var(--ease),color .2s var(--ease)}
+  .btn-gold{background:var(--gold);color:var(--blue-dk)}
+  .btn-gold:hover{background:var(--gold-lt);color:var(--blue-dk)}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-blue:hover{background:var(--blue-dk);color:#fff}
+  .btn-line{border:1px solid var(--rule-2);color:var(--ink-2);background:transparent}
+  .btn-line:hover{border-color:var(--blue);color:var(--blue)}
+
+  ::selection{background:var(--gold);color:var(--blue-dk)}
+
+  .hdr{background:var(--card);border-bottom:1px solid var(--rule);
+       position:relative;z-index:20}
+  .hdr-in{max-width:1440px;margin:0 auto;padding:0 64px;height:76px;
+          display:flex;align-items:center;gap:40px}
+  .brand{display:flex;align-items:center;gap:12px;flex:none}
+  .brand-mark{width:40px;height:40px;border-radius:999px;background:var(--blue);
+    display:flex;align-items:center;justify-content:center;flex:none}
+  .brand-name{font:700 18px/1.05 var(--disp);letter-spacing:.04em;
+    text-transform:uppercase;color:var(--blue-dk);display:block}
+  .brand-sub{font:700 9.5px/1 var(--sans);letter-spacing:.28em;
+    text-transform:uppercase;color:var(--gold-ink);display:block;margin-top:3px}
+  .nav{display:flex;align-items:center;gap:2px;flex:1}
+  .nav a{position:relative;padding:26px 13px;font:600 12px/1 var(--sans);
+    letter-spacing:.11em;text-transform:uppercase;color:var(--ink-2);
+    transition:color .18s var(--ease)}
+  .nav a:hover{color:var(--blue)}
+  .nav a[aria-current]{color:var(--blue-dk)}
+  .nav-mark{position:absolute;left:13px;right:13px;bottom:-1px;height:2px;border-radius:2px}
+  .nav-caret{margin-left:5px;opacity:.45}
+  .hdr-cta{display:flex;align-items:center;gap:14px;flex:none}
+  .shed{font:600 12px/1 var(--sans);letter-spacing:.06em;color:var(--muted);
+    display:inline-flex;align-items:center;gap:6px;transition:color .18s var(--ease)}
+  .shed:hover{color:var(--blue)}
+
+  .stage{padding:44px 64px 56px}
+  .lab{display:flex;align-items:baseline;gap:14px;margin-bottom:20px}
+  .lab-n{font:700 10px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;
+         color:var(--gold-ink)}
+  .lab-t{font:700 20px/1 var(--disp);letter-spacing:.05em;text-transform:uppercase;
+         color:var(--ink)}
+  .lab-s{font:400 13px/1.4 var(--serif);font-style:italic;color:var(--muted)}
+  .band{border-top:1px solid var(--rule);background:var(--paper-deep)}
+  .frame{border:1px solid var(--rule);border-radius:8px;overflow:hidden;
+         background:var(--card);box-shadow:0 1px 2px rgba(2,32,69,.04)}
+
+  /* --- Megapanel --- */
+  .mega{position:absolute;left:0;right:0;top:100%;background:var(--card);
+    border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    box-shadow:0 20px 44px rgba(2,32,69,.13);z-index:30;
+    transition:opacity .2s var(--ease),transform .2s var(--ease)}
+  .mega-in{max-width:1440px;margin:0 auto;padding:34px 64px 38px;
+    display:grid;grid-template-columns:1fr 1fr 380px;gap:48px}
+  .mega h4{font:700 10px/1 var(--sans);letter-spacing:.17em;text-transform:uppercase;
+    color:var(--muted);padding-bottom:14px;border-bottom:1px solid var(--rule);
+    margin-bottom:6px}
+  .mega li a{display:block;padding:11px 0;font:600 16px/1.2 var(--disp);
+    letter-spacing:.005em;color:var(--ink);transition:color .16s var(--ease)}
+  .mega li a:hover{color:var(--blue)}
+  .mega li a small{display:block;font:400 12.5px/1.4 var(--serif);color:var(--muted);
+    margin-top:4px}
+
+  .drop{position:absolute;left:0;top:100%;min-width:230px;background:var(--card);
+    border:1px solid var(--rule);border-radius:0 0 8px 8px;padding:8px;z-index:30;
+    box-shadow:0 16px 34px rgba(2,32,69,.14);
+    transition:opacity .18s var(--ease),transform .18s var(--ease)}
+  .drop a{display:block;padding:10px 12px;border-radius:5px;
+    font:500 13.5px/1 var(--sans);color:var(--ink-2);
+    transition:background-color .15s var(--ease),color .15s var(--ease)}
+  .drop a:hover{background:var(--paper);color:var(--blue)}
+
+  /* --- Kompakt --- */
+  .hdr.mini .hdr-in{height:58px}
+  .hdr.mini .nav a{padding:19px 13px;font-size:11.5px}
+  .hdr.mini .brand-mark{width:32px;height:32px}
+  .hdr.mini .brand-name{font-size:15px}
+  .hdr.mini .brand-sub{font-size:8.5px;letter-spacing:.24em}
+  .hdr.mini{box-shadow:0 2px 14px rgba(2,32,69,.10)}
+
+  /* --- Mobil --- */
+  .phone{width:390px;border:1px solid var(--rule-2);border-radius:14px;
+         overflow:hidden;background:var(--paper);flex:none;
+         box-shadow:0 10px 30px rgba(2,32,69,.10)}
+  .mbar{display:flex;align-items:center;justify-content:space-between;
+        padding:0 18px;height:62px;background:var(--card);
+        border-bottom:1px solid var(--rule)}
+  .burger{width:26px;height:18px;position:relative;border:0;background:transparent;
+          cursor:pointer;padding:0}
+  .burger i{position:absolute;left:0;height:2px;width:26px;border-radius:2px;
+    background:var(--ink);transition:transform .3s var(--ease),opacity .3s var(--ease)}
+  .mdraw{background:var(--night);color:#fff;padding:8px 22px 26px}
+  .mdraw li{border-top:1px solid rgba(255,255,255,.10)}
+  .mdraw li a{display:flex;align-items:center;justify-content:space-between;
+    padding:17px 0;font:600 21px/1 var(--disp);letter-spacing:.04em;
+    text-transform:uppercase;color:#fff}
+  .mdraw li a:hover{color:var(--gold)}
+  .mhero{padding:20px 18px}
+
+  .nav .navbtn{position:relative;padding:26px 13px;font:600 12px/1 var(--sans);
+    letter-spacing:.11em;text-transform:uppercase;color:var(--ink-2);border:0;
+    background:transparent;cursor:pointer;display:inline-flex;align-items:center;
+    transition:color .18s var(--ease)}
+  .nav .navbtn:hover{color:var(--blue)}
+
+  </style>
+</helmet>
+<div style="width:1440px;background:var(--paper)"><section class="stage"><div class="lab"><span class="lab-n">01</span><span class="lab-t">Standard</span><span class="lab-s">Vit rad, guldmarkör under aktiv flik, matchbandet under</span></div><div class="frame"><header class="hdr"><div class="rule3"></div><div class="hdr-in"><a class="brand" href="#" aria-label="Chelsea Supporters Sweden — startsidan"><span class="brand-mark"><svg  width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span><span><span class="brand-name">Chelsea Supporters</span><span class="brand-sub">Sweden</span></span></a><nav class="nav" aria-label="Huvudmeny"><a href="#" aria-current="page">Löpsedel<span class="nav-mark" style="background:var(--gold)"></span></a><a href="#">Artiklar<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Matcher<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Föreningen<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Guider<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Podden</a></nav><div class="hdr-cta"><a class="shed" href="#">The Shed<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a><a class="btn btn-blue" href="#">Bli medlem</a></div></div></header><div style="background:var(--night);color:#fff"><div style="max-width:1440px;margin:0 auto;padding:0 64px;height:62px;display:flex;align-items:center;gap:24px"><span style="font:700 10px/1 var(--sans);letter-spacing:.20em;text-transform:uppercase;color:var(--gold)">Nästa match</span><span style="font:600 14px/1 var(--sans)">Arsenal <span style="color:rgba(255,255,255,.4);margin:0 6px">—</span> Chelsea</span><span style="width:5px;height:5px;border-radius:999px;background:rgba(255,255,255,.28)"></span><span style="font:500 13px/1 var(--sans);color:rgba(255,255,255,.62)">sön 6 sep 17:30 · Emirates Stadium</span><span style="margin-left:auto;font:700 11.5px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--gold)">Se matchen med oss →</span></div></div></div></section><section class="band"><div class="stage"><div class="lab"><span class="lab-n">02</span><span class="lab-t">Undermeny</span><span class="lab-s">Klicka på Artiklar — panelen visar typerna och senaste texten</span></div><div class="frame" style="position:relative;padding-bottom:{{o.pad}}px"><header class="hdr"><div class="rule3"></div><div class="hdr-in"><a class="brand" href="#" aria-label="Chelsea Supporters Sweden — startsidan"><span class="brand-mark"><svg  width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span><span><span class="brand-name">Chelsea Supporters</span><span class="brand-sub">Sweden</span></span></a><nav class="nav" aria-label="Huvudmeny"><a href="#">Löpsedel</a><button type="button" class="navbtn" style="{{o.style}}" onClick="{{o.toggle}}" aria-expanded="{{o.expanded}}">Artiklar<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><a href="#">Matcher<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Föreningen<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Guider<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Podden</a></nav><div class="hdr-cta"><a class="shed" href="#">The Shed<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a><a class="btn btn-blue" href="#">Bli medlem</a></div></div></header><div class="mega" style="opacity:{{o.opacity}};transform:translateY({{o.y}}px);visibility:{{o.vis}}"><div class="mega-in"><div><h4>Efter typ</h4><ul><li><a href="#">Matchreferat<small>Varje match, samma kväll</small></a></li><li><a href="#">Spelarbetyg<small>Hela laget, satt av redaktionen</small></a></li><li><a href="#">Inför match<small>Laguppställning, form och oddsen</small></a></li></ul></div><div><h4>Läsning</h4><ul><li><a href="#">Krönikor<small>Längre texter av medlemmar</small></a></li><li><a href="#">Intervjuer<small>Profiler i och utanför föreningen</small></a></li><li><a href="#">Föreningsnytt<small>Årsmöten, resor och beslut</small></a></li></ul></div><div><h4>Senast publicerat</h4><a class="gz" href="#" style="display:block;padding-top:6px"><span class="ph" style="aspect-ratio:380 / 200;display:block;border-radius:6px"><span class="zoom" style="position:absolute;inset:0"><svg class="phm" width="52" height="52" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span></span><span style="display:block;font:700 10px/1 var(--sans);letter-spacing:.15em;text-transform:uppercase;color:var(--blue);margin-top:14px">Krönika</span><span class="hl" style="display:block;font:600 19px/1.24 var(--disp);color:var(--ink);margin-top:8px">Sju mål på Stamford Bridge — och ändå är det försvaret vi pratar om</span></a></div></div></div></div></div></section><section class="stage"><div class="lab"><span class="lab-n">03</span><span class="lab-t">Vid scroll</span><span class="lab-s">Raden krymper till 58 px och lägger på en skugga</span></div><div class="frame"><header class="hdr mini"><div class="rule3"></div><div class="hdr-in"><a class="brand" href="#" aria-label="Chelsea Supporters Sweden — startsidan"><span class="brand-mark"><svg  width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span><span><span class="brand-name">Chelsea Supporters</span><span class="brand-sub">Sweden</span></span></a><nav class="nav" aria-label="Huvudmeny"><a href="#">Löpsedel</a><a href="#">Artiklar<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#" aria-current="page">Matcher<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg><span class="nav-mark" style="background:var(--gold)"></span></a><a href="#">Föreningen<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Guider<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Podden</a></nav><div class="hdr-cta"><a class="shed" href="#">The Shed<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a><a class="btn btn-blue" href="#">Bli medlem</a></div></div></header></div></section><section class="band"><div class="stage"><div class="lab"><span class="lab-n">04</span><span class="lab-t">Mobil</span><span class="lab-s">Klicka på hamburgaren i vänstra telefonen</span></div><div style="display:flex;gap:40px;align-items:flex-start"><div class="phone"><div class="mbar"><span style="display:flex;align-items:center;gap:9px"><span style="width:32px;height:32px;border-radius:999px;background:var(--blue);display:flex;align-items:center;justify-content:center"><svg  width="18" height="18" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span><span style="font:700 15px/1 var(--disp);letter-spacing:.05em;text-transform:uppercase;color:var(--blue-dk)">CSS</span></span><button type="button" class="burger" onClick="{{m.toggle}}" aria-label="Öppna meny" aria-expanded="{{m.expanded}}"><i style="top:0;transform:{{m.t1}}"></i><i style="top:8px;opacity:{{m.o2}}"></i><i style="top:16px;transform:{{m.t3}}"></i></button></div><div style="display:{{m.showDraw}}"><nav class="mdraw" aria-label="Meny"><ul><li><a href="#">Löpsedel</a></li><li><a href="#">Artiklar<span style="color:var(--gold);font-size:15px">+</span></a></li><li><a href="#">Matcher<span style="color:var(--gold);font-size:15px">+</span></a></li><li><a href="#">Föreningen<span style="color:var(--gold);font-size:15px">+</span></a></li><li><a href="#">Guider<span style="color:var(--gold);font-size:15px">+</span></a></li><li><a href="#">Podden</a></li></ul><a class="btn btn-gold" href="#" style="margin-top:24px;width:100%;justify-content:center">Bli medlem</a><a href="#" style="display:block;text-align:center;margin-top:16px;font:600 12px/1 var(--sans);color:rgba(255,255,255,.6)">The Shed ↗</a></nav></div><div style="display:{{m.showHero}}"><div style="background:var(--night);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:10px"><span style="font:700 9px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--gold)">Nästa</span><span style="font:600 12.5px/1 var(--sans)">Arsenal — Chelsea</span><span style="margin-left:auto;font:500 11.5px/1 var(--sans);color:rgba(255,255,255,.6)">sön 17:30</span></div><div class="mhero"><span class="ph" style="aspect-ratio:354 / 210;display:block;border-radius:6px"><svg class="phm" width="50" height="50" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span><span style="display:flex;align-items:center;gap:10px;margin-top:16px"><span style="display:block;width:22px;height:3px;background:var(--gold);border-radius:2px" aria-hidden="true"></span><span class="kick" style="color:var(--gold-ink)">Krönika</span></span><h2 style="font:700 27px/1.04 var(--disp);letter-spacing:-.01em;color:var(--ink);margin-top:10px">Sju mål på Stamford Bridge — och ändå är det försvaret vi pratar om</h2><p style="font:400 15px/1.55 var(--serif);color:var(--ink-2);margin-top:10px">Chelsea vann med 4–3 mot Brighton. Det var underhållande, och det var nervöst.</p><p style="font:500 11.5px/1 var(--sans);color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px solid var(--rule)">Redaktionen · 31 aug · 6 min</p></div></div></div><div style="max-width:360px;padding-top:8px"><h3 style="font:700 14px/1 var(--disp);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);padding-bottom:14px;border-bottom:2px solid var(--ink)">Regler</h3><ul style="margin-top:6px"><li style="padding:14px 0;border-top:1px solid var(--rule);font:400 14.5px/1.6 var(--serif);color:var(--ink-2)"><b style="font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);display:block;margin-bottom:3px">Träffytor</b>Allt klickbart är minst 44 px högt, även på mobil.</li><li style="padding:14px 0;border-top:1px solid var(--rule);font:400 14.5px/1.6 var(--serif);color:var(--ink-2)"><b style="font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);display:block;margin-bottom:3px">Guld betyder en sak</b>Guld markerar var du är och en enda uppmaning per vy. Aldrig dekoration.</li><li style="padding:14px 0;border-top:1px solid var(--rule);font:400 14.5px/1.6 var(--serif);color:var(--ink-2)"><b style="font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);display:block;margin-bottom:3px">Undermenyer öppnas</b>Panelen öppnas på klick, inte hover — det fungerar likadant med tangentbord och pekskärm.</li><li style="padding:14px 0;border-top:1px solid var(--rule);font:400 14.5px/1.6 var(--serif);color:var(--ink-2)"><b style="font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);display:block;margin-bottom:3px">The Shed ligger kvar</b>Forumet bor på SvenskaFans och länkas alltid ut med en tydlig ikon.</li></ul></div></div></div></section></div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":1900}}'>
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { open: false, mob: false };
+  }
+  renderVals() {
+    const open = this.state.open;
+    const mob = this.state.mob;
+    return {
+      o: {
+        toggle: () => this.setState({ open: !open }),
+        expanded: open ? 'true' : 'false',
+        opacity: open ? 1 : 0,
+        y: open ? 0 : -8,
+        vis: open ? 'visible' : 'hidden',
+        pad: open ? 300 : 0,
+        style: open ? 'color:#034694' : '',
+      },
+      m: {
+        toggle: () => this.setState({ mob: !mob }),
+        expanded: mob ? 'true' : 'false',
+        showDraw: mob ? 'block' : 'none',
+        showHero: mob ? 'none' : 'block',
+        t1: mob ? 'translateY(8px) rotate(45deg)' : 'none',
+        t3: mob ? 'translateY(-8px) rotate(-45deg)' : 'none',
+        o2: mob ? 0 : 1,
+      },
+    };
+  }
+}
+
+</script>
+</body>
+</html>

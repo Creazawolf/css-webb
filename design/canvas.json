@@ -1,0 +1,81 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 4560,
+      "title": "Löpsedel",
+      "is_interactive": true
+    },
+    {
+      "file": "Matchcenter.dc.html",
+      "x": 1600,
+      "y": 0,
+      "w": 1440,
+      "h": 1700,
+      "title": "Matchcenter",
+      "is_interactive": true
+    },
+    {
+      "file": "Artikel.dc.html",
+      "x": 3200,
+      "y": 0,
+      "w": 1440,
+      "h": 3820,
+      "title": "Artikelsida",
+      "is_interactive": true
+    },
+    {
+      "file": "Navigation.dc.html",
+      "x": 4800,
+      "y": 0,
+      "w": 1440,
+      "h": 1900,
+      "title": "Navigation",
+      "is_interactive": true
+    },
+    {
+      "file": "Mobil.dc.html",
+      "x": 6400,
+      "y": 0,
+      "w": 390,
+      "h": 2200,
+      "title": "Löpsedel, mobil"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "riktning",
+      "x": 0,
+      "y": -300,
+      "w": 1440,
+      "text": "RIKTNING: REDAKTIONELL MATCHTIDNING\n\nKlubbfärgerna och Oswald/Inter är kvar. Fyra saker är nya:\n1. Varm papperston (#F4F2EE) i stället för kylig grå — det är den enskilt största skillnaden.\n2. Newsreader som brödtextserif. Oswald och Inter räcker för rubriker och gränssnitt, men inte för att läsa en krönika i.\n3. Större typografiskt spann: 52 px löpsedelsrubrik mot 11 px kicker. Dagens sajt ligger mycket plattare.\n4. Hårfina linjer i stället för skuggade kort överallt, och guld bara där det betyder något — aktiv flik, en enda uppmaning per vy.\n\nKlickbart här: filterknapparna under Från redaktionen, och nedräkningen i matchbandet tickar."
+    },
+    {
+      "id": "matchcenter",
+      "x": 1600,
+      "y": -300,
+      "w": 1440,
+      "text": "MATCHCENTER\n\nHerrar/Damer och Tabell/Kommande växlar på riktigt — klicka.\n\nSiffrorna är hämtade ur Chelsea FC:s eget API den 4 september 2026, inte påhittade. WSL-tabellen visar noll spelade matcher eftersom serien startar 5 september. Det är ett läge sajten faktiskt hamnar i varje sommar, så det är designat i stället för bortglömt."
+    },
+    {
+      "id": "artikel",
+      "x": 3200,
+      "y": -300,
+      "w": 1440,
+      "text": "ARTIKELSIDA\n\nTre spalter: verktyg till vänster, 720 px läsmått i mitten, faktaruta till höger. Brödtexten är serif i 19 px — knapparna för textstorlek i vänsterspalten fungerar.\n\nAllt inom [HAKPARENTESER] är fakta ni fyller i. Bilderna är medvetna platshållare, inte försök till foton."
+    },
+    {
+      "id": "navigation",
+      "x": 4800,
+      "y": -300,
+      "w": 1440,
+      "text": "NAVIGATION\n\nFyra tillstånd. Undermenyn öppnas på KLICK, inte hover — samma beteende fungerar med tangentbord och på pekskärm, vilket dagens hover-meny inte gör.\n\nKlicka på Artiklar i tillstånd 02, och på hamburgaren i telefonen i tillstånd 04.\n\nMedlemskap är borta ur menyraden. Det finns redan som knapp längst till höger, och två vägar till samma sida gör bara raden trängre."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

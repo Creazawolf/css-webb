@@ -1,0 +1,310 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&amp;display=swap">
+  <style>
+  :root{
+    --paper:#F4F2EE; --paper-deep:#EBE7E0; --card:#FFFFFF;
+    --ink:#101B2B; --ink-2:#3D4757; --muted:#6B7482;
+    --rule:#DFDAD2; --rule-2:#C8C1B5;
+    --blue:#034694; --blue-dk:#022B5C; --blue-lt:#0A5BB5; --night:#01142C;
+    --gold:#D4A843; --gold-lt:#E8C96A; --gold-ink:#8A6A1E;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --disp:'Oswald',system-ui,'Arial Narrow',sans-serif;
+    --serif:'Newsreader',Georgia,'Times New Roman',serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  a:hover{color:var(--blue)}
+  h1,h2,h3,h4,p,ul,ol,figure{margin:0}
+  ul{padding:0;list-style:none}
+
+  .kick{font:700 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase}
+  .disp{font-family:var(--disp);font-weight:700;letter-spacing:-.005em}
+  .num{font-family:var(--disp);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+  /* Platshållare för bild — medvetet grafisk, inte ett försök till foto */
+  .ph{position:relative;background:var(--blue-dk);overflow:hidden}
+  .ph::before{content:'';position:absolute;inset:0;
+    background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 1px,transparent 1px 10px)}
+  .phm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.20}
+
+  .lift{transition:transform .25s var(--ease),box-shadow .25s var(--ease),
+        border-color .25s var(--ease)}
+  .lift:hover{transform:translateY(-3px);
+    box-shadow:0 4px 12px rgba(2,32,69,.09),0 14px 32px rgba(2,32,69,.10)}
+  .zoom{transition:transform .6s var(--ease)}
+  .gz:hover .zoom{transform:scale(1.045)}
+  .gz:hover .hl{color:var(--blue)}
+  .hl{transition:color .2s var(--ease)}
+
+  .rule3{height:3px;background:linear-gradient(90deg,var(--blue-dk),var(--blue) 55%,var(--gold))}
+  .hr{height:1px;background:var(--rule);border:0}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;font:700 12px/1 var(--sans);
+       letter-spacing:.08em;text-transform:uppercase;border-radius:6px;
+       padding:13px 20px;transition:background-color .2s var(--ease),color .2s var(--ease)}
+  .btn-gold{background:var(--gold);color:var(--blue-dk)}
+  .btn-gold:hover{background:var(--gold-lt);color:var(--blue-dk)}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-blue:hover{background:var(--blue-dk);color:#fff}
+  .btn-line{border:1px solid var(--rule-2);color:var(--ink-2);background:transparent}
+  .btn-line:hover{border-color:var(--blue);color:var(--blue)}
+
+  ::selection{background:var(--gold);color:var(--blue-dk)}
+
+  .hdr{background:var(--card);border-bottom:1px solid var(--rule);
+       position:relative;z-index:20}
+  .hdr-in{max-width:1440px;margin:0 auto;padding:0 64px;height:76px;
+          display:flex;align-items:center;gap:40px}
+  .brand{display:flex;align-items:center;gap:12px;flex:none}
+  .brand-mark{width:40px;height:40px;border-radius:999px;background:var(--blue);
+    display:flex;align-items:center;justify-content:center;flex:none}
+  .brand-name{font:700 18px/1.05 var(--disp);letter-spacing:.04em;
+    text-transform:uppercase;color:var(--blue-dk);display:block}
+  .brand-sub{font:700 9.5px/1 var(--sans);letter-spacing:.28em;
+    text-transform:uppercase;color:var(--gold-ink);display:block;margin-top:3px}
+  .nav{display:flex;align-items:center;gap:2px;flex:1}
+  .nav a{position:relative;padding:26px 13px;font:600 12px/1 var(--sans);
+    letter-spacing:.11em;text-transform:uppercase;color:var(--ink-2);
+    transition:color .18s var(--ease)}
+  .nav a:hover{color:var(--blue)}
+  .nav a[aria-current]{color:var(--blue-dk)}
+  .nav-mark{position:absolute;left:13px;right:13px;bottom:-1px;height:2px;border-radius:2px}
+  .nav-caret{margin-left:5px;opacity:.45}
+  .hdr-cta{display:flex;align-items:center;gap:14px;flex:none}
+  .shed{font:600 12px/1 var(--sans);letter-spacing:.06em;color:var(--muted);
+    display:inline-flex;align-items:center;gap:6px;transition:color .18s var(--ease)}
+  .shed:hover{color:var(--blue)}
+
+  .ft{background:var(--night);color:#fff;padding:64px 64px 0}
+  .ft-in{max-width:1440px;margin:0 auto}
+  .ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;
+           padding-bottom:56px}
+  .ft h4{font:700 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;
+         color:rgba(255,255,255,.55);margin-bottom:18px}
+  .ft li+li{margin-top:11px}
+  .ft li a{font:400 13.5px/1.4 var(--sans);color:rgba(255,255,255,.78);
+           transition:color .18s var(--ease)}
+  .ft li a:hover{color:var(--gold-lt)}
+  .ft-bot{border-top:1px solid rgba(255,255,255,.10);padding:20px 0;
+    display:flex;justify-content:space-between;align-items:center;
+    font:400 11.5px/1 var(--sans);color:rgba(255,255,255,.52)}
+
+  .wrap{max-width:1440px;margin:0 auto;padding:0 64px}
+
+  .head{padding:52px 0 40px;display:flex;align-items:flex-end;
+        justify-content:space-between;gap:40px}
+  .h1{font:700 50px/.98 var(--disp);letter-spacing:-.012em;color:var(--ink)}
+  .h1s{font:400 16px/1.55 var(--serif);color:var(--ink-2);margin-top:12px;max-width:520px}
+  .seg{display:inline-flex;padding:4px;background:var(--paper-deep);border-radius:999px;
+       border:1px solid var(--rule);flex:none}
+  .seg button{font:700 12px/1 var(--sans);letter-spacing:.10em;text-transform:uppercase;
+    padding:11px 22px;border-radius:999px;border:0;cursor:pointer;background:transparent;
+    color:var(--ink-2);transition:background-color .2s var(--ease),color .2s var(--ease)}
+  .seg button:hover{color:var(--blue)}
+
+  /* --- Resultattavla --- */
+  .board{background:var(--night);color:#fff}
+  .board-in{max-width:1440px;margin:0 auto;padding:0 64px;
+            display:grid;grid-template-columns:1fr 1px 1fr}
+  .bcell{padding:28px 0;display:flex;align-items:center;gap:28px}
+  .bcell:last-child{padding-left:48px}
+  .bsep{background:rgba(255,255,255,.12)}
+  .blab{font:700 10px/1 var(--sans);letter-spacing:.20em;text-transform:uppercase;
+        color:var(--gold);margin-bottom:12px}
+  .bteam{display:flex;flex-direction:column;align-items:center;gap:9px;width:84px;flex:none}
+  .bteam span:last-child{font:600 11.5px/1.25 var(--sans);text-align:center;
+                         color:rgba(255,255,255,.82)}
+  .bscore{font:700 46px/1 var(--disp);font-variant-numeric:tabular-nums;
+          letter-spacing:-.035em}
+  .bmeta{font:500 12px/1.6 var(--sans);color:rgba(255,255,255,.58)}
+  .cd{display:flex;gap:14px}
+  .cdu{text-align:center}
+  .cdn{font:700 24px/1 var(--disp);font-variant-numeric:tabular-nums;display:block}
+  .cdl{font:600 8.5px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;
+       color:rgba(255,255,255,.45);display:block;margin-top:5px}
+
+  /* --- Innehåll --- */
+  .cols{display:grid;grid-template-columns:1fr 396px;gap:56px;padding:56px 0 72px;
+        align-items:start}
+  .tabs{display:flex;gap:0;border-bottom:2px solid var(--ink);margin-bottom:4px}
+  .tabs button{font:700 13px/1 var(--disp);letter-spacing:.13em;text-transform:uppercase;
+    padding:0 20px 16px;border:0;background:transparent;cursor:pointer;color:var(--muted);
+    position:relative;transition:color .2s var(--ease)}
+  .tabs button:first-child{padding-left:0}
+  .tabs button:hover{color:var(--ink)}
+  .tabmark{position:absolute;left:0;right:20px;bottom:-2px;height:2px}
+  .tabs button:first-child .tabmark{left:0;right:20px}
+
+  .lt{width:100%;border-collapse:collapse;font:500 13.5px/1 var(--sans)}
+  .lt th{font:700 9.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;
+         color:var(--muted);text-align:left;padding:18px 0 12px}
+  .lt td{padding:13px 0;border-top:1px solid var(--rule);color:var(--ink-2)}
+  .lt tr.me td{color:var(--blue);font-weight:700;background:rgba(3,70,148,.055)}
+  .lt tr.me td:first-child{box-shadow:inset 3px 0 0 var(--blue)}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:999px;margin-right:4px}
+
+  .fx li{display:flex;align-items:center;gap:20px;padding:16px 0;
+         border-top:1px solid var(--rule)}
+  .fx li:first-child{border-top:0}
+  .fx-d{font:600 12.5px/1.4 var(--sans);color:var(--ink-2);width:120px;flex:none;
+        font-variant-numeric:tabular-nums}
+  .fx-t{font:600 16px/1.25 var(--disp);color:var(--ink);flex:1}
+  .fx-c{font:500 11.5px/1 var(--sans);color:var(--muted);flex:none}
+
+  .side-h{font:700 13px/1 var(--disp);letter-spacing:.16em;text-transform:uppercase;
+          color:var(--ink);padding-bottom:16px;border-bottom:2px solid var(--ink)}
+  .side li{padding:18px 0;border-top:1px solid var(--rule)}
+  .side li:first-child{border-top:0}
+  .side-k{font:700 10px/1 var(--sans);letter-spacing:.15em;text-transform:uppercase;
+          color:var(--blue)}
+  .side-t{font:600 18px/1.24 var(--disp);color:var(--ink);margin-top:8px;display:block}
+  .side-m{font:500 11.5px/1 var(--sans);color:var(--muted);margin-top:8px}
+  .note{margin-top:18px;padding:16px 18px;border:1px solid var(--rule);
+        border-radius:6px;background:var(--card);
+        font:400 14px/1.55 var(--serif);color:var(--ink-2)}
+
+  </style>
+</helmet>
+<div style="width:1440px;background:var(--paper)">
+<header class="hdr">
+  <div class="rule3"></div>
+  <div class="hdr-in">
+    <a class="brand" href="#" aria-label="Chelsea Supporters Sweden — startsidan">
+      <span class="brand-mark"><svg  width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span>
+      <span>
+        <span class="brand-name">Chelsea Supporters</span>
+        <span class="brand-sub">Sweden</span>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Huvudmeny"><a href="#">Löpsedel</a><a href="#">Artiklar<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#" aria-current="page">Matcher<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg><span class="nav-mark" style="background:var(--gold)"></span></a><a href="#">Föreningen<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Guider<svg class="nav-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a><a href="#">Podden</a></nav>
+    <div class="hdr-cta">
+      <a class="shed" href="#">The Shed
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 17 17 7M9 7h8v8"/></svg>
+      </a>
+      <a class="btn btn-blue" href="#">Bli medlem</a>
+    </div>
+  </div>
+</header><section class="wrap"><div class="head"><div><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><span style="display:block;width:30px;height:3px;background:var(--gold);border-radius:2px" aria-hidden="true"></span><span class="kick" style="color:var(--gold-ink)">Matcher</span></div><h1 class="h1">Matchcenter</h1><p class="h1s">Senaste och nästa match, tabell och kommande möten — hämtat direkt från Chelsea FC.</p></div><div class="seg" role="group" aria-label="Välj lag"><button type="button" style="{{t0.style}}" onClick="{{t0.pick}}">Herrar</button><button type="button" style="{{t1.style}}" onClick="{{t1.pick}}">Damer</button></div></div></section><div class="board" style="display:{{boardH}}"><div class="board-in"><div class="bcell"><div style="flex:none"><p class="blab">Senaste match</p><div style="display:flex;align-items:center;gap:22px"><span class="bteam"><span style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:#034694;color:#fff;font:700 13px/1 var(--sans)">CHE</span><span>Chelsea</span></span><span class="bscore">4<span style="color:rgba(255,255,255,.28);margin:0 7px">:</span>3</span><span class="bteam"><span style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:#0057B8;color:#fff;font:700 13px/1 var(--sans)">BHA</span><span>Brighton</span></span></div></div><p class="bmeta" style="border-left:1px solid rgba(255,255,255,.12);padding-left:26px">Premier League<br>söndag 30 augusti · Stamford Bridge</p></div><div class="bsep"></div><div class="bcell"><div style="flex:none"><p class="blab">Nästa match</p><div style="display:flex;align-items:center;gap:22px"><span class="bteam"><span style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:#C81326;color:#fff;font:700 13px/1 var(--sans)">ARS</span><span>Arsenal</span></span><span style="font:700 16px/1 var(--disp);letter-spacing:.16em;color:rgba(255,255,255,.32)">VS</span><span class="bteam"><span style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:#034694;color:#fff;font:700 13px/1 var(--sans)">CHE</span><span>Chelsea</span></span></div></div><div style="border-left:1px solid rgba(255,255,255,.12);padding-left:26px"><p class="bmeta" style="margin-bottom:12px">Premier League<br>söndag 6 september 17:30 · Emirates Stadium</p><div class="cd"><span class="cdu"><span class="cdn">{{cdH.d}}</span><span class="cdl">dygn</span></span><span class="cdu"><span class="cdn">{{cdH.h}}</span><span class="cdl">tim</span></span><span class="cdu"><span class="cdn">{{cdH.m}}</span><span class="cdl">min</span></span><span class="cdu"><span class="cdn">{{cdH.s}}</span><span class="cdl">sek</span></span></div></div></div></div></div><div class="board" style="display:{{boardD}}"><div class="board-in"><div class="bcell"><div style="flex:none"><p class="blab">Senaste match</p><div style="display:flex;align-items:center;gap:22px"><span class="bteam"><span style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:#0067B1;color:#fff;font:700 13px/1 var(--sans)">RSO</span><span>Real Sociedad</span></span><span class="bscore">0<span style="color:rgba(255,255,255,.28);margin:0 7px">:</span>1</span><span class="bteam"><span style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:#034694;color:#fff;font:700 13px/1 var(--sans)">CHE</span><span>Chelsea Women</span></span></div></div><p class="bmeta" style="border-left:1px solid rgba(255,255,255,.12);padding-left:26px">Women’s Champions League – kval<br>onsdag 2 september · Estadio Izan · 6–2 sammanlagt</p></div><div class="bsep"></div><div class="bcell"><div style="flex:none"><p class="blab">Nästa match</p><div style="display:flex;align-items:center;gap:22px"><span class="bteam"><span style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:#034694;color:#fff;font:700 13px/1 var(--sans)">CHE</span><span>Chelsea Women</span></span><span style="font:700 16px/1 var(--disp);letter-spacing:.16em;color:rgba(255,255,255,.32)">VS</span><span class="bteam"><span style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:#670E36;color:#fff;font:700 13px/1 var(--sans)">AVL</span><span>Aston Villa</span></span></div></div><div style="border-left:1px solid rgba(255,255,255,.12);padding-left:26px"><p class="bmeta" style="margin-bottom:12px">Barclays Women’s Super League<br>lördag 5 september 13:30 · Stamford Bridge</p><div class="cd"><span class="cdu"><span class="cdn">{{cdD.d}}</span><span class="cdl">dygn</span></span><span class="cdu"><span class="cdn">{{cdD.h}}</span><span class="cdl">tim</span></span><span class="cdu"><span class="cdn">{{cdD.m}}</span><span class="cdl">min</span></span><span class="cdu"><span class="cdn">{{cdD.s}}</span><span class="cdl">sek</span></span></div></div></div></div></div><section class="wrap"><div class="cols"><div><div class="tabs" role="group" aria-label="Visa"><button type="button" style="{{b0.style}}" onClick="{{b0.pick}}">Tabell<span class="tabmark" style="background:{{b0.mark}}"></span></button><button type="button" style="{{b1.style}}" onClick="{{b1.pick}}">Kommande<span class="tabmark" style="background:{{b1.mark}}"></span></button></div><div style="display:{{tblH}}"><table class="lt"><caption style="caption-side:top;text-align:left;font:500 12px/1 var(--sans);color:var(--muted);padding:20px 0 0">Premier League · 2026/27</caption><thead><tr><th scope="col" style="width:34px">#</th><th scope="col">Lag</th><th scope="col" style="text-align:center;width:48px">S</th><th scope="col" style="text-align:center;width:48px">V</th><th scope="col" style="text-align:center;width:48px">O</th><th scope="col" style="text-align:center;width:48px">F</th><th scope="col" style="text-align:center;width:56px">+/−</th><th scope="col" style="width:78px">Form</th><th scope="col" style="text-align:right;width:40px">P</th></tr></thead><tbody><tr class=""><td>1</td><td style="font-weight:600">Manchester City</td><td style="text-align:center">2</td><td style="text-align:center">2</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">+4</td><td><span style="display:inline-flex"><span class="dot" style="background:#16a34a"></span><span class="dot" style="background:#16a34a"></span></span></td><td style="text-align:right;font-weight:700">6</td></tr><tr class=""><td>2</td><td style="font-weight:600">Arsenal</td><td style="text-align:center">2</td><td style="text-align:center">2</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">+4</td><td><span style="display:inline-flex"><span class="dot" style="background:#16a34a"></span><span class="dot" style="background:#16a34a"></span></span></td><td style="text-align:right;font-weight:700">6</td></tr><tr class=""><td>3</td><td style="font-weight:600">Hull City</td><td style="text-align:center">2</td><td style="text-align:center">2</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">+3</td><td><span style="display:inline-flex"><span class="dot" style="background:#16a34a"></span><span class="dot" style="background:#16a34a"></span></span></td><td style="text-align:right;font-weight:700">6</td></tr><tr class="me"><td>4</td><td style="font-weight:600">Chelsea</td><td style="text-align:center">2</td><td style="text-align:center">2</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">+2</td><td><span style="display:inline-flex"><span class="dot" style="background:#16a34a"></span><span class="dot" style="background:#16a34a"></span></span></td><td style="text-align:right;font-weight:700">6</td></tr><tr class=""><td>5</td><td style="font-weight:600">Brentford</td><td style="text-align:center">2</td><td style="text-align:center">1</td><td style="text-align:center">1</td><td style="text-align:center">0</td><td style="text-align:center">+3</td><td><span style="display:inline-flex"><span class="dot" style="background:#94a3b8"></span><span class="dot" style="background:#16a34a"></span></span></td><td style="text-align:right;font-weight:700">4</td></tr><tr class=""><td>6</td><td style="font-weight:600">Newcastle</td><td style="text-align:center">2</td><td style="text-align:center">1</td><td style="text-align:center">1</td><td style="text-align:center">0</td><td style="text-align:center">+2</td><td><span style="display:inline-flex"><span class="dot" style="background:#16a34a"></span><span class="dot" style="background:#94a3b8"></span></span></td><td style="text-align:right;font-weight:700">4</td></tr><tr class=""><td>7</td><td style="font-weight:600">Everton</td><td style="text-align:center">2</td><td style="text-align:center">1</td><td style="text-align:center">1</td><td style="text-align:center">0</td><td style="text-align:center">+2</td><td><span style="display:inline-flex"><span class="dot" style="background:#94a3b8"></span><span class="dot" style="background:#16a34a"></span></span></td><td style="text-align:right;font-weight:700">4</td></tr><tr class=""><td>8</td><td style="font-weight:600">Leeds United</td><td style="text-align:center">2</td><td style="text-align:center">1</td><td style="text-align:center">1</td><td style="text-align:center">0</td><td style="text-align:center">+1</td><td><span style="display:inline-flex"><span class="dot" style="background:#94a3b8"></span><span class="dot" style="background:#16a34a"></span></span></td><td style="text-align:right;font-weight:700">4</td></tr></tbody></table></div><div style="display:{{tblD}}"><table class="lt"><caption style="caption-side:top;text-align:left;font:500 12px/1 var(--sans);color:var(--muted);padding:20px 0 0">Barclays Women’s Super League · 2026/27</caption><thead><tr><th scope="col" style="width:34px">#</th><th scope="col">Lag</th><th scope="col" style="text-align:center;width:48px">S</th><th scope="col" style="text-align:center;width:48px">V</th><th scope="col" style="text-align:center;width:48px">O</th><th scope="col" style="text-align:center;width:48px">F</th><th scope="col" style="text-align:center;width:56px">+/−</th><th scope="col" style="width:78px">Form</th><th scope="col" style="text-align:right;width:40px">P</th></tr></thead><tbody><tr class=""><td>1</td><td style="font-weight:600">Arsenal Women</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td><span style="display:inline-flex"></span></td><td style="text-align:right;font-weight:700">0</td></tr><tr class=""><td>2</td><td style="font-weight:600">Aston Villa Women</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td><span style="display:inline-flex"></span></td><td style="text-align:right;font-weight:700">0</td></tr><tr class=""><td>3</td><td style="font-weight:600">Birmingham City Women</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td><span style="display:inline-flex"></span></td><td style="text-align:right;font-weight:700">0</td></tr><tr class=""><td>4</td><td style="font-weight:600">Brighton Women</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td><span style="display:inline-flex"></span></td><td style="text-align:right;font-weight:700">0</td></tr><tr class=""><td>5</td><td style="font-weight:600">Everton Women</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td><span style="display:inline-flex"></span></td><td style="text-align:right;font-weight:700">0</td></tr><tr class="me"><td>6</td><td style="font-weight:600">Chelsea Women</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td><span style="display:inline-flex"></span></td><td style="text-align:right;font-weight:700">0</td></tr><tr class=""><td>7</td><td style="font-weight:600">Leicester City Women</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td><span style="display:inline-flex"></span></td><td style="text-align:right;font-weight:700">0</td></tr><tr class=""><td>8</td><td style="font-weight:600">Liverpool Women</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td style="text-align:center">0</td><td><span style="display:inline-flex"></span></td><td style="text-align:right;font-weight:700">0</td></tr></tbody></table><p class="note">Serien har inte startat än. Tabellen fylls i så fort den första omgången är spelad.</p></div><div style="display:{{fxH}}"><ul class="fx" style="margin-top:24px"><li><span class="fx-d">sön 6 sep 17:30</span><span class="fx-t">Arsenal – Chelsea</span><span class="fx-c">Premier League</span></li><li><span class="fx-d">ons 9 sep 21:00</span><span class="fx-t">Chelsea – Leeds United</span><span class="fx-c">Carabao Cup</span></li><li><span class="fx-d">lör 12 sep 15:00</span><span class="fx-t">Chelsea – Hull City</span><span class="fx-c">Premier League</span></li><li><span class="fx-d">fre 18 sep 20:00</span><span class="fx-t">Brentford – Chelsea</span><span class="fx-c">Premier League</span></li><li><span class="fx-d">lör 10 okt 15:00</span><span class="fx-t">Chelsea – Bournemouth</span><span class="fx-c">Premier League</span></li></ul></div><div style="display:{{fxD}}"><ul class="fx" style="margin-top:24px"><li><span class="fx-d">lör 5 sep 13:30</span><span class="fx-t">Chelsea Women – Aston Villa Women</span><span class="fx-c">WSL</span></li><li><span class="fx-d">sön 13 sep 13:00</span><span class="fx-t">Man United Women – Chelsea Women</span><span class="fx-c">WSL</span></li><li><span class="fx-d">lör 19 sep 13:45</span><span class="fx-t">Chelsea Women – Birmingham City Women</span><span class="fx-c">WSL</span></li><li><span class="fx-d">sön 27 sep 17:30</span><span class="fx-t">Chelsea Women – Arsenal Women</span><span class="fx-c">WSL</span></li><li><span class="fx-d">sön 4 okt 15:00</span><span class="fx-t">West Ham Women – Chelsea Women</span><span class="fx-c">WSL</span></li></ul></div><div style="display:flex;gap:12px;margin-top:32px"><a class="btn btn-line" href="#">Hela spelschemat</a><a class="btn btn-line" href="#">Full tabell</a></div></div><aside><p class="side-h">Från matcherna</p><ul class="side"><li><a class="gz" href="#" style="display:block"><span class="side-k">Spelarbetyg</span><span class="side-t hl">Spelarbetyg: Chelsea – Brighton</span><span class="side-m">31 aug · Redaktionen</span></a></li><li><a class="gz" href="#" style="display:block"><span class="side-k">Matchreferat</span><span class="side-t hl">Fyra framåt, tre bakåt och tre poäng kvar i London</span><span class="side-m">30 aug · Redaktionen</span></a></li><li><a class="gz" href="#" style="display:block"><span class="side-k">Inför match</span><span class="side-t hl">Inför Arsenal borta: tre frågor före derbyt</span><span class="side-m">4 sep · Redaktionen</span></a></li></ul><div style="margin-top:28px;padding:22px 24px;background:var(--blue-dk);border-radius:6px;color:#fff"><p class="kick" style="color:var(--gold)">Mötesplatser</p><p style="font:600 19px/1.3 var(--disp);margin-top:10px">Var ses vi på söndag?</p><p style="font:400 14px/1.6 var(--serif);color:rgba(255,255,255,.78);margin-top:8px">Nio pubar i landet visar Arsenal–Chelsea. Hitta närmaste.</p><a href="#" style="display:inline-flex;align-items:center;gap:7px;margin-top:14px;font:700 11.5px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--gold)">Se mötesplatser<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a></div></aside></div></section>
+<footer class="ft">
+  <div class="ft-in">
+    <div class="ft-grid">
+      <div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="width:40px;height:40px;border-radius:999px;
+                background:rgba(255,255,255,.09);display:flex;align-items:center;
+                justify-content:center"><svg  width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="30" stroke="#FFFFFF" stroke-width="1.5"/><path d="M32 12v40M12 32h40" stroke="#FFFFFF" stroke-width="1"/><circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-width="1.5"/></svg></span>
+          <span>
+            <span style="font:700 15px/1.05 var(--disp);letter-spacing:.04em;
+                  text-transform:uppercase;display:block">Chelsea Supporters</span>
+            <span style="font:700 9px/1 var(--sans);letter-spacing:.28em;
+                  text-transform:uppercase;color:var(--gold);display:block;
+                  margin-top:3px">Sweden</span>
+          </span>
+        </div>
+        <p style="margin-top:18px;max-width:280px;font:400 13.5px/1.65 var(--sans);
+                  color:rgba(255,255,255,.68)">
+          Sveriges supporterförening för Chelsea FC. Matchkvällar, resor,
+          referat och gemenskap — sedan 1996.
+        </p>
+        <a href="#" style="margin-top:18px;display:inline-flex;align-items:center;gap:7px;
+           font:600 12.5px/1 var(--sans);color:var(--gold)">
+          Diskutera i The Shed
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+      </div><div><h4>Innehåll</h4><ul><li><a href="#">Löpsedel</a></li><li><a href="#">Artiklar</a></li><li><a href="#">Matchreferat</a></li><li><a href="#">Spelarbetyg</a></li><li><a href="#">ChelseaPodden</a></li></ul></div><div><h4>Matcher</h4><ul><li><a href="#">Matchcenter</a></li><li><a href="#">Spelschema</a></li><li><a href="#">Tabell</a></li><li><a href="#">Mötesplatser</a></li><li><a href="#">Biljetter</a></li></ul></div><div><h4>Föreningen</h4><ul><li><a href="#">Bli medlem</a></li><li><a href="#">Evenemang</a></li><li><a href="#">Om oss</a></li><li><a href="#">Redaktionen</a></li><li><a href="#">Kontakt</a></li></ul></div>
+    </div>
+    <div class="ft-bot">
+      <span>© 2026 Chelsea Supporters Sweden · Org.nr [ORGANISATIONSNUMMER]</span>
+      <span>info@chelseasweden.se</span>
+    </div>
+  </div>
+</footer></div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+
+/* Ingen sc-for och ingen sc-if: allt innehåll ligger som vanlig HTML, och
+   logiken styr bara VAD som syns. Det gör texten redigerbar direkt i canvasen
+   och håller mallen ur vägen för HTML-parserns tabellregler. */
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.kickoff = [
+      Date.UTC(2026, 8, 6, 15, 30, 0),  /* Arsenal–Chelsea, 17:30 svensk tid */
+      Date.UTC(2026, 8, 5, 11, 30, 0)   /* Chelsea Women–Aston Villa, 13:30 */
+    ];
+    this.state = {
+      team: 0,
+      tab: 0,
+      cd: [{ d: '00', h: '00', m: '00', s: '00' }, { d: '00', h: '00', m: '00', s: '00' }]
+    };
+  }
+  componentDidMount() {
+    this.update();
+    this.timer = setInterval(() => this.update(), 1000);
+  }
+  componentWillUnmount() {
+    if (this.timer) clearInterval(this.timer);
+  }
+  split(target) {
+    let ms = target - Date.now();
+    if (ms < 0) ms = 0;
+    const t = Math.floor(ms / 1000);
+    const p = (n) => (n < 10 ? '0' : '') + n;
+    return {
+      d: p(Math.floor(t / 86400)),
+      h: p(Math.floor((t % 86400) / 3600)),
+      m: p(Math.floor((t % 3600) / 60)),
+      s: p(t % 60)
+    };
+  }
+  update() {
+    this.setState({ cd: [this.split(this.kickoff[0]), this.split(this.kickoff[1])] });
+  }
+  renderVals() {
+    const on = 'background:#101B2B;color:#ffffff';
+    const team = this.state.team;
+    const tab = this.state.tab;
+    const show = (yes) => (yes ? 'block' : 'none');
+    return {
+      cdH: this.state.cd[0],
+      cdD: this.state.cd[1],
+      boardH: show(team === 0),
+      boardD: show(team === 1),
+      tblH: show(team === 0 && tab === 0),
+      tblD: show(team === 1 && tab === 0),
+      fxH: show(team === 0 && tab === 1),
+      fxD: show(team === 1 && tab === 1),
+      t0: { pick: () => this.setState({ team: 0 }), style: team === 0 ? on : '' },
+      t1: { pick: () => this.setState({ team: 1 }), style: team === 1 ? on : '' },
+      b0: {
+        pick: () => this.setState({ tab: 0 }),
+        style: tab === 0 ? 'color:#101B2B' : '',
+        mark: tab === 0 ? '#D4A843' : 'transparent'
+      },
+      b1: {
+        pick: () => this.setState({ tab: 1 }),
+        style: tab === 1 ? 'color:#101B2B' : '',
+        mark: tab === 1 ? '#D4A843' : 'transparent'
+      }
+    };
+  }
+}
+
+</script>
+</body>
+</html>
