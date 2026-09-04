@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { getSiteUrl } from '../../lib/env'
+
 import {
   defineCollection,
   isAdminOrEditor,
@@ -28,7 +30,7 @@ export const Pages = defineCollection({
     group: 'Innehåll',
     preview: (doc) => {
       if (typeof doc?.slug !== 'string' || !doc.slug) return null
-      const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+      const base = getSiteUrl()
       return `${base}/sv/${doc.slug}`
     },
   },

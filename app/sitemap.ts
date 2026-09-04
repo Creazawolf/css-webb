@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 
+import { getSiteUrl } from '@/lib/env'
 import { getAllPageSlugs } from '@/lib/pages'
 import { getAllPostSlugs } from '@/lib/posts'
 
@@ -21,8 +22,7 @@ const BASE_PATHS = [
 
 const ARTICLE_TYPES = ['referat', 'spelarbetyg', 'infor', 'kronika']
 
-const resolveSiteUrl = (): string =>
-  (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
+const resolveSiteUrl = (): string => getSiteUrl()
 
 /**
  * Sitemap.

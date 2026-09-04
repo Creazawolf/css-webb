@@ -12,25 +12,17 @@ import sharp from 'sharp'
 import { allCollections } from './payload/collections'
 import { allGlobals } from './payload/globals'
 import { Users } from './payload/collections/Users'
+import { envString, getAllowedOrigins } from './lib/env'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const databaseURL =
-  process.env.DATABASE_URL ??
-  process.env.POSTGRES_URL ??
-  process.env.POSTGRES_PRISMA_URL ??
-  process.env.POSTGRES_URL_NON_POOLING ??
-  process.env.DATABASE_URL_DIRECT
-const siteURL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-const allowedOrigins = Array.from(
-  new Set(
-    [
-      'http://localhost:3000',
-      siteURL,
-      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-    ].filter((origin): origin is string => Boolean(origin)),
-  ),
-)
+  envString('DATABASE_URL') ??
+  envString('POSTGRES_URL') ??
+  envString('POSTGRES_PRISMA_URL') ??
+  envString('POSTGRES_URL_NON_POOLING') ??
+  envString('DATABASE_URL_DIRECT')
+const allowedOrigins = getAllowedOrigins()
 
 if (!databaseURL) {
   throw new Error(

@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 import NavBar from '@/components/NavBar'
 import NextMatchBar from '@/components/NextMatchBar'
 import { getNextFixture } from '@/lib/api-football'
+import { getSiteUrl } from '@/lib/env'
 import { getNavigation, getSiteConfig } from '@/lib/site'
 
 import '../../globals.css'
@@ -34,7 +35,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const site = await getSiteConfig(locale)
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+  const base = getSiteUrl()
 
   return {
     metadataBase: new URL(base),
