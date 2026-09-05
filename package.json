@@ -24,6 +24,7 @@
     "lint:fix": "eslint . --fix",
     "seed": "tsx scripts/seed.ts",
     "seed:news": "tsx scripts/seed-news.ts",
+    "seed:foreningen": "tsx scripts/seed-foreningen.ts",
     "payload:migrate:ci": "tsx scripts/migrate-ci.ts"
   },
   "dependencies": {

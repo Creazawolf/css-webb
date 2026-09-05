@@ -348,6 +348,14 @@ export interface Post {
    */
   author?: (number | null) | User;
   /**
+   * För texter som flyttats hit utifrån. Visas som skribent när personen inte har ett konto här. Lämna tom för egna texter.
+   */
+  byline?: string | null;
+  /**
+   * Var texten publicerades först. Visas som en källhänvisning under artikeln.
+   */
+  sourceUrl?: string | null;
+  /**
    * Fylls i automatiskt när du publicerar.
    */
   publishedAt?: string | null;
@@ -950,6 +958,8 @@ export interface PostsSelect<T extends boolean = true> {
       };
   slug?: T;
   author?: T;
+  byline?: T;
+  sourceUrl?: T;
   publishedAt?: T;
   featured?: T;
   updatedAt?: T;

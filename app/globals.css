@@ -355,7 +355,11 @@ html[data-js='on'] .reveal:not([data-revealed='true']) {
   color: #1a2433;
 }
 
-.article-content > * + * {
+/* Payloads RichText lägger ett eget omslag runt innehållet, så avstånden
+   måste nå ett steg djupare än direkt barn. Utan det klibbar styckena ihop
+   i CMS-sidornas textblock. */
+.article-content > * + *,
+.article-content > .payload-richtext > * + * {
   margin-top: 1.5em;
 }
 

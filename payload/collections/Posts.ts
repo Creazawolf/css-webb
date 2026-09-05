@@ -218,6 +218,26 @@ export const Posts = defineCollection({
       },
     },
     {
+      name: 'byline',
+      type: 'text',
+      label: 'Ursprunglig skribent',
+      maxLength: 120,
+      admin: {
+        position: 'sidebar',
+        description:
+          'För texter som flyttats hit utifrån. Visas som skribent när personen inte har ett konto här. Lämna tom för egna texter.',
+      },
+    },
+    {
+      name: 'sourceUrl',
+      type: 'text',
+      label: 'Ursprunglig länk',
+      admin: {
+        position: 'sidebar',
+        description: 'Var texten publicerades först. Visas som en källhänvisning under artikeln.',
+      },
+    },
+    {
       name: 'publishedAt',
       type: 'date',
       label: 'Publiceringsdatum',

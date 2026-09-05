@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 import type { Route } from 'next'
 
 import { formatDateSv } from '@/lib/format-date'
@@ -94,7 +95,7 @@ function countWords(node: unknown): number {
   return 0
 }
 
-function FactRow({ label, value }: { label: string; value: string }) {
+function FactRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <>
       <dt className="border-t border-[rgb(var(--color-rule))] py-[13px] text-[12px] font-medium leading-none text-[rgb(var(--color-muted))] first-of-type:border-t-0">
@@ -116,6 +117,8 @@ export default async function ArtikelPage({ params }: Props) {
   const categoryName = isCategory(post.category) ? post.category.name : null
   const typeLabel = ARTICLE_TYPE_LABELS[post.articleType ?? 'nyhet'] ?? null
   const author = isUser(post.author) ? post.author : null
+  // Texter som flyttats hit har ingen användare kopplad — då bär bylinen namnet.
+  const writerName = author?.name ?? (typeof post.byline === 'string' ? post.byline : '')
   const date = post.publishedAt ?? post.createdAt
 
   const imageUrl = mediaUrl(post.featuredImage, 'og')
@@ -190,7 +193,7 @@ export default async function ArtikelPage({ params }: Props) {
         )}
 
         <div className="mt-[30px] flex max-w-[820px] flex-wrap items-center gap-4 border-y border-[rgb(var(--color-rule))] py-4">
-          {author &&
+          {writerName &&
             (avatarUrl ? (
               <Image
                 src={avatarUrl}
@@ -201,13 +204,13 @@ export default async function ArtikelPage({ params }: Props) {
               />
             ) : (
               <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-[rgb(var(--color-chelsea-blue-dark))] text-[14px] font-bold leading-none text-white">
-                {author.name.slice(0, 1).toUpperCase()}
+                {writerName.slice(0, 1).toUpperCase()}
               </span>
             ))}
           <div className="min-w-0 flex-1">
-            {author && (
+            {writerName && (
               <p className="text-[13.5px] font-semibold leading-[1.3] text-[rgb(var(--color-text))]">
-                {author.name}
+                {writerName}
               </p>
             )}
             <p className="mt-[3px] text-[11.5px] font-medium leading-[1.3] text-[rgb(var(--color-muted))]">
@@ -310,8 +313,23 @@ export default async function ArtikelPage({ params }: Props) {
               {typeLabel && <FactRow label="Typ" value={typeLabel} />}
               {categoryName && <FactRow label="Kategori" value={categoryName} />}
               <FactRow label="Publicerad" value={formatDateSv(date)} />
-              {author && <FactRow label="Skribent" value={author.name} />}
+              {writerName && <FactRow label="Skribent" value={writerName} />}
               <FactRow label="Lästid" value={`${readingMinutes} min läsning`} />
+              {typeof post.sourceUrl === 'string' && post.sourceUrl && (
+                <FactRow
+                  label="Först publicerad"
+                  value={
+                    <a
+                      href={post.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2 hover:text-[rgb(var(--color-chelsea-blue))]"
+                    >
+                      SvenskaFans
+                    </a>
+                  }
+                />
+              )}
             </dl>
           </div>
 

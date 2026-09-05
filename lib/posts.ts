@@ -21,7 +21,7 @@ export type ArticleCard = {
   title: string
   slug: string
   excerpt: string
-  /** Etikett att visa på kortet — kategori om den finns, annars artikeltyp. */
+  /** Etikett att visa på kortet — artikeltypen, samma ord som filtren använder. */
   label: string
   articleType: string
   category: string
