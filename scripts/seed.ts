@@ -154,7 +154,9 @@ const NAV_ITEMS = [
     ],
   },
   { label: 'Podden', link: '/podden', children: [] },
-  { label: 'Medlemskap', link: '/medlemskap', children: [] },
+  // Medlemskap ligger inte i menyraden — "Bli medlem"-knappen till höger går
+  // till samma sida, och två ingångar bredvid varandra tar bara plats från de
+  // poster som inte har någon annan väg in.
 ]
 
 async function seedCategories(payload: Payload): Promise<void> {

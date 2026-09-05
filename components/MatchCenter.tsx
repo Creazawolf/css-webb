@@ -11,6 +11,12 @@ type MatchCenterProps = {
   locale: string
   herrar?: MatchCenterData | null | undefined
   damer?: MatchCenterData | null | undefined
+  /**
+   * Antal lag att visa på var sida om Chelsea i tabellen. Utelämnas den visas
+   * hela serien — det är vad man vill på matchsidan. Startsidan skickar in ett
+   * tal, så att tabellen blir en lägesbild i stället för en lång lista.
+   */
+  standingsRadius?: number
 }
 
 const tableTabs = ['Tabell', 'Kommande'] as const
@@ -36,6 +42,26 @@ const TH =
 const TD = 'border-t border-[rgb(var(--color-rule))] py-[13px]'
 
 const ABBR = 'cursor-help no-underline'
+
+const isChelsea = (team: string): boolean => team.toLowerCase().includes('chelsea')
+
+/**
+ * Klipper tabellen till ett fönster runt Chelsea, med lika många lag över som
+ * under. Ligger laget nära toppen eller botten skjuts fönstret in så att det
+ * ändå blir lika många rader — annars skulle tabellen krympa just de omgångar
+ * då den är som mest intressant.
+ */
+function windowAroundChelsea(rows: StandingRow[], radius: number): StandingRow[] {
+  const size = radius * 2 + 1
+  if (rows.length <= size) return rows
+
+  const index = rows.findIndex((row) => isChelsea(row.team))
+  // Hittas inte Chelsea (fel serie, ändrat lagnamn) är toppen det rimliga.
+  if (index < 0) return rows.slice(0, size)
+
+  const start = Math.min(Math.max(index - radius, 0), rows.length - size)
+  return rows.slice(start, start + size)
+}
 
 type Countdown = { d: string; h: string; m: string; s: string }
 
@@ -96,7 +122,7 @@ function EmptyState({ children }: { children: React.ReactNode }) {
 }
 
 function BoardTeam({ logo, abbr, name }: { logo: string; abbr: string; name: string }) {
-  const isChelsea = name.toLowerCase().includes('chelsea')
+  const chelsea = isChelsea(name)
 
   return (
     <span className="flex w-[84px] flex-none flex-col items-center gap-[9px]">
@@ -111,7 +137,7 @@ function BoardTeam({ logo, abbr, name }: { logo: string; abbr: string; name: str
       ) : (
         <span
           className={`flex h-11 w-11 items-center justify-center rounded-full text-[13px] font-bold leading-none text-white ${
-            isChelsea ? 'bg-[rgb(var(--color-chelsea-blue))]' : 'bg-white/15'
+            chelsea ? 'bg-[rgb(var(--color-chelsea-blue))]' : 'bg-white/15'
           }`}
         >
           {abbr}
@@ -317,9 +343,11 @@ function Form({ form }: { form: string[] }) {
 function StandingsTable({
   standings,
   leagueName,
+  radius,
 }: {
   standings: StandingRow[]
   leagueName: string
+  radius?: number | undefined
 }) {
   if (standings.length === 0) {
     return (
@@ -329,11 +357,19 @@ function StandingsTable({
     )
   }
 
+  const rows = radius === undefined ? standings : windowAroundChelsea(standings, radius)
+  const trimmed = rows.length < standings.length
+  // Säg ut att tabellen är beskuren. Ett utsnitt som ser ut som hela serien är
+  // vilseledande — särskilt när den inte börjar på plats 1.
+  const caption = trimmed
+    ? `${leagueName || 'Tabellställning'} · plats ${rows[0]?.pos}–${rows[rows.length - 1]?.pos} av ${standings.length}`
+    : leagueName || 'Tabellställning'
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-left text-[13.5px] font-medium">
         <caption className="caption-top pt-5 text-left text-[12px] font-medium text-[rgb(var(--color-muted))]">
-          {leagueName || 'Tabellställning'}
+          {caption}
         </caption>
         <thead>
           <tr>
@@ -381,24 +417,24 @@ function StandingsTable({
           </tr>
         </thead>
         <tbody>
-          {standings.map((row) => {
-            const isChelsea = row.team.toLowerCase().includes('chelsea')
-            const tone = isChelsea
+          {rows.map((row) => {
+            const chelsea = isChelsea(row.team)
+            const tone = chelsea
               ? 'font-bold text-[rgb(var(--color-chelsea-blue))]'
               : 'text-[rgb(var(--color-ink-2))]'
             return (
-              <tr key={row.teamId} className={isChelsea ? 'bg-[rgba(3,70,148,0.055)]' : ''}>
+              <tr key={row.teamId} className={chelsea ? 'bg-[rgba(3,70,148,0.055)]' : ''}>
                 <td
                   className={`${TD} ${tone}`}
                   style={
-                    isChelsea
+                    chelsea
                       ? { boxShadow: 'inset 3px 0 0 rgb(var(--color-chelsea-blue))' }
                       : undefined
                   }
                 >
                   {row.pos}
                 </td>
-                <td className={`${TD} ${tone} ${isChelsea ? '' : 'font-semibold'}`}>{row.team}</td>
+                <td className={`${TD} ${tone} ${chelsea ? '' : 'font-semibold'}`}>{row.team}</td>
                 <td className={`${TD} ${tone} text-center`}>{row.played}</td>
                 <td className={`${TD} ${tone} hidden text-center sm:table-cell`}>{row.won}</td>
                 <td className={`${TD} ${tone} hidden text-center sm:table-cell`}>{row.drawn}</td>
@@ -456,7 +492,12 @@ function UpcomingList({ matches }: { matches: MatchData[] }) {
  * den visar vi en tydlig tomtext — aldrig påhittade resultat, som skulle vara
  * sämre än inget alls.
  */
-export default function MatchCenter({ locale, herrar, damer }: MatchCenterProps) {
+export default function MatchCenter({
+  locale,
+  herrar,
+  damer,
+  standingsRadius,
+}: MatchCenterProps) {
   const [activeTeam, setActiveTeam] = useState<'herrar' | 'damer'>('herrar')
   const [activeTab, setActiveTab] = useState<TableTab>('Tabell')
 
@@ -548,7 +589,11 @@ export default function MatchCenter({ locale, herrar, damer }: MatchCenterProps)
           </div>
 
           {activeTab === 'Tabell' ? (
-            <StandingsTable standings={data.standings} leagueName={data.leagueName} />
+            <StandingsTable
+              standings={data.standings}
+              leagueName={data.leagueName}
+              radius={standingsRadius}
+            />
           ) : (
             <UpcomingList matches={data.upcoming} />
           )}

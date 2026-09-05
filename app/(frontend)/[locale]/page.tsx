@@ -46,7 +46,9 @@ async function HeroModule({ locale }: { locale: string }) {
 
 async function MatchCenterModule({ locale }: { locale: string }) {
   const { herrar, damer } = await getMatchCenterData()
-  return <MatchCenter locale={locale} herrar={herrar} damer={damer} />
+  // Fyra lag över och under Chelsea räcker för att visa läget. Hela serien tar
+  // en halv skärm i anspråk på mobilen, och finns ett klick bort.
+  return <MatchCenter locale={locale} herrar={herrar} damer={damer} standingsRadius={4} />
 }
 
 async function NewsModule({ locale }: { locale: string }) {
@@ -105,10 +107,6 @@ export default async function Startsida({ params }: PageProps) {
         <HeroModule locale={locale} />
       </Suspense>
 
-      <Suspense fallback={<MatchCenterSkeleton />}>
-        <MatchCenterModule locale={locale} />
-      </Suspense>
-
       <Suspense fallback={<NewsGridSkeleton />}>
         <NewsModule locale={locale} />
       </Suspense>
@@ -118,6 +116,13 @@ export default async function Startsida({ params }: PageProps) {
           <ChelseaNewsModule />
         </Suspense>
       )}
+
+      {/* Matchcentret ligger efter nyheterna. Föreningens egna texter är det
+          löpsedeln finns till för; ställningen är en avstämning man scrollar
+          ner till, och nästa match står redan i matchremsan i sidhuvudet. */}
+      <Suspense fallback={<MatchCenterSkeleton />}>
+        <MatchCenterModule locale={locale} />
+      </Suspense>
 
       <Suspense fallback={null}>
         <EventsModule locale={locale} />

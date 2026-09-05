@@ -226,10 +226,10 @@ export default function NavBar({
     return (
       <div
         id={`undermeny-${index}`}
-        className="animate-fade-in absolute inset-x-0 top-full z-30 hidden border-y border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))] shadow-[0_20px_44px_rgba(2,32,69,0.13)] lg:block"
+        className="animate-fade-in absolute inset-x-0 top-full z-30 hidden border-y border-[rgb(var(--color-rule))] bg-[rgb(var(--color-card))] shadow-[0_20px_44px_rgba(2,32,69,0.13)] xl:block"
       >
         <div
-          className={`${WRAP} grid gap-12 pb-[38px] pt-[34px] lg:grid-cols-[1fr_1fr_340px]`}
+          className={`${WRAP} grid gap-12 pb-[38px] pt-[34px] xl:grid-cols-[1fr_1fr_340px]`}
         >
           {columns.map((column, columnIndex) => (
             <div key={`kolumn-${columnIndex}`}>
@@ -342,7 +342,7 @@ export default function NavBar({
       />
 
       <div
-        className={`${WRAP} flex items-stretch gap-6 transition-[height] duration-200 lg:gap-10 ${
+        className={`${WRAP} flex items-stretch gap-6 transition-[height] duration-200 ${
           compact ? 'h-[58px]' : 'h-[76px]'
         }`}
       >
@@ -383,10 +383,13 @@ export default function NavBar({
           </span>
         </Link>
 
-        {/* Desktopmeny */}
+        {/* Desktopmenyn ryms först vid 1280px. Under det tar hamburgaren över
+            — hellre det än en rad som klipps mitt i ett ord. Lägger någon till
+            fler poster i CMS:et än raden rymmer blir den scrollbar i stället
+            för avskuren, så ingen menypost försvinner tyst. */}
         <nav
           aria-label="Huvudmeny"
-          className="hidden min-w-0 flex-1 items-stretch overflow-x-clip lg:flex"
+          className="hidden min-w-0 flex-1 items-stretch overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] xl:flex [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item, index) => {
             const active = isActive(item)
@@ -481,7 +484,7 @@ export default function NavBar({
             aria-label={isOpen ? 'Stäng meny' : 'Öppna meny'}
             aria-expanded={isOpen}
             aria-controls="mobilmeny"
-            className="-mr-2 inline-flex h-11 w-11 items-center justify-center text-[rgb(var(--color-text))] lg:hidden"
+            className="-mr-2 inline-flex h-11 w-11 items-center justify-center text-[rgb(var(--color-text))] xl:hidden"
           >
             <span className="relative h-[18px] w-[26px]" aria-hidden="true">
               <span
@@ -502,7 +505,7 @@ export default function NavBar({
       {isOpen && (
         <div
           id="mobilmeny"
-          className="fixed inset-0 z-[100] flex flex-col bg-[rgb(var(--color-night))] text-white lg:hidden"
+          className="fixed inset-0 z-[100] flex flex-col bg-[rgb(var(--color-night))] text-white xl:hidden"
         >
           <div className="flex h-[62px] shrink-0 items-center justify-between border-b border-white/10 px-4 sm:px-6">
             <span className="flex items-center gap-[9px]">

@@ -61,6 +61,31 @@ export const importSvenskaFans: Endpoint = {
       return Response.json({ done: true, task: 'foreningen' })
     }
 
+    // Tar bort menyvalet Medlemskap. "Bli medlem"-knappen går till samma sida,
+    // och den dubbletten tar plats från de poster som inte har någon annan väg
+    // in. Bara den posten rörs — resten av menyn lämnas som redaktionen satt
+    // den.
+    if (url.searchParams.get('task') === 'meny') {
+      const nav = await req.payload.findGlobal({ slug: 'navigation', depth: 0 })
+      const items = Array.isArray(nav.items) ? nav.items : []
+      const kept = items.filter((item) => item?.link !== '/medlemskap')
+
+      if (kept.length !== items.length) {
+        await req.payload.updateGlobal({
+          slug: 'navigation',
+          data: { items: kept },
+          overrideAccess: true,
+        })
+      }
+
+      return Response.json({
+        done: true,
+        task: 'meny',
+        removed: items.length - kept.length,
+        items: kept.map((item) => item?.label),
+      })
+    }
+
     // Rensar bort demoartiklarna. Bara texter som saknar ursprungslänk kan
     // träffas, så en importerad artikel med samma slug står kvar.
     if (url.searchParams.get('task') === 'rensa-demo') {
