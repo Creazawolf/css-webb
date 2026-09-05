@@ -26,6 +26,24 @@ const isAuthorised = (req: PayloadRequest): boolean => {
   return a.length === b.length && timingSafeEqual(a, b)
 }
 
+/**
+ * Demoartiklarna från `pnpm seed:news`. Rubriker och citat i dem är påhittade
+ * — de duger som utfyllnad medan sajten byggs, men får inte ligga kvar när
+ * föreningen visar upp den. Slugarna räknas upp här i stället för att matchas
+ * på ett mönster, så att rensningen omöjligt kan råka ta en riktig artikel.
+ */
+const DEMO_SLUGS = [
+  'arsenal-21-chelsea-bittert-derby-pa-emirates',
+  'rosenior-vi-maste-forbattra-disciplinen',
+  'champions-league-chelsea-stalls-mot-psg-i-attondelen',
+  'ifs-ny-huvudsponsor-loggan-pa-trojan-resten-av-sasongen',
+  'resegrupp-till-london-psg-matchen-i-mars',
+  'topp-fyra-racet-sa-ser-tabellsituationen-ut',
+  'pubkvall-pa-the-aston-i-stockholm-chelsea-vs-psg',
+  'transferfonstret-chalobah-kan-lamna-nmecha-intresserar',
+  'rosenior-hyllas-efter-starten-basta-sedan-conte',
+]
+
 export const importSvenskaFans: Endpoint = {
   path: '/import-svenskafans',
   method: 'post',
@@ -41,6 +59,23 @@ export const importSvenskaFans: Endpoint = {
     if (url.searchParams.get('task') === 'foreningen') {
       await seedForeningen(req.payload)
       return Response.json({ done: true, task: 'foreningen' })
+    }
+
+    // Rensar bort demoartiklarna. Bara texter som saknar ursprungslänk kan
+    // träffas, så en importerad artikel med samma slug står kvar.
+    if (url.searchParams.get('task') === 'rensa-demo') {
+      const deleted = await req.payload.delete({
+        collection: 'posts',
+        where: {
+          and: [{ slug: { in: DEMO_SLUGS } }, { sourceUrl: { exists: false } }],
+        },
+      })
+      return Response.json({
+        done: true,
+        task: 'rensa-demo',
+        deleted: deleted.docs.map((doc) => doc.slug),
+        errors: deleted.errors,
+      })
     }
 
     const num = (key: string, fallback: number): number =>
