@@ -9,6 +9,7 @@ import { en } from '@payloadcms/translations/languages/en'
 import { sv } from '@payloadcms/translations/languages/sv'
 import sharp from 'sharp'
 
+import { cronSvenskaFans } from './payload/endpoints/cron-svenskafans'
 import { importSvenskaFans } from './payload/endpoints/import-svenskafans'
 import { allCollections } from './payload/collections'
 import { allGlobals } from './payload/globals'
@@ -66,7 +67,7 @@ export default buildConfig({
   collections: allCollections,
   // Importen av föreningens texter körs härifrån: databasen går bara att nå
   // inifrån driftmiljön.
-  endpoints: [importSvenskaFans],
+  endpoints: [importSvenskaFans, cronSvenskaFans],
   globals: allGlobals,
   localization: {
     locales: [

@@ -240,6 +240,51 @@ export type ImportResult =
   | { status: 'created' | 'updated'; title: string }
   | { status: 'skipped'; title: string; reason: string }
 
+/**
+ * Hämtar bara det som tillkommit sedan förra körningen.
+ *
+ * Tänkt för schemat, som går ofta och nästan alltid hittar noll nya texter.
+ * Vilka länkar som redan finns avgörs med en enda databasfråga, så en tom
+ * körning kostar ett flödesanrop och inget mer — artikelsidorna hämtas först
+ * för de poster som faktiskt är nya.
+ *
+ * Taket finns för att en körning ska hinna klart innan tidsgränsen. Ligger
+ * sajten efter med fler texter än så tas resten vid nästa körning.
+ */
+export async function importNewArticles(
+  payload: Payload,
+  { look = 20, max = 5 }: { look?: number; max?: number } = {},
+): Promise<{ checked: number; fresh: number; results: ImportResult[] }> {
+  // Poddavsnitten ligger i samma flöde men har ingen brödtext att hämta, så de
+  // sorteras bort på rubriken redan här. Sparades de inte undan skulle de bli
+  // eviga nykomlingar: hämtade, förkastade och hämtade igen varje körning,
+  // tills de tog hela utrymmet från de texter som faktiskt är nya.
+  const feed = (await fetchFeed(look)).filter((item) => !/^#\d+\.\s/.test(item.title))
+  if (feed.length === 0) return { checked: 0, fresh: 0, results: [] }
+
+  const known = await payload.find({
+    collection: 'posts',
+    where: { sourceUrl: { in: feed.map((item) => item.link) } },
+    limit: feed.length,
+    depth: 0,
+    draft: true,
+    pagination: false,
+  })
+  const seen = new Set(known.docs.map((doc) => doc.sourceUrl))
+
+  // Nyast först i flödet, men äldst först in — så hamnar de i rätt ordning
+  // även om taket gör att bara en del ryms den här gången.
+  const fresh = feed.filter((item) => !seen.has(item.link))
+  const batch = fresh.slice(0, max).reverse()
+
+  const results: ImportResult[] = []
+  for (const item of batch) {
+    results.push(await importArticle(payload, item))
+  }
+
+  return { checked: feed.length, fresh: fresh.length, results }
+}
+
 /** Hämtar flödet och ger posterna i publiceringsordning, nyast först. */
 export async function fetchFeed(limit: number): Promise<Feed[]> {
   return parseFeed(await fetchText(RSS_URL)).slice(0, limit)

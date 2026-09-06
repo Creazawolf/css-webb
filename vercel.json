@@ -8,10 +8,19 @@
     "app/api/**/*.ts": {
       "maxDuration": 60
     },
+    "app/(payload)/api/**/route.ts": {
+      "maxDuration": 60
+    },
     "app/(frontend)/**/page.tsx": {
       "maxDuration": 15
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/svenskafans",
+      "schedule": "0 */2 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
