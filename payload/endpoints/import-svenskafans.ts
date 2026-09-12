@@ -103,6 +103,49 @@ export const importSvenskaFans: Endpoint = {
       })
     }
 
+    // Läser om artiklar utifrån deras egen sparade länk i stället för utifrån
+    // flödet. RSS-fönstret rymmer bara de senaste hundra, så en rättning som
+    // går via flödet missar allt som hunnit falla ur det.
+    if (url.searchParams.get('task') === 'uppdatera') {
+      const offset = Math.max(0, Number(url.searchParams.get('offset') ?? '0') || 0)
+      const limit = Math.min(10, Math.max(1, Number(url.searchParams.get('limit') ?? '5') || 5))
+
+      const stored = await req.payload.find({
+        collection: 'posts',
+        where: { sourceUrl: { exists: true } },
+        sort: 'id',
+        depth: 0,
+        page: Math.floor(offset / limit) + 1,
+        limit,
+        draft: true,
+      })
+
+      const results = []
+      for (const post of stored.docs) {
+        const link = typeof post.sourceUrl === 'string' ? post.sourceUrl : ''
+        if (!link) continue
+        results.push(
+          await importArticle(req.payload, {
+            title: post.title,
+            link,
+            // Datumet bevaras som det står i databasen — källan anger tid i
+            // sitt eget flöde, och det flödet når vi inte härifrån.
+            pubDate: post.publishedAt ?? post.createdAt,
+          }),
+        )
+      }
+
+      const next = offset + stored.docs.length
+      return Response.json({
+        done: next >= stored.totalDocs,
+        task: 'uppdatera',
+        offset,
+        next,
+        total: stored.totalDocs,
+        results,
+      })
+    }
+
     const num = (key: string, fallback: number): number =>
       Number(url.searchParams.get(key) ?? String(fallback)) || fallback
 
