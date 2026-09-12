@@ -1,6 +1,8 @@
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
 import type { GlobalAfterChangeHook } from 'payload'
+
+import { POSTS_TAG } from '../../lib/cache-tags'
 
 /**
  * Rensar Next-cachen när innehåll ändras i CMS:et.
@@ -38,6 +40,14 @@ function revalidateForAllLocales(paths: string[]): void {
 /** Startsidan och listorna påverkas av nästan allt innehåll. */
 function revalidateCommon(): void {
   revalidateForAllLocales(['', '/artiklar'])
+  // Listsidorna är dynamiska (de läser sidnumret ur adressen), så deras
+  // innehåll ligger i en datacache i stället för i sidcachen. Den rensas på
+  // tag — annars skulle en ny artikel synas på startsidan men inte i listan.
+  try {
+    revalidateTag(POSTS_TAG, 'max')
+  } catch {
+    // Ingen renderingskontext — inget att rensa.
+  }
 }
 
 export const revalidatePost: CollectionAfterChangeHook = ({ doc, previousDoc }) => {

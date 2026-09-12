@@ -1,9 +1,11 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import type { Route } from 'next'
 
 import ArticleGrid from '@/components/ArticleGrid'
 import Pagination from '@/components/Pagination'
+import { NewsGridSkeleton } from '@/components/Skeletons'
 import { ARTICLE_TYPE_LABELS, getPosts } from '@/lib/posts'
 
 export const revalidate = 300
@@ -27,8 +29,18 @@ const TYPE_FILTERS = ['referat', 'spelarbetyg', 'infor', 'kronika'] as const
 const CHIP =
   'inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full px-4 text-[11.5px] font-semibold uppercase leading-none tracking-[0.06em] transition-colors'
 
-export default async function ArtiklarPage({ params, searchParams }: PageProps) {
-  const { locale } = await params
+/**
+ * Själva listan. Ligger i en egen komponent för att sidnumret — det enda som
+ * gör sidan dynamisk — ska väntas in bakom en Suspense-gräns. Rubriken och
+ * filtren når därmed läsaren direkt, i stället för att vänta på databasen.
+ */
+async function Lista({
+  locale,
+  searchParams,
+}: {
+  locale: string
+  searchParams: PageProps['searchParams']
+}) {
   const { sida } = await searchParams
 
   const parsed = Number.parseInt(sida ?? '1', 10)
@@ -39,6 +51,26 @@ export default async function ArtiklarPage({ params, searchParams }: PageProps) 
   const { articles, totalPages } = await getPosts({ limit: PER_PAGE, page, locale }).catch(
     () => ({ articles: [], totalPages: 0, totalDocs: 0 }),
   )
+
+  return (
+    <>
+      <ArticleGrid
+        locale={locale}
+        articles={articles}
+        emptyMessage="Inga artiklar publicerade ännu. Logga in i adminpanelen för att skriva den första."
+      />
+
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        basePath={`/${locale}/artiklar`}
+      />
+    </>
+  )
+}
+
+export default async function ArtiklarPage({ params, searchParams }: PageProps) {
+  const { locale } = await params
 
   return (
     <section className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
@@ -80,17 +112,9 @@ export default async function ArtiklarPage({ params, searchParams }: PageProps) 
         ))}
       </div>
 
-      <ArticleGrid
-        locale={locale}
-        articles={articles}
-        emptyMessage="Inga artiklar publicerade ännu. Logga in i adminpanelen för att skriva den första."
-      />
-
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        basePath={`/${locale}/artiklar`}
-      />
+      <Suspense fallback={<NewsGridSkeleton count={PER_PAGE} />}>
+        <Lista locale={locale} searchParams={searchParams} />
+      </Suspense>
     </section>
   )
 }

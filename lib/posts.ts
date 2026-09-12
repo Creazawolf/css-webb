@@ -1,8 +1,11 @@
+import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 import type { Where } from 'payload'
 import config from '@payload-config'
 
 import type { Category, Media, Post, User } from '@/payload-types'
+
+import { POSTS_TAG } from './cache-tags'
 
 export type Locale = 'sv' | 'en'
 
@@ -110,11 +113,30 @@ type GetPostsOptions = {
   excludeIds?: number[]
 }
 
-export async function getPosts(options: GetPostsOptions = {}): Promise<{
-  articles: ArticleCard[]
-  totalPages: number
-  totalDocs: number
-}> {
+type PostsResult = { articles: ArticleCard[]; totalPages: number; totalDocs: number }
+
+/**
+ * Artikellistan, cachad.
+ *
+ * `/artiklar` och `/artiklar/typ/[type]` läser `searchParams` för sidnumret,
+ * vilket gör dem dynamiska — sidcachen hjälper alltså inte där. Utan det här
+ * skulle varje besök kosta en ny fråga till Neon, och det är den frågan som
+ * gör listsidorna märkbart trögare än resten av sajten.
+ *
+ * Cachen rensas på tag i stället för på tid, så en publicerad artikel syns
+ * lika snabbt som förut.
+ */
+const cachedPosts = unstable_cache(
+  async (options: GetPostsOptions): Promise<PostsResult> => queryPosts(options),
+  ['posts-list'],
+  { tags: [POSTS_TAG] },
+)
+
+export async function getPosts(options: GetPostsOptions = {}): Promise<PostsResult> {
+  return cachedPosts(options)
+}
+
+async function queryPosts(options: GetPostsOptions): Promise<PostsResult> {
   const {
     limit = 9,
     page = 1,

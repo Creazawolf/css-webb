@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import type { Route } from 'next'
 
 import ArticleGrid from '@/components/ArticleGrid'
 import Pagination from '@/components/Pagination'
+import { NewsGridSkeleton } from '@/components/Skeletons'
 import { ARTICLE_TYPE_LABELS, getPosts } from '@/lib/posts'
 
 export const revalidate = 300
@@ -43,12 +45,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function ArtikeltypPage({ params, searchParams }: PageProps) {
-  const { locale, type } = await params
+/**
+ * Listan för en artikeltyp. Egen komponent av samma skäl som på /artiklar:
+ * sidnumret är det enda som gör sidan dynamisk, så det väntas in bakom en
+ * Suspense-gräns och resten av sidan når läsaren direkt.
+ */
+async function Lista({
+  locale,
+  type,
+  label,
+  searchParams,
+}: {
+  locale: string
+  type: string
+  label: string
+  searchParams: PageProps['searchParams']
+}) {
   const { sida } = await searchParams
-
-  const label = ARTICLE_TYPE_LABELS[type]
-  if (!label) notFound()
 
   const parsed = Number.parseInt(sida ?? '1', 10)
   const page = Number.isFinite(parsed) && parsed > 0 ? parsed : 1
@@ -59,6 +72,30 @@ export default async function ArtikeltypPage({ params, searchParams }: PageProps
     locale,
     articleType: type,
   }).catch(() => ({ articles: [], totalPages: 0, totalDocs: 0 }))
+
+  return (
+    <>
+      <ArticleGrid
+        locale={locale}
+        articles={articles}
+        emptyMessage={`Inga artiklar av typen "${label}" ännu.`}
+        emptyAction={{ label: 'Alla artiklar', href: `/${locale}/artiklar` as Route }}
+      />
+
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        basePath={`/${locale}/artiklar/typ/${type}`}
+      />
+    </>
+  )
+}
+
+export default async function ArtikeltypPage({ params, searchParams }: PageProps) {
+  const { locale, type } = await params
+
+  const label = ARTICLE_TYPE_LABELS[type]
+  if (!label) notFound()
 
   return (
     <section className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
@@ -98,18 +135,9 @@ export default async function ArtikeltypPage({ params, searchParams }: PageProps
           den som navigerar med skärmläsare. */}
       <h2 className="sr-only">{label}</h2>
 
-      <ArticleGrid
-        locale={locale}
-        articles={articles}
-        emptyMessage={`Inga artiklar av typen "${label}" ännu.`}
-        emptyAction={{ label: 'Alla artiklar', href: `/${locale}/artiklar` as Route }}
-      />
-
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        basePath={`/${locale}/artiklar/typ/${type}`}
-      />
+      <Suspense fallback={<NewsGridSkeleton count={PER_PAGE} />}>
+        <Lista locale={locale} type={type} label={label} searchParams={searchParams} />
+      </Suspense>
     </section>
   )
 }
