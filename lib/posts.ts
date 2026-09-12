@@ -123,13 +123,15 @@ type PostsResult = { articles: ArticleCard[]; totalPages: number; totalDocs: num
  * skulle varje besök kosta en ny fråga till Neon, och det är den frågan som
  * gör listsidorna märkbart trögare än resten av sajten.
  *
- * Cachen rensas på tag i stället för på tid, så en publicerad artikel syns
- * lika snabbt som förut.
+ * Cachen rensas på tag när något publiceras, så en ny artikel syns direkt.
+ * Tidsgränsen är ett skyddsnät: skulle rensningen fallera vore listan annars
+ * cachad för alltid, och en ny artikel skulle aldrig dyka upp. Fem minuter är
+ * samma eftersläpning som sidan hade innan den här cachen fanns.
  */
 const cachedPosts = unstable_cache(
   async (options: GetPostsOptions): Promise<PostsResult> => queryPosts(options),
   ['posts-list'],
-  { tags: [POSTS_TAG] },
+  { tags: [POSTS_TAG], revalidate: 300 },
 )
 
 export async function getPosts(options: GetPostsOptions = {}): Promise<PostsResult> {
