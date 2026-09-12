@@ -24,6 +24,8 @@ type Article = {
   link: string
   publishedAt: string
   byline: string
+  /** Artikelns egen ingress, som den står under rubriken hos SvenskaFans. */
+  lead: string
   imageUrl: string | null
   paragraphs: Paragraph[]
 }
@@ -142,6 +144,13 @@ function parseArticle(html: string, feed: Feed): Article | null {
   }
 
   const ogImage = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1] ?? null
+
+  // Ingressen står i og:description. Den går inte att härleda ur brödtexten:
+  // ett spelarbetyg inleds med betygsskalan och sedan första spelaren, så
+  // första stycket blir "Penders 2 – Riktigt fin dubbelräddning..." i stället
+  // för textens egen sammanfattning.
+  const ogDescription = html.match(/<meta property="og:description" content="([^"]*)"/)?.[1] ?? ''
+
   const iso = new Date(feed.pubDate)
 
   return {
@@ -149,6 +158,7 @@ function parseArticle(html: string, feed: Feed): Article | null {
     link: feed.link,
     publishedAt: (Number.isNaN(iso.getTime()) ? new Date() : iso).toISOString(),
     byline,
+    lead: decode(ogDescription).replace(/\s+/g, ' ').trim(),
     imageUrl: ogImage,
     paragraphs,
   }
@@ -236,6 +246,41 @@ function toLexical(paragraphs: Paragraph[]) {
 }
 
 
+/**
+ * Letar upp en redan hämtad bild på filnamnet och skriver på dess ursprungliga
+ * adress. Payload lägger på "-1", "-2" och så vidare när ett filnamn krockar,
+ * så kandidaterna kontrolleras mot ett mönster i stället för att jämföras rakt.
+ */
+async function adoptByFilename(
+  payload: Payload,
+  imageUrl: string,
+): Promise<{ id: number } | null> {
+  const base = imageUrl.split('/').pop() ?? ''
+  const match = base.match(/^(.*?)(\.[A-Za-z0-9]+)$/)
+  if (!match) return null
+
+  const [, stem, ext] = match as unknown as [string, string, string]
+  const found = await payload.find({
+    collection: 'media',
+    where: { filename: { like: stem } },
+    limit: 20,
+    depth: 0,
+  })
+
+  const pattern = new RegExp(
+    `^${stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(-\\d+)?${ext.replace('.', '\\.')}$`,
+  )
+  const hit = found.docs.find((doc) => typeof doc.filename === 'string' && pattern.test(doc.filename))
+  if (!hit) return null
+
+  await payload.update({
+    collection: 'media',
+    id: hit.id,
+    data: { sourceUrl: imageUrl },
+  })
+  return { id: hit.id }
+}
+
 export type ImportResult =
   | { status: 'created' | 'updated'; title: string }
   | { status: 'skipped'; title: string; reason: string }
@@ -314,20 +359,29 @@ export async function importArticle(payload: Payload, item: Feed): Promise<Impor
   let imageId: number | null = null
   if (article.imageUrl) {
     try {
+      // Igenkänningen sker på bildens egen adress. Tidigare matchades den på
+      // rubriken, och eftersom rubriker som "Spelarbetyg: Chelsea – Leeds"
+      // återkommer mellan säsonger ärvde den nyare artikeln den äldres bild.
       const existing = await payload.find({
         collection: 'media',
-        where: { alt: { equals: article.title } },
+        where: { sourceUrl: { equals: article.imageUrl } },
         limit: 1,
       })
-      if (existing.docs[0]) {
-        imageId = existing.docs[0].id
+
+      // Bilder som hämtades innan adressen började sparas har inget att matcha
+      // på. De känns igen på filnamnet i stället och får adressen påskriven, så
+      // att en omkörning rättar artiklarna utan att ladda ned allt en gång till.
+      const adopted = existing.docs[0] ? null : await adoptByFilename(payload, article.imageUrl)
+
+      if (existing.docs[0] || adopted) {
+        imageId = (existing.docs[0] ?? adopted)!.id
       } else {
         const res = await fetch(article.imageUrl, { headers: { 'User-Agent': UA } })
         if (res.ok) {
           const buffer = Buffer.from(await res.arrayBuffer())
           const media = await payload.create({
             collection: 'media',
-            data: { alt: article.title },
+            data: { alt: article.title, sourceUrl: article.imageUrl },
             file: {
               data: buffer,
               name: article.imageUrl.split('/').pop() ?? 'bild.jpg',
@@ -343,8 +397,10 @@ export async function importArticle(payload: Payload, item: Feed): Promise<Impor
     }
   }
 
-  // Ingressen tas ur det första stycket som faktiskt är en mening.
-  // Spelarbetygen inleds med en rubrikrad ("Betygsskala") som inte duger.
+  // Ingressen är textens egen, hämtad ur og:description. Saknas den faller vi
+  // tillbaka på första stycket som är en hel mening — men det är just den
+  // gissningen som gav fel ingress på varenda spelarbetyg, så den är en
+  // nödutgång och inte förstahandsvalet.
   const asText = (par: Paragraph): string =>
     par.spans
       .map((sp) => sp.text)
@@ -353,7 +409,8 @@ export async function importArticle(payload: Payload, item: Feed): Promise<Impor
       .trim()
 
   const lead =
-    article.paragraphs.map(asText).find((text) => text.length >= 60) ??
+    article.lead ||
+    article.paragraphs.map(asText).find((text) => text.length >= 60) ||
     asText(article.paragraphs[0] ?? { spans: [] })
 
   // Rubriker som "Spelarbetyg: Chelsea – Brighton" återkommer mellan

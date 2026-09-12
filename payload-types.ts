@@ -211,6 +211,10 @@ export interface Media {
    * Valfritt, men ange alltid källa för bilder du inte tagit själv.
    */
   credit?: string | null;
+  /**
+   * Sätts av importen och används för att känna igen en bild som redan hämtats. Tom för bilder som laddats upp för hand.
+   */
+  sourceUrl?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -874,6 +878,7 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
   credit?: T;
+  sourceUrl?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

@@ -71,5 +71,16 @@ export const Media = defineCollection({
         description: 'Valfritt, men ange alltid källa för bilder du inte tagit själv.',
       },
     },
+    {
+      name: 'sourceUrl',
+      label: 'Ursprunglig bildadress',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description:
+          'Sätts av importen och används för att känna igen en bild som redan hämtats. Tom för bilder som laddats upp för hand.',
+      },
+    },
   ],
 } satisfies CollectionConfig)
