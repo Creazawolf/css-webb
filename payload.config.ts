@@ -11,6 +11,7 @@ import sharp from 'sharp'
 
 import { cronSvenskaFans } from './payload/endpoints/cron-svenskafans'
 import { importSvenskaFans } from './payload/endpoints/import-svenskafans'
+import { stadaMedia } from './payload/endpoints/stada-media'
 import { allCollections } from './payload/collections'
 import { allGlobals } from './payload/globals'
 import { Users } from './payload/collections/Users'
@@ -74,7 +75,7 @@ export default buildConfig({
   collections: allCollections,
   // Importen av föreningens texter körs härifrån: databasen går bara att nå
   // inifrån driftmiljön.
-  endpoints: [importSvenskaFans, cronSvenskaFans],
+  endpoints: [importSvenskaFans, cronSvenskaFans, stadaMedia],
   globals: allGlobals,
   localization: {
     locales: [
