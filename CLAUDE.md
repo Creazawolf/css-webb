@@ -86,6 +86,10 @@ Every page sets `export const revalidate`. Slow modules are wrapped in `<Suspens
 
 Payload `afterChange` hooks (`payload/hooks/revalidate.ts`) purge the affected paths on publish, so editors see changes at once. Those helpers must stay no-ops outside a request context — `revalidatePath` throws in scripts and jobs.
 
+`/artiklar` and `/artiklar/typ/[type]` read `searchParams` for the page number, which makes them dynamic — `revalidate` does nothing there. The list itself sits behind `<Suspense>` so the shell ships without waiting for the database, and the query is cached with `unstable_cache` under the `POSTS_TAG` tag (`lib/cache-tags.ts` — its own file, so the hooks don't reach the Payload config through `lib/posts.ts` and form an import cycle). The tag is purged by `revalidatePost`; the 300 s `revalidate` on the cache entry is only a backstop, so a failed purge can't freeze the list forever.
+
+Media bypasses Payload: `disablePayloadAccessControl` on the blob adapter points every image straight at Vercel Blob's CDN. Going through `/api/media/file` cost ~1.4 s on a cold request, because it is a serverless function that hits the database before fetching the file. `images.deviceSizes` is trimmed to the widths the sources can actually fill — the originals top out at 1000px, and the optimizer never upscales, so the default list generated five identical copies of the same image under five cache keys.
+
 ### External integrations
 
 - **Chelsea FC match data** — `chelseafc.com/en/api/fixtures/{upcoming,results,league-table}`, keyed by the `pageId` of the club's own Fixtures & Results pages (men `30EGwHPO9uwBCc75RQY6kg`, women `NFFa1rMz6sNIHsRi7Hbpb`). No key, no quota, and the WSL coverage that paid tiers of the general football APIs charge for. `seasonId` is optional — leave it out and the API always answers for the current season, so nothing needs touching between seasons. Endpoints were read out of the club's own bundle (`/assets/<version>/main.js`).
