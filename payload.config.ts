@@ -60,7 +60,14 @@ export default buildConfig({
   }),
   plugins: [
     vercelBlobStorage({
-      collections: { media: true },
+      collections: {
+        // Bilderna pekar direkt på Blobs CDN i stället för att gå via
+        // /api/media/file, som är en serverlös funktion med databasuppslag —
+        // den vägen kostade drygt en sekund på en kall förfrågan. Allt i
+        // mediabiblioteket är publik sajtbild ändå, så det finns ingen
+        // åtkomstkontroll att förlora.
+        media: { disablePayloadAccessControl: true },
+      },
       token: process.env.BLOB_READ_WRITE_TOKEN ?? '',
     }),
   ],
